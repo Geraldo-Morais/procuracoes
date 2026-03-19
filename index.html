@@ -180,6 +180,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 /* Sections hidden by default */
 .tipo-section { display: none; }
 .tipo-section.active { display: block; }
+.page.compact-poderes p { font-size: 11.5pt; }
 /* Compact mode for types with more content (incapaz, relativo, analfabeto) */
 .page.compact .dados-table { margin-bottom: 8pt; font-size: 10.5pt; }
 .page.compact .dados-table td { padding: 2pt 4pt; }
@@ -409,8 +410,10 @@ function mudarTipo(tipo) {
     document.getElementById('lbl-outorgante').textContent = labels[tipo] || labels.normal;
     // Add compact class for types with extra sections
     var page = document.querySelector('.page');
-    if (tipo === 'normal') page.classList.remove('compact');
-    else page.classList.add('compact');
+    if (tipo === 'normal') { page.classList.remove('compact'); page.classList.remove('compact-poderes'); }
+    else { page.classList.add('compact'); }
+    if (tipo === 'relativo' || tipo === 'analfabeto') page.classList.add('compact-poderes');
+    else page.classList.remove('compact-poderes');
 
     // Show/hide profissao row (incapaz doesn't have it)
     document.getElementById('row-profissao').style.display = tipo === 'incapaz' ? 'none' : '';
