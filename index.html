@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Procuração Ad Judicia et Extra</title>
+<style>
+@page {
+    size: A4;
+    margin-top: 1cm;
+    margin-bottom: 2.7cm;
+    margin-left: 2.5cm;
+    margin-right: 2cm;
+    @bottom-center {
+        content: "Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA\A Telefone: 77 99927-1876  ·  E-mail: menezesadv49@gmail.com";
+        font-family: 'Times New Roman', serif;
+        font-size: 8pt;
+        color: #555;
+        border-top: 1.5pt solid #aaa;
+        padding-top: 14pt;
+        text-align: center;
+        white-space: pre-wrap;
+        vertical-align: top;
+    }
+    @bottom-right {
+        content: counter(page) " de " counter(pages);
+        font-family: 'Times New Roman', serif;
+        font-size: 8pt;
+        color: #555;
+        border-top: 1.5pt solid #aaa;
+        padding-top: 14pt;
+        text-align: right;
+        vertical-align: top;
+    }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #d0d0d0;
+}
+.page {
+    position: relative;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 50px auto 40px;
+    padding: 1cm 2cm 2.5cm 2.5cm;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.header { margin-bottom: 6pt; margin-top: -8pt; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; }
+.header table { width: 100%; border-collapse: collapse; border-bottom: none; }
+.header td { border: none; padding: 0; vertical-align: middle; }
+.titulo { text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14pt; margin-top: 8pt; margin-bottom: 8pt; letter-spacing: 0.5pt; }
+.titulo em { font-style: italic; }
+.dados-table { width: 100%; border-collapse: collapse; margin-bottom: 14pt; font-size: 11pt; }
+.dados-table td { border: 1pt solid #999; padding: 3pt 6pt; text-align: left; vertical-align: top; }
+.dados-table .label { font-size: 7.5pt; color: #555; text-transform: uppercase; display: block; margin-bottom: 0; }
+.secao { font-weight: bold; margin-top: 18pt; margin-bottom: 5pt; font-size: 12pt; }
+p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
+.espaco-antes { margin-top: 16pt; }
+.assinatura { text-align: center; margin-top: 32pt; }
+.assinatura-label { font-weight: bold; font-size: 12pt; }
+.assinatura-linha { display: inline-block; width: 270pt; border-bottom: 1pt solid #000; height: 1pt; vertical-align: bottom; margin-bottom: -1pt; }
+.local-data-line {
+    text-align: center;
+    margin-top: 20pt;
+    font-size: 12pt;
+    font-weight: bold;
+}
+.date-wrapper { display: inline-block; white-space: nowrap; }
+.date-sep { padding: 0 2pt; }
+.dados-table input[type="text"] {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: 11pt;
+    color: #000;
+    border: none;
+    outline: none;
+    background: #fff8dc;
+    width: 100%;
+    padding: 2pt 0;
+    min-height: 16pt;
+}
+.dados-table input[type="text"]:focus { background: #fff3a0; }
+.date-input {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: 12pt;
+    color: #000;
+    border: none;
+    outline: none;
+    background: #fff8dc;
+    text-align: center;
+    padding: 0;
+    min-width: 16pt;
+}
+.date-input:focus { background: #fff3a0; }
+.toolbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #622423;
+    color: #fff;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    gap: 12px;
+}
+.toolbar select {
+    padding: 5px 10px;
+    font-size: 10pt;
+    border-radius: 4px;
+    border: none;
+    font-weight: bold;
+}
+.toolbar button {
+    background: #fff;
+    color: #622423;
+    border: none;
+    padding: 6px 18px;
+    font-weight: bold;
+    font-size: 10pt;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.toolbar button:hover { background: #f0e0e0; }
+#sizer {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: 12pt;
+}
+.footer-screen {
+    position: absolute;
+    bottom: 0.5cm;
+    left: 2.5cm;
+    right: 2cm;
+    border-top: 1.5pt solid #aaa;
+    padding-top: 6pt;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.footer-text { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; text-align: center; line-height: 1.4; flex: 1; }
+.footer-page { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; white-space: nowrap; padding-left: 12pt; }
+/* Testemunhas (analfabeto) */
+.testemunha-bloco { margin-bottom: 8pt; }
+.testemunha-titulo { font-weight: bold; font-size: 9pt; margin-bottom: 2pt; }
+.testemunha-nome-label { font-size: 8pt; color: #555; }
+.testemunha-linha { display: block; width: 100%; border-bottom: 1pt solid #000; height: 10pt; margin-bottom: 2pt; }
+.testemunha-campos { display: flex; gap: 8pt; }
+.testemunha-campo { flex: 1; font-size: 9pt; }
+.testemunha-campo .label { font-size: 7pt; }
+.testemunha-campo input { font-family: 'Times New Roman', serif; font-weight: bold; font-size: 9pt; border: none; outline: none; background: #fff8dc; width: 100%; padding: 0; }
+.testemunha-campo input:focus { background: #fff3a0; }
+/* Sections hidden by default */
+.tipo-section { display: none; }
+.tipo-section.active { display: block; }
+@media print {
+    body { background: #fff; }
+    .toolbar { display: none !important; }
+    .page { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
+    .dados-table input[type="text"], .date-input, .testemunha-campo input { background: transparent !important; -webkit-appearance: none; }
+    .footer-screen { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <label style="font-weight:bold;">Tipo:</label>
+        <select id="tipoSelect" onchange="mudarTipo(this.value)">
+            <option value="normal">Normal</option>
+            <option value="incapaz">Absolutamente Incapaz (&lt; 16 anos)</option>
+            <option value="relativo">Relativamente Incapaz (16-17 anos)</option>
+            <option value="analfabeto">Analfabeto</option>
+        </select>
+    </div>
+    <button onclick="window.print()">Gerar PDF</button>
+</div>
+
+<span id="sizer"></span>
+
+<div class="page">
+
+<!-- CABECALHO -->
+<div class="header">
+    <table>
+        <tr>
+            <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
+            <td style="width:34%; text-align:center; vertical-align:bottom;">
+                <img src="data:image/png;base64,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" style="height:55px; margin:0 auto 6pt; display:block;" alt="Logo Menezes">
+            </td>
+            <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
+                Menezes &amp; Advogados Associados
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- TITULO -->
+<div class="titulo">Procuração <em>Ad Judicia et Extra</em></div>
+
+<!-- ====== OUTORGANTE: NORMAL / RELATIVO / ANALFABETO ====== -->
+<div id="sec-outorgante-full" class="tipo-section active">
+<div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;" id="lbl-outorgante">OUTORGANTE:</div>
+<table class="dados-table">
+<tr>
+    <td style="width:50%"><span class="label">Nome Completo:</span><input type="text" id="nome" value="" maxlength="50"></td>
+    <td style="width:25%"><span class="label">CPF:</span><input type="text" id="cpf" value="" maxlength="14"></td>
+    <td style="width:25%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="rg" value="" maxlength="25"></td>
+</tr>
+<tr id="row-profissao">
+    <td><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></td>
+    <td><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="15"></td>
+    <td><span class="label">Telefone:</span><input type="text" id="telefone" value="" maxlength="16"></td>
+</tr>
+<tr>
+    <td><span class="label">Endereço:</span><input type="text" id="endereco" value="" maxlength="45"></td>
+    <td><span class="label">Número:</span><input type="text" id="numero" value="" maxlength="8"></td>
+    <td><span class="label">Estado:</span><input type="text" id="estado" value="" maxlength="20"></td>
+</tr>
+<tr>
+    <td><span class="label">Cidade:</span><input type="text" id="cidade" value="" maxlength="30"></td>
+    <td colspan="2"><span class="label">Bairro:</span><input type="text" id="bairro" value="" maxlength="30"></td>
+</tr>
+</table>
+</div>
+
+<!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
+<div id="sec-representante" class="tipo-section">
+<div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">REPRESENTANTE LEGAL:</div>
+<table class="dados-table">
+<tr>
+    <td style="width:40%"><span class="label">Nome Completo:</span><input type="text" id="rep_nome" value="" maxlength="50"></td>
+    <td style="width:20%"><span class="label">CPF:</span><input type="text" id="rep_cpf" value="" maxlength="14"></td>
+    <td style="width:20%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="rep_rg" value="" maxlength="25"></td>
+    <td style="width:20%"><span class="label">Qualidade:</span><input type="text" id="rep_qualidade" value="" maxlength="20" placeholder="Pai, Mãe, Tutor..."></td>
+</tr>
+</table>
+</div>
+
+<!-- ====== ASSISTENTE LEGAL (relativamente incapaz) ====== -->
+<div id="sec-assistente" class="tipo-section">
+<div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">ASSISTENTE LEGAL:</div>
+<table class="dados-table">
+<tr>
+    <td style="width:40%"><span class="label">Nome Completo:</span><input type="text" id="assist_nome" value="" maxlength="50"></td>
+    <td style="width:20%"><span class="label">CPF:</span><input type="text" id="assist_cpf" value="" maxlength="14"></td>
+    <td style="width:20%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="assist_rg" value="" maxlength="25"></td>
+    <td style="width:20%"><span class="label">Qualidade:</span><input type="text" id="assist_qualidade" value="" maxlength="20" placeholder="Genitor, Curador..."></td>
+</tr>
+</table>
+</div>
+
+<!-- OUTORGADO -->
+<p class="espaco-antes"><strong>OUTORGADO: CLAYTON GONÇALVES MENEZES</strong>, advogado inscrito na OAB/BA sob o nº 49.167, com endereço profissional na Av. Ascendino Melo nº 297, Shopping Itatiaia, Menezes Advocacia, Centro, Vitória da Conquista – BA.</p>
+
+<!-- PODERES -->
+<div class="secao espaco-antes">PODERES:</div>
+<p>O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia</em> e <em>extra</em> dando enfim, amplos e irrestrito poderes para o foro em geral, inclusive no âmbito da administração pública, direta e indireta, em seus órgãos competentes, podendo, para tanto, praticar todos os atos necessários ao fiel desempenho da presente ação judicial ou administrativa, e qualquer procedimento que seja necessária a intervenção de advogado, representando-o, conjunta ou separadamente, perante o INSS ou qualquer juízo, comarca, instância ou Tribunal, para quem concedem os mais amplos e irrestritos poderes, sendo que estes podem, observados os poderes do advogado estabelecido em Lei, são conferidos para intentar ou acompanhar qualquer feito em nome do outorgante, como autor, réu, assistentes, opoente, ou terceiro interveniente, podendo, ainda, celebrar ajustes amigáveis, receber valores em seu nome, renunciar valores excedentes ao teto dos Juizados Especiais Federais, assinar declaração de hipossuficiência, requerer isenção de imposto de renda, requerer gratuidade da justiça, dar e receber quitação de crédito, negociar débito, suscitar incidente de falsidade, arguir exceções de impedimento ou de suspeição, transigir, firmar compromissos e receber citação e intimações, desistir, e substabelecer, se necessário, com ou sem reserva os poderes ora conferidos, bem como retirar alvarás e senhas do "MEU INSS"/GOV.BR.</p>
+
+<!-- ====== ASSINATURA: NORMAL ====== -->
+<div id="sec-assinatura-normal" class="tipo-section active">
+<div class="assinatura">
+    <span class="assinatura-label">OUTORGANTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+</div>
+<div class="local-data-line">
+    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+</div>
+</div>
+
+<!-- ====== ASSINATURA: INCAPAZ ====== -->
+<div id="sec-assinatura-incapaz" class="tipo-section">
+<div class="assinatura">
+    <span class="assinatura-label">REPRESENTANTE LEGAL:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+</div>
+<div class="local-data-line">
+    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade2" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf2" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia2" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes2" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano2" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+</div>
+</div>
+
+<!-- ====== ASSINATURA: RELATIVO ====== -->
+<div id="sec-assinatura-relativo" class="tipo-section">
+<div class="assinatura">
+    <span class="assinatura-label">OUTORGANTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+</div>
+<div class="assinatura" style="margin-top:20pt;">
+    <span class="assinatura-label">ASSISTENTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+</div>
+<div class="local-data-line">
+    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade3" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf3" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia3" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes3" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano3" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+</div>
+</div>
+
+<!-- ====== ASSINATURA: ANALFABETO ====== -->
+<div id="sec-assinatura-analfabeto" class="tipo-section">
+<table style="width:100%; margin-top:18pt; border:none; border-collapse:collapse;">
+<tr>
+    <td style="width:50%; vertical-align:middle; text-align:center; border:none; padding:0 8pt 0 0;">
+        <div style="font-weight:bold; font-size:10pt; margin-bottom:4pt;">ASSINATURA A ROGO DO(A) OUTORGANTE:</div>
+        <span style="display:inline-block; width:220pt; border-bottom:1pt solid #000; height:10pt;">&nbsp;</span>
+        <div style="font-size:7.5pt; color:#555; margin-top:1pt;">(1ª testemunha assina a rogo do outorgante)</div>
+        <div class="local-data-line" style="margin-top:8pt; font-size:10pt;">
+            <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade4" value="" maxlength="25" placeholder="CIDADE" style="font-size:10pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf4" value="" maxlength="2" placeholder="UF" style="font-size:10pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia4" value="" maxlength="2" placeholder="DD" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes4" value="" maxlength="12" placeholder="Mês" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano4" value="" maxlength="4" placeholder="AAAA" style="font-size:10pt;"><span class="date-sep">.</span></span>
+        </div>
+        <div style="margin-top:8pt; text-align:center;">
+            <div style="font-size:8pt; color:#555;">Impressão digital (polegar direito):</div>
+            <div style="width:50pt; height:40pt; border:1pt solid #999; margin:3pt auto 0;"></div>
+        </div>
+    </td>
+    <td style="width:50%; vertical-align:top; border:none; padding:0 0 0 8pt;">
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">1ª TESTEMUNHA (assina a rogo):</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test1_rg" value="" maxlength="25"></div>
+            </div>
+        </div>
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf" value="" maxlength="14"></div>
+            </div>
+        </div>
+    </td>
+</tr>
+</table>
+</div>
+
+<!-- FOOTER screen -->
+<div class="footer-screen">
+    <div class="footer-text">
+        Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
+        Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
+    </div>
+    <div class="footer-page">1 de 1</div>
+</div>
+
+</div><!-- .page -->
+
+<script>
+// === TIPO SWITCHING ===
+function mudarTipo(tipo) {
+    // Titles
+    var titles = {
+        normal: 'Procuração Ad Judicia et Extra',
+        incapaz: 'Procuração Ad Judicia et Extra — Menor Impúbere (representação)',
+        relativo: 'Procuração Ad Judicia et Extra — Relativamente Incapaz (assistência)',
+        analfabeto: 'Procuração Ad Judicia et Extra — Analfabeto'
+    };
+    document.title = titles[tipo] || titles.normal;
+
+    // Outorgante label
+    var labels = {
+        normal: 'OUTORGANTE:',
+        incapaz: 'OUTORGANTE (menor de 16 anos):',
+        relativo: 'OUTORGANTE:',
+        analfabeto: 'OUTORGANTE (analfabeto):'
+    };
+    document.getElementById('lbl-outorgante').textContent = labels[tipo] || labels.normal;
+
+    // Show/hide profissao row (incapaz doesn't have it)
+    document.getElementById('row-profissao').style.display = tipo === 'incapaz' ? 'none' : '';
+
+    // Show/hide sections
+    document.getElementById('sec-outorgante-full').className = 'tipo-section active';
+    document.getElementById('sec-representante').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
+    document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
+
+    // Signatures
+    document.getElementById('sec-assinatura-normal').className = 'tipo-section' + (tipo === 'normal' ? ' active' : '');
+    document.getElementById('sec-assinatura-incapaz').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
+    document.getElementById('sec-assinatura-relativo').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
+    document.getElementById('sec-assinatura-analfabeto').className = 'tipo-section' + (tipo === 'analfabeto' ? ' active' : '');
+}
+
+// === NORMALIZATION ===
+var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function toUpperCase(v) { return v.toUpperCase(); }
+function toTitleCase(v) {
+    var preps = ['de','da','do','das','dos','e'];
+    return v.split(' ').filter(function(w){return w.length>0;}).map(function(w) {
+        var lw = w.toLowerCase();
+        return preps.indexOf(lw) >= 0 ? lw : lw.charAt(0).toUpperCase() + lw.substring(1);
+    }).join(' ');
+}
+function normalizeMes(v) {
+    var n = parseInt(v, 10);
+    if (n >= 1 && n <= 12) return MESES[n - 1];
+    if (v.trim().length === 0) return v;
+    var w = v.trim().toLowerCase();
+    return w.charAt(0).toUpperCase() + w.substring(1);
+}
+function normalizeUF(v) { return v.toUpperCase().substring(0, 2); }
+function filterInput(v, allow) {
+    if (allow === 'text') return v.replace(/[0-9]/g, '');
+    if (allow === 'num')  return v.replace(/[^0-9]/g, '');
+    return v;
+}
+
+var FIELDS = {
+    nome: {fmt:'upper',allow:'text'}, cpf: {fmt:null,allow:null}, rg: {fmt:'upper',allow:null},
+    profissao: {fmt:'upper',allow:'text'}, estado_civil: {fmt:'upper',allow:'text'}, telefone: {fmt:null,allow:null},
+    endereco: {fmt:'upper',allow:null}, numero: {fmt:null,allow:null}, estado: {fmt:'upper',allow:'text'},
+    cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
+    rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:null,allow:null}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
+    assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:null,allow:null}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
+    test1_cpf: {fmt:null,allow:null}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:null,allow:null}
+};
+var REALTIME = { upper: true, uf: true };
+function normalize(id, v) {
+    var f = FIELDS[id]; if (!f || !f.fmt) return v;
+    switch (f.fmt) { case 'upper': return toUpperCase(v); case 'title': return toTitleCase(v); case 'uf': return normalizeUF(v); case 'mes': return normalizeMes(v); default: return v; }
+}
+
+// === AUTO-SIZE ===
+var sizer = document.getElementById('sizer');
+function autoSize(el) { sizer.textContent = el.value || el.placeholder || 'M'; el.style.width = (sizer.offsetWidth + 6) + 'px'; }
+
+// Date fields across all signature sections
+var ALL_DATE_IDS = ['local_cidade','local_uf','data_dia','data_mes','data_ano',
+    'local_cidade2','local_uf2','data_dia2','data_mes2','data_ano2',
+    'local_cidade3','local_uf3','data_dia3','data_mes3','data_ano3',
+    'local_cidade4','local_uf4','data_dia4','data_mes4','data_ano4'];
+var DATE_FIELDS = {};
+ALL_DATE_IDS.forEach(function(id) {
+    if (id.includes('cidade')) DATE_FIELDS[id] = {fmt:'title',allow:'text'};
+    else if (id.includes('uf')) DATE_FIELDS[id] = {fmt:'uf',allow:'text'};
+    else if (id.includes('dia') || id.includes('ano')) DATE_FIELDS[id] = {fmt:null,allow:'num'};
+    else if (id.includes('mes')) DATE_FIELDS[id] = {fmt:'mes',allow:null};
+});
+
+// Bind table fields
+Object.keys(FIELDS).forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cfg = FIELDS[id];
+    el.addEventListener('input', function() {
+        var pos = el.selectionStart, before = el.value;
+        if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
+        if (REALTIME[cfg.fmt]) el.value = normalize(id, el.value);
+        el.setSelectionRange(Math.max(0, pos - (before.length - el.value.length)), Math.max(0, pos - (before.length - el.value.length)));
+    });
+    if (cfg.fmt) el.addEventListener('blur', function() { if (cfg.allow) el.value = filterInput(el.value, cfg.allow); el.value = normalize(id, el.value); });
+});
+
+// Bind date fields
+ALL_DATE_IDS.forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    var cfg = DATE_FIELDS[id] || {};
+    el.addEventListener('input', function() {
+        if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
+        if (REALTIME[cfg.fmt]) el.value = normalize(id, el.value);
+        autoSize(el);
+    });
+    el.addEventListener('blur', function() {
+        if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
+        if (cfg.fmt) {
+            switch(cfg.fmt) { case 'title': el.value = toTitleCase(el.value); break; case 'uf': el.value = normalizeUF(el.value); break; case 'mes': el.value = normalizeMes(el.value); break; }
+        }
+        autoSize(el);
+    });
+    autoSize(el);
+});
+
+// Sync cidade → local_cidade (all variants)
+var cidadeEl = document.getElementById('cidade');
+cidadeEl.addEventListener('blur', function() {
+    ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) { el.value = toTitleCase(cidadeEl.value); autoSize(el); }
+    });
+});
+
+// Auto-fill date
+var now = new Date();
+['','2','3','4'].forEach(function(suffix) {
+    var d = document.getElementById('data_dia' + suffix);
+    var m = document.getElementById('data_mes' + suffix);
+    var a = document.getElementById('data_ano' + suffix);
+    if (d && !d.value) { d.value = String(now.getDate()); autoSize(d); }
+    if (m && !m.value) { m.value = MESES[now.getMonth()]; autoSize(m); }
+    if (a && !a.value) { a.value = String(now.getFullYear()); autoSize(a); }
+});
+
+// Initial field normalization
+Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
+</script>
+
+</body>
+</html>
