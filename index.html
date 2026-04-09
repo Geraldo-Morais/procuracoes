@@ -191,6 +191,11 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .page.compact .local-data-line { margin-top: 12pt; }
 .page.compact p { margin-bottom: 5pt; line-height: 1.4; }
 .page.compact .titulo { margin-top: 4pt; margin-bottom: 4pt; }
+/* Ajuste fino: no tipo incapaz, afastar assinatura do fim dos poderes sem colar no rodapé */
+.page.compact #sec-assinatura-incapaz .assinatura { margin-top: 32pt; }
+.page.compact #sec-assinatura-incapaz .local-data-line { margin-top: 16pt; }
+/* Relativamente incapaz: manter assinatura no mesmo nível visual do tipo normal */
+.page.compact #sec-assinatura-relativo .assinatura { margin-top: 32pt; }
 @media print {
     body { background: #fff; }
     .toolbar { display: none !important; }
@@ -328,10 +333,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <!-- ====== ASSINATURA: RELATIVO ====== -->
 <div id="sec-assinatura-relativo" class="tipo-section">
 <div class="assinatura">
-    <span class="assinatura-label">OUTORGANTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
-</div>
-<div class="assinatura" style="margin-top:20pt;">
-    <span class="assinatura-label">ASSISTENTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+    <span class="assinatura-label">ASSISTENTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">_____</span>
 </div>
 <div class="local-data-line">
     <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade3" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf3" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia3" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes3" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano3" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
@@ -448,6 +450,23 @@ function normalizeMes(v) {
     return w.charAt(0).toUpperCase() + w.substring(1);
 }
 function normalizeUF(v) { return v.toUpperCase().substring(0, 2); }
+function stripDiacritics(v) { return v.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+var ESTADO_POR_UF = {
+    ACRE: 'AC', ALAGOAS: 'AL', AMAPA: 'AP', AMAZONAS: 'AM', BAHIA: 'BA', CEARA: 'CE',
+    DISTRITOFEDERAL: 'DF', ESPIRITOSANTO: 'ES', GOIAS: 'GO', MARANHAO: 'MA',
+    MATOGROSSO: 'MT', MATOGROSSODOSUL: 'MS', MINASGERAIS: 'MG', PARA: 'PA',
+    PARAIBA: 'PB', PARANA: 'PR', PERNAMBUCO: 'PE', PIAUI: 'PI', RIODEJANEIRO: 'RJ',
+    RIOGRANDEDONORTE: 'RN', RIOGRANDEDOSUL: 'RS', RONDONIA: 'RO', RORAIMA: 'RR',
+    SANTACATARINA: 'SC', SAOPAULO: 'SP', SERGIPE: 'SE', TOCANTINS: 'TO'
+};
+function normalizeEstadoToUF(v) {
+    var trimmed = (v || '').trim();
+    if (!trimmed) return '';
+    var ufCandidate = stripDiacritics(trimmed).toUpperCase().replace(/[^A-Z]/g, '');
+    if (ufCandidate.length === 2) return ufCandidate;
+    var estadoKey = ufCandidate;
+    return ESTADO_POR_UF[estadoKey] || normalizeUF(trimmed);
+}
 function filterInput(v, allow) {
     if (allow === 'text') return v.replace(/[0-9]/g, '');
     if (allow === 'num')  return v.replace(/[^0-9]/g, '');
@@ -523,6 +542,14 @@ var cidadeEl = document.getElementById('cidade');
 cidadeEl.addEventListener('blur', function() {
     ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
         var el = document.getElementById(id); if (el) { el.value = toTitleCase(cidadeEl.value); autoSize(el); }
+    });
+});
+
+// Sync estado -> local_uf (all variants)
+var estadoEl = document.getElementById('estado');
+estadoEl.addEventListener('blur', function() {
+    ['local_uf','local_uf2','local_uf3','local_uf4'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) { el.value = normalizeEstadoToUF(estadoEl.value); autoSize(el); }
     });
 });
 
