@@ -85,6 +85,12 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     min-height: 16pt;
 }
 .dados-table input[type="text"]:focus { background: #fff3a0; }
+.dados-table input[type="text"].input-error,
+.date-input.input-error,
+.testemunha-campo input.input-error {
+    background: #ffe9e9 !important;
+    box-shadow: inset 0 0 0 1px #b30000;
+}
 .date-input {
     font-family: 'Times New Roman', Times, serif;
     font-weight: bold;
@@ -227,7 +233,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
             </div>
         </span>
     </div>
-    <button onclick="window.print()">Gerar PDF</button>
+    <button onclick="gerarPDF()">Gerar PDF</button>
 </div>
 
 <span id="sizer"></span>
@@ -269,14 +275,16 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <tr>
     <td><span class="label">Endereço:</span><input type="text" id="endereco" value="" maxlength="45"></td>
     <td><span class="label">Número:</span><input type="text" id="numero" value="" maxlength="8"></td>
-    <td><span class="label">Estado:</span><input type="text" id="estado" value="" maxlength="20"></td>
+    <td><span class="label">Estado:</span><input type="text" id="estado" value="" maxlength="20" list="estados-list"></td>
 </tr>
 <tr>
-    <td><span class="label">Cidade:</span><input type="text" id="cidade" value="" maxlength="30"></td>
+    <td><span class="label">Cidade:</span><input type="text" id="cidade" value="" maxlength="30" list="cidades-list"></td>
     <td colspan="2"><span class="label">Bairro:</span><input type="text" id="bairro" value="" maxlength="30"></td>
 </tr>
 </table>
 </div>
+<datalist id="estados-list"></datalist>
+<datalist id="cidades-list"></datalist>
 
 <!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
 <div id="sec-representante" class="tipo-section">
@@ -418,8 +426,8 @@ function mudarTipo(tipo) {
     if (tipo === 'relativo' || tipo === 'analfabeto') page.classList.add('compact-poderes');
     else page.classList.remove('compact-poderes');
 
-    // Show/hide profissao row (incapaz doesn't have it)
-    document.getElementById('row-profissao').style.display = tipo === 'incapaz' ? 'none' : '';
+    // Mantém a linha visível para garantir telefone sempre disponível
+    document.getElementById('row-profissao').style.display = '';
 
     // Show/hide sections
     document.getElementById('sec-outorgante-full').className = 'tipo-section active';
@@ -450,7 +458,7 @@ function normalizeMes(v) {
     var w = v.trim().toLowerCase();
     return w.charAt(0).toUpperCase() + w.substring(1);
 }
-function normalizeUF(v) { return v.toUpperCase().substring(0, 2); }
+function normalizeUF(v) { return stripDiacritics(v).toUpperCase().replace(/[^A-Z]/g, '').substring(0, 2); }
 function stripDiacritics(v) { return v.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 var ESTADO_POR_UF = {
     ACRE: 'AC', ALAGOAS: 'AL', AMAPA: 'AP', AMAZONAS: 'AM', BAHIA: 'BA', CEARA: 'CE',
@@ -466,8 +474,37 @@ function normalizeEstadoToUF(v) {
     var ufCandidate = stripDiacritics(trimmed).toUpperCase().replace(/[^A-Z]/g, '');
     if (ufCandidate.length === 2) return ufCandidate;
     var estadoKey = ufCandidate;
-    return ESTADO_POR_UF[estadoKey] || normalizeUF(trimmed);
+    return ESTADO_POR_UF[estadoKey] || '';
 }
+function onlyDigits(v) { return (v || '').replace(/\D/g, ''); }
+function formatCPF(v) {
+    var d = onlyDigits(v).substring(0, 11);
+    if (d.length <= 3) return d;
+    if (d.length <= 6) return d.substring(0, 3) + '.' + d.substring(3);
+    if (d.length <= 9) return d.substring(0, 3) + '.' + d.substring(3, 6) + '.' + d.substring(6);
+    return d.substring(0, 3) + '.' + d.substring(3, 6) + '.' + d.substring(6, 9) + '-' + d.substring(9);
+}
+function formatTelefone(v) {
+    var d = onlyDigits(v).substring(0, 11);
+    if (d.length <= 2) return d ? '(' + d : '';
+    if (d.length <= 3) return '(' + d.substring(0, 2) + ') ' + d.substring(2);
+    if (d.length <= 7) return '(' + d.substring(0, 2) + ') ' + d.substring(2, 3) + ' ' + d.substring(3);
+    return '(' + d.substring(0, 2) + ') ' + d.substring(2, 3) + ' ' + d.substring(3, 7) + '-' + d.substring(7);
+}
+function isValidCPF(v) {
+    var d = onlyDigits(v);
+    if (d.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(d)) return false;
+    var sum = 0, i;
+    for (i = 0; i < 9; i++) sum += parseInt(d.charAt(i), 10) * (10 - i);
+    var dv1 = 11 - (sum % 11); if (dv1 >= 10) dv1 = 0;
+    if (dv1 !== parseInt(d.charAt(9), 10)) return false;
+    sum = 0;
+    for (i = 0; i < 10; i++) sum += parseInt(d.charAt(i), 10) * (11 - i);
+    var dv2 = 11 - (sum % 11); if (dv2 >= 10) dv2 = 0;
+    return dv2 === parseInt(d.charAt(10), 10);
+}
+function isTelefoneCompleto(v) { return /^\(\d{2}\)\s\d\s\d{4}-\d{4}$/.test((v || '').trim()); }
 function filterInput(v, allow) {
     if (allow === 'text') return v.replace(/[0-9]/g, '');
     if (allow === 'num')  return v.replace(/[^0-9]/g, '');
@@ -475,18 +512,26 @@ function filterInput(v, allow) {
 }
 
 var FIELDS = {
-    nome: {fmt:'upper',allow:'text'}, cpf: {fmt:null,allow:null}, rg: {fmt:'upper',allow:null},
-    profissao: {fmt:'upper',allow:'text'}, estado_civil: {fmt:'upper',allow:'text'}, telefone: {fmt:null,allow:null},
+    nome: {fmt:'upper',allow:'text'}, cpf: {fmt:'cpf',allow:'num'}, rg: {fmt:'upper',allow:null},
+    profissao: {fmt:'upper',allow:'text'}, estado_civil: {fmt:'upper',allow:'text'}, telefone: {fmt:'fone',allow:'num'},
     endereco: {fmt:'upper',allow:null}, numero: {fmt:null,allow:null}, estado: {fmt:'upper',allow:'text'},
     cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
-    rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:null,allow:null}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
-    assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:null,allow:null}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
-    test1_cpf: {fmt:null,allow:null}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:null,allow:null}
+    rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
+    assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
+    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'}
 };
-var REALTIME = { upper: true, uf: true };
+var REALTIME = { upper: true, uf: true, cpf: true, fone: true };
 function normalize(id, v) {
     var f = FIELDS[id]; if (!f || !f.fmt) return v;
-    switch (f.fmt) { case 'upper': return toUpperCase(v); case 'title': return toTitleCase(v); case 'uf': return normalizeUF(v); case 'mes': return normalizeMes(v); default: return v; }
+    switch (f.fmt) {
+        case 'upper': return toUpperCase(v);
+        case 'title': return toTitleCase(v);
+        case 'uf': return normalizeUF(v);
+        case 'mes': return normalizeMes(v);
+        case 'cpf': return formatCPF(v);
+        case 'fone': return formatTelefone(v);
+        default: return v;
+    }
 }
 
 // === AUTO-SIZE ===
@@ -538,21 +583,142 @@ ALL_DATE_IDS.forEach(function(id) {
     autoSize(el);
 });
 
-// Sync cidade → local_cidade (all variants)
-var cidadeEl = document.getElementById('cidade');
-cidadeEl.addEventListener('blur', function() {
-    ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) { el.value = toTitleCase(cidadeEl.value); autoSize(el); }
-    });
+function setError(id, hasError) {
+    var el = document.getElementById(id); if (!el) return;
+    if (hasError) el.classList.add('input-error');
+    else el.classList.remove('input-error');
+}
+function applyRGFallback(id) {
+    var el = document.getElementById(id); if (!el) return;
+    if (!el.value || !el.value.trim()) el.value = '--';
+}
+['rg','rep_rg','assist_rg','test1_rg'].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.addEventListener('focus', function() { if (el.value === '--') el.value = ''; });
+    el.addEventListener('blur', function() { applyRGFallback(id); });
 });
 
-// Sync estado -> local_uf (all variants)
+var cidadeEl = document.getElementById('cidade');
 var estadoEl = document.getElementById('estado');
-estadoEl.addEventListener('blur', function() {
+var estadosListEl = document.getElementById('estados-list');
+var cidadesListEl = document.getElementById('cidades-list');
+var IBGE_UFS = {};
+var IBGE_CIDADES = {};
+var CURRENT_UF = '';
+
+function normalizeKey(v) { return stripDiacritics(v || '').toUpperCase().replace(/[^A-Z]/g, ''); }
+function updateUFSignatures(uf) {
     ['local_uf','local_uf2','local_uf3','local_uf4'].forEach(function(id) {
-        var el = document.getElementById(id); if (el) { el.value = normalizeEstadoToUF(estadoEl.value); autoSize(el); }
+        var el = document.getElementById(id); if (el) { el.value = uf || ''; autoSize(el); }
     });
-});
+}
+function updateCidadeSignatures(v) {
+    ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) { el.value = toTitleCase(v || ''); autoSize(el); }
+    });
+}
+function normalizeEstadoToUFStrict(v) {
+    var trimmed = (v || '').trim();
+    if (!trimmed) return '';
+    var uf = normalizeUF(trimmed);
+    if (IBGE_UFS[uf]) return uf;
+    var localUf = normalizeEstadoToUF(trimmed);
+    if (localUf && IBGE_UFS[localUf]) return localUf;
+    var key = normalizeKey(trimmed);
+    if (IBGE_UFS[key]) return IBGE_UFS[key];
+    return '';
+}
+function fillEstadoDatalist(estados) {
+    estadosListEl.innerHTML = '';
+    estados.forEach(function(e) {
+        var opt = document.createElement('option');
+        opt.value = e.nome;
+        estadosListEl.appendChild(opt);
+        IBGE_UFS[normalizeKey(e.nome)] = e.sigla;
+        IBGE_UFS[e.sigla] = e.sigla;
+    });
+}
+function fillCidadeDatalist(cidades) {
+    cidadesListEl.innerHTML = '';
+    cidades.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.nome;
+        cidadesListEl.appendChild(opt);
+    });
+}
+function levenshtein(a, b) {
+    var m = a.length, n = b.length, i, j;
+    var dp = Array(m + 1);
+    for (i = 0; i <= m; i++) { dp[i] = Array(n + 1); dp[i][0] = i; }
+    for (j = 0; j <= n; j++) dp[0][j] = j;
+    for (i = 1; i <= m; i++) {
+        for (j = 1; j <= n; j++) {
+            var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+            dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        }
+    }
+    return dp[m][n];
+}
+async function ensureCitiesForUF(uf) {
+    if (!uf) return;
+    if (IBGE_CIDADES[uf]) { fillCidadeDatalist(IBGE_CIDADES[uf].raw); return; }
+    try {
+        var resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + uf + '/municipios');
+        if (!resp.ok) return;
+        var cidades = await resp.json();
+        var byKey = {};
+        cidades.forEach(function(c) { byKey[normalizeKey(c.nome)] = c.nome; });
+        IBGE_CIDADES[uf] = { raw: cidades, byKey: byKey };
+        fillCidadeDatalist(cidades);
+    } catch (e) {}
+}
+function getBestCityMatch(key, byKey) {
+    var keys = Object.keys(byKey);
+    if (!keys.length) return '';
+    if (byKey[key]) return byKey[key];
+    var best = '', bestDist = 999;
+    keys.forEach(function(k) {
+        var d = levenshtein(key, k);
+        if (d < bestDist) { bestDist = d; best = byKey[k]; }
+    });
+    var limit = Math.max(2, Math.floor(key.length * 0.25));
+    return bestDist <= limit ? best : '';
+}
+async function loadEstadosIBGE() {
+    try {
+        var resp = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+        if (!resp.ok) return;
+        var estados = await resp.json();
+        fillEstadoDatalist(estados);
+    } catch (e) {}
+}
+async function syncEstadoCidade() {
+    var uf = normalizeEstadoToUFStrict(estadoEl.value);
+    if (uf) {
+        estadoEl.value = uf;
+        CURRENT_UF = uf;
+        updateUFSignatures(uf);
+        await ensureCitiesForUF(uf);
+    } else {
+        CURRENT_UF = '';
+        updateUFSignatures('');
+    }
+}
+async function normalizeCidadeByIBGE() {
+    var uf = CURRENT_UF || normalizeEstadoToUFStrict(estadoEl.value);
+    if (!uf) { updateCidadeSignatures(cidadeEl.value); return; }
+    await ensureCitiesForUF(uf);
+    var entry = IBGE_CIDADES[uf];
+    if (!entry) { updateCidadeSignatures(cidadeEl.value); return; }
+    var key = normalizeKey(cidadeEl.value);
+    if (!key) { updateCidadeSignatures(''); return; }
+    var normalized = getBestCityMatch(key, entry.byKey);
+    if (normalized) cidadeEl.value = toUpperCase(normalized);
+    updateCidadeSignatures(cidadeEl.value);
+}
+
+cidadeEl.addEventListener('blur', function() { normalizeCidadeByIBGE(); });
+estadoEl.addEventListener('blur', function() { syncEstadoCidade(); });
 
 // Auto-fill date
 var now = new Date();
@@ -567,6 +733,57 @@ var now = new Date();
 
 // Initial field normalization
 Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
+['rg','rep_rg','assist_rg','test1_rg'].forEach(function(id) { applyRGFallback(id); });
+
+function tipoAtual() { return (document.getElementById('tipoSelect') || {}).value || 'normal'; }
+function fieldValue(id) {
+    var el = document.getElementById(id);
+    return el ? (el.value || '').trim() : '';
+}
+function validateForm() {
+    var errors = [];
+    ['cpf','rep_cpf','assist_cpf','telefone'].forEach(function(id) { setError(id, false); });
+
+    var cpfOutorgante = fieldValue('cpf');
+    if (cpfOutorgante && !isValidCPF(cpfOutorgante)) {
+        errors.push('CPF do outorgante inválido.');
+        setError('cpf', true);
+    }
+
+    var tipo = tipoAtual();
+    if (tipo === 'incapaz') {
+        var repCpf = fieldValue('rep_cpf');
+        if (!repCpf || !isValidCPF(repCpf)) {
+            errors.push('CPF do representante legal é obrigatório e deve ser válido.');
+            setError('rep_cpf', true);
+        }
+    }
+    if (tipo === 'relativo') {
+        var assistCpf = fieldValue('assist_cpf');
+        if (!assistCpf || !isValidCPF(assistCpf)) {
+            errors.push('CPF do assistente legal é obrigatório e deve ser válido.');
+            setError('assist_cpf', true);
+        }
+    }
+
+    var telefone = fieldValue('telefone');
+    if (!isTelefoneCompleto(telefone)) {
+        errors.push('Telefone obrigatório no formato (XX) X XXXX-XXXX.');
+        setError('telefone', true);
+    }
+
+    return errors;
+}
+function gerarPDF() {
+    var errors = validateForm();
+    if (errors.length) {
+        alert('Corrija antes de gerar PDF:\\n\\n- ' + errors.join('\\n- '));
+        return;
+    }
+    window.print();
+}
+
+loadEstadosIBGE().then(function() { syncEstadoCidade().then(function() { normalizeCidadeByIBGE(); }); });
 </script>
 
 </body>
