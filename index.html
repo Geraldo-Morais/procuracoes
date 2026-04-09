@@ -751,9 +751,45 @@ function fieldValue(id) {
     var el = document.getElementById(id);
     return el ? (el.value || '').trim() : '';
 }
+function hasAnyMeaningfulInput() {
+    var inputs = document.querySelectorAll('input[type="text"]');
+    for (var i = 0; i < inputs.length; i++) {
+        var el = inputs[i];
+        if (!el || !el.id) continue;
+        if (el.classList.contains('date-input')) continue;
+        var v = (el.value || '').trim();
+        if (!v) continue;
+        if (v === '--' && (el.id === 'rg' || el.id === 'rep_rg' || el.id === 'assist_rg' || el.id === 'test1_rg')) continue;
+        return true;
+    }
+    return false;
+}
+function markRequiredEmpty(id, errors, label) {
+    var v = fieldValue(id);
+    if (!v || v === '--') {
+        errors.push(label + ' é obrigatório.');
+        setError(id, true);
+    }
+}
 function validateForm() {
     var errors = [];
-    ['cpf','rep_cpf','assist_cpf','telefone'].forEach(function(id) { setError(id, false); });
+    ['nome','profissao','estado_civil','telefone','endereco','numero','estado','cidade','bairro',
+     'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade']
+        .forEach(function(id) { setError(id, false); });
+
+    // Permite gerar modelo em branco para preenchimento manual
+    if (!hasAnyMeaningfulInput()) return errors;
+
+    // Se começou a preencher, exige conjunto base completo
+    markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
+    markRequiredEmpty('profissao', errors, 'Profissão');
+    markRequiredEmpty('estado_civil', errors, 'Estado civil');
+    markRequiredEmpty('telefone', errors, 'Telefone');
+    markRequiredEmpty('endereco', errors, 'Endereço');
+    markRequiredEmpty('numero', errors, 'Número');
+    markRequiredEmpty('estado', errors, 'Estado');
+    markRequiredEmpty('cidade', errors, 'Cidade');
+    markRequiredEmpty('bairro', errors, 'Bairro');
 
     var cpfOutorgante = fieldValue('cpf');
     if (cpfOutorgante && !isValidCPF(cpfOutorgante)) {
@@ -763,6 +799,8 @@ function validateForm() {
 
     var tipo = tipoAtual();
     if (tipo === 'incapaz') {
+        markRequiredEmpty('rep_nome', errors, 'Nome do representante legal');
+        markRequiredEmpty('rep_qualidade', errors, 'Qualidade do representante legal');
         var repCpf = fieldValue('rep_cpf');
         if (!repCpf || !isValidCPF(repCpf)) {
             errors.push('CPF do representante legal é obrigatório e deve ser válido.');
@@ -770,6 +808,8 @@ function validateForm() {
         }
     }
     if (tipo === 'relativo') {
+        markRequiredEmpty('assist_nome', errors, 'Nome do assistente legal');
+        markRequiredEmpty('assist_qualidade', errors, 'Qualidade do assistente legal');
         var assistCpf = fieldValue('assist_cpf');
         if (!assistCpf || !isValidCPF(assistCpf)) {
             errors.push('CPF do assistente legal é obrigatório e deve ser válido.');
@@ -778,7 +818,7 @@ function validateForm() {
     }
 
     var telefone = fieldValue('telefone');
-    if (!isTelefoneCompleto(telefone)) {
+    if (telefone && !isTelefoneCompleto(telefone)) {
         errors.push('Telefone obrigatório no formato (XX) X XXXX-XXXX.');
         setError('telefone', true);
     }
