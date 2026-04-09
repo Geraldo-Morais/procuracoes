@@ -468,6 +468,8 @@ var ESTADO_POR_UF = {
     RIOGRANDEDONORTE: 'RN', RIOGRANDEDOSUL: 'RS', RONDONIA: 'RO', RORAIMA: 'RR',
     SANTACATARINA: 'SC', SAOPAULO: 'SP', SERGIPE: 'SE', TOCANTINS: 'TO'
 };
+var UFS_VALIDAS = {};
+Object.keys(ESTADO_POR_UF).forEach(function(k) { UFS_VALIDAS[ESTADO_POR_UF[k]] = true; });
 function normalizeEstadoToUF(v) {
     var trimmed = (v || '').trim();
     if (!trimmed) return '';
@@ -621,9 +623,9 @@ function normalizeEstadoToUFStrict(v) {
     var trimmed = (v || '').trim();
     if (!trimmed) return '';
     var uf = normalizeUF(trimmed);
-    if (IBGE_UFS[uf]) return uf;
+    if (IBGE_UFS[uf] || UFS_VALIDAS[uf]) return uf;
     var localUf = normalizeEstadoToUF(trimmed);
-    if (localUf && IBGE_UFS[localUf]) return localUf;
+    if (localUf && (IBGE_UFS[localUf] || UFS_VALIDAS[localUf])) return localUf;
     var key = normalizeKey(trimmed);
     if (IBGE_UFS[key]) return IBGE_UFS[key];
     return '';
