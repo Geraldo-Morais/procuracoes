@@ -640,10 +640,19 @@ function fillEstadoDatalist(estados) {
 }
 function fillCidadeDatalist(cidades) {
     cidadesListEl.innerHTML = '';
+    var seen = {};
     cidades.forEach(function(c) {
         var opt = document.createElement('option');
         opt.value = c.nome;
         cidadesListEl.appendChild(opt);
+        seen[c.nome] = true;
+        var semAcento = stripDiacritics(c.nome);
+        if (semAcento !== c.nome && !seen[semAcento]) {
+            var optSemAcento = document.createElement('option');
+            optSemAcento.value = semAcento;
+            cidadesListEl.appendChild(optSemAcento);
+            seen[semAcento] = true;
+        }
     });
 }
 function levenshtein(a, b) {
