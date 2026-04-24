@@ -1,0 +1,14 @@
+# Dados de clientes — NUNCA commitar (PII: nome, CPF, RG, endereços)
+casos/
+*-caso.html
+*-CASO.pdf
+*-REVOGACAO.pdf
+*-PROCURACAO.pdf
+cliente-*.html
+cliente-*.pdf
+
+# Temporários / sistema
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp

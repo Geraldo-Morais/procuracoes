@@ -72,7 +72,8 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 }
 .date-wrapper { display: inline-block; white-space: nowrap; }
 .date-sep { padding: 0 2pt; }
-.dados-table input[type="text"] {
+.dados-table input[type="text"],
+.inline-input {
     font-family: 'Times New Roman', Times, serif;
     font-weight: bold;
     font-size: 11pt;
@@ -84,7 +85,16 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     padding: 2pt 0;
     min-height: 16pt;
 }
-.dados-table input[type="text"]:focus { background: #fff3a0; }
+.dados-table input[type="text"]:focus,
+.inline-input:focus { background: #fff3a0; }
+.inline-input {
+    width: auto;
+    min-width: 60pt;
+    padding: 0 4pt;
+    display: inline-block;
+    vertical-align: baseline;
+    min-height: unset;
+}
 .dados-table input[type="text"].input-error,
 .date-input.input-error,
 .testemunha-campo input.input-error {
@@ -289,8 +299,36 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <datalist id="estados-list"></datalist>
 <datalist id="cidades-list"></datalist>
 
-<!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
-<div id="sec-representante" class="tipo-section">
+<!-- ====== OUTORGANTE + REPRESENTANTE em texto corrido (absolutamente incapaz) ====== -->
+<!-- Quando tipo=incapaz, esconde-se sec-outorgante-full e usa-se este bloco -->
+<div id="sec-outorgante-incapaz-corrido" class="tipo-section">
+<p class="espaco-antes"><strong>OUTORGANTE:</strong>
+    <input type="text" class="inline-input" id="inc_nome" maxlength="50" placeholder="NOME COMPLETO" style="min-width:200pt">,
+    brasileiro(a), solteiro(a), menor absolutamente incapaz, inscrito(a) no CPF sob o nº
+    <input type="text" class="inline-input" id="inc_cpf" maxlength="14" placeholder="000.000.000-00" style="min-width:110pt">,
+    portador(a) do RG nº
+    <input type="text" class="inline-input" id="inc_rg" maxlength="25" placeholder="RG / Órgão Emissor" style="min-width:140pt">,
+    residente e domiciliado(a) em
+    <input type="text" class="inline-input" id="inc_cidade" maxlength="30" placeholder="Cidade" style="min-width:140pt"> –
+    <input type="text" class="inline-input" id="inc_uf" maxlength="2" placeholder="UF" style="min-width:28pt">,
+    neste ato <strong>representado(a) por seu(sua) genitor(a)</strong>, abaixo identificado(a).
+</p>
+
+<p><strong>REPRESENTANTE LEGAL:</strong>
+    <input type="text" class="inline-input" id="inc_rep_nome" maxlength="50" placeholder="NOME COMPLETO" style="min-width:200pt">,
+    brasileiro(a), inscrito(a) no CPF sob o nº
+    <input type="text" class="inline-input" id="inc_rep_cpf" maxlength="14" placeholder="000.000.000-00" style="min-width:110pt">,
+    portador(a) do RG nº
+    <input type="text" class="inline-input" id="inc_rep_rg" maxlength="25" placeholder="RG / Órgão Emissor" style="min-width:140pt">,
+    na qualidade de
+    <input type="text" class="inline-input" id="inc_rep_qualidade" maxlength="20" placeholder="mãe / pai / tutor" style="min-width:90pt">
+    e representante legal do(a) outorgante.
+</p>
+</div>
+
+<!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz — LEGACY, tabela) ====== -->
+<!-- Mantido oculto — caso queira voltar ao formato de tabela no futuro -->
+<div id="sec-representante" class="tipo-section" style="display:none !important;">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">REPRESENTANTE LEGAL:</div>
 <table class="dados-table">
 <tr>
@@ -321,7 +359,6 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <!-- TEXTO DE REVOGAÇÃO -->
 <div class="secao espaco-antes">DA REVOGAÇÃO:</div>
 <p>O Outorgante, por este instrumento particular, vem <strong>REVOGAR, de forma expressa e incondicional</strong>, a procuração anteriormente outorgada em favor do procurador acima identificado, tornando <strong>sem qualquer efeito</strong> todos os poderes nela conferidos a partir desta data, nos termos dos <strong>arts. 682, I, 686 e 687 do Código Civil</strong>.</p>
-<p>Requer, ainda, que a presente revogação seja <strong>juntada aos autos</strong> de qualquer processo judicial ou administrativo em que o procurador revogado tenha atuado em seu nome, comunicando-se a revogação para todos os fins de direito.</p>
 
 <!-- ====== ASSINATURA: NORMAL ====== -->
 <div id="sec-assinatura-normal" class="tipo-section active">
@@ -434,8 +471,12 @@ function mudarTipo(tipo) {
     document.getElementById('row-profissao').style.display = '';
 
     // Show/hide sections
-    document.getElementById('sec-outorgante-full').className = 'tipo-section active';
-    document.getElementById('sec-representante').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
+    // Quando tipo=incapaz, a revogacao usa texto corrido (sec-outorgante-incapaz-corrido)
+    // no lugar da tabela do outorgante e do bloco separado do representante legal
+    var isIncapaz = tipo === 'incapaz';
+    document.getElementById('sec-outorgante-full').className = 'tipo-section' + (isIncapaz ? '' : ' active');
+    document.getElementById('sec-outorgante-incapaz-corrido').className = 'tipo-section' + (isIncapaz ? ' active' : '');
+    document.getElementById('sec-representante').className = 'tipo-section'; // legacy — fica oculto
     document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
 
     // Signatures
@@ -524,7 +565,11 @@ var FIELDS = {
     cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
     rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
     assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
-    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'}
+    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'},
+    inc_nome: {fmt:'upper',allow:'text'}, inc_cpf: {fmt:'cpf',allow:'num'}, inc_rg: {fmt:'upper',allow:null},
+    inc_cidade: {fmt:'upper',allow:'text'}, inc_uf: {fmt:'uf',allow:'text'},
+    inc_rep_nome: {fmt:'upper',allow:'text'}, inc_rep_cpf: {fmt:'cpf',allow:'num'}, inc_rep_rg: {fmt:'upper',allow:null},
+    inc_rep_qualidade: {fmt:'upper',allow:'text'}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true };
 function normalize(id, v) {
@@ -561,13 +606,20 @@ ALL_DATE_IDS.forEach(function(id) {
 Object.keys(FIELDS).forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     var cfg = FIELDS[id];
+    var isInline = el.classList.contains('inline-input');
     el.addEventListener('input', function() {
         var pos = el.selectionStart, before = el.value;
         if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
         if (REALTIME[cfg.fmt]) el.value = normalize(id, el.value);
         el.setSelectionRange(Math.max(0, pos - (before.length - el.value.length)), Math.max(0, pos - (before.length - el.value.length)));
+        if (isInline) autoSize(el);
     });
-    if (cfg.fmt) el.addEventListener('blur', function() { if (cfg.allow) el.value = filterInput(el.value, cfg.allow); el.value = normalize(id, el.value); });
+    if (cfg.fmt) el.addEventListener('blur', function() {
+        if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
+        el.value = normalize(id, el.value);
+        if (isInline) autoSize(el);
+    });
+    if (isInline) autoSize(el);
 });
 
 // Bind date fields
@@ -748,7 +800,7 @@ var now = new Date();
 
 // Initial field normalization
 Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
-['rg','rep_rg','assist_rg','test1_rg'].forEach(function(id) { applyRGFallback(id); });
+['rg','rep_rg','assist_rg','test1_rg','inc_rg','inc_rep_rg'].forEach(function(id) { applyRGFallback(id); });
 
 function tipoAtual() { return (document.getElementById('tipoSelect') || {}).value || 'normal'; }
 function fieldValue(id) {
@@ -784,31 +836,31 @@ function validateForm() {
     // Permite gerar modelo em branco para preenchimento manual
     if (!hasAnyMeaningfulInput()) return errors;
 
-    // Se começou a preencher, exige conjunto base completo
-    markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
-    markRequiredEmpty('profissao', errors, 'Profissão');
-    markRequiredEmpty('estado_civil', errors, 'Estado civil');
-    markRequiredEmpty('telefone', errors, 'Telefone');
-    markRequiredEmpty('endereco', errors, 'Endereço');
-    markRequiredEmpty('numero', errors, 'Número');
-    markRequiredEmpty('estado', errors, 'Estado');
-    markRequiredEmpty('cidade', errors, 'Cidade');
-    markRequiredEmpty('bairro', errors, 'Bairro');
-
-    var cpfOutorgante = fieldValue('cpf');
-    if (cpfOutorgante && !isValidCPF(cpfOutorgante)) {
-        errors.push('CPF do outorgante inválido.');
-        setError('cpf', true);
-    }
-
+    // Revogacao exige menos dados do que a outorga — muitas vezes o
+    // escritorio nao tem qualificacao completa da parte revogante.
     var tipo = tipoAtual();
+
     if (tipo === 'incapaz') {
-        markRequiredEmpty('rep_nome', errors, 'Nome do representante legal');
-        markRequiredEmpty('rep_qualidade', errors, 'Qualidade do representante legal');
-        var repCpf = fieldValue('rep_cpf');
-        if (!repCpf || !isValidCPF(repCpf)) {
+        // Formato corrido: valida os campos inline da seção incapaz.
+        markRequiredEmpty('inc_nome', errors, 'Nome completo do outorgante');
+        var incCpf = fieldValue('inc_cpf');
+        if (incCpf && !isValidCPF(incCpf)) {
+            errors.push('CPF do outorgante inválido.');
+            setError('inc_cpf', true);
+        }
+        markRequiredEmpty('inc_rep_nome', errors, 'Nome do representante legal');
+        markRequiredEmpty('inc_rep_qualidade', errors, 'Qualidade do representante legal');
+        var incRepCpf = fieldValue('inc_rep_cpf');
+        if (!incRepCpf || !isValidCPF(incRepCpf)) {
             errors.push('CPF do representante legal é obrigatório e deve ser válido.');
-            setError('rep_cpf', true);
+            setError('inc_rep_cpf', true);
+        }
+    } else {
+        markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
+        var cpfOutorgante = fieldValue('cpf');
+        if (cpfOutorgante && !isValidCPF(cpfOutorgante)) {
+            errors.push('CPF do outorgante inválido.');
+            setError('cpf', true);
         }
     }
     if (tipo === 'relativo') {
@@ -823,7 +875,7 @@ function validateForm() {
 
     var telefone = fieldValue('telefone');
     if (telefone && !isTelefoneCompleto(telefone)) {
-        errors.push('Telefone obrigatório no formato (XX) X XXXX-XXXX.');
+        errors.push('Telefone, se preenchido, deve estar no formato (XX) X XXXX-XXXX.');
         setError('telefone', true);
     }
 
