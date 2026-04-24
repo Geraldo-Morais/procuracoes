@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Procuração Ad Judicia et Extra</title>
+<title>Revogação de Procuração</title>
 <style>
 @page {
     size: A4;
@@ -234,7 +234,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
         </span>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
-        <a href="revogacao.html" style="color:#fff; text-decoration:underline; font-size:10pt;">Revogar procuração →</a>
+        <a href="index.html" style="color:#fff; text-decoration:underline; font-size:10pt;">← Procuração (outorga)</a>
         <button onclick="gerarPDF()">Gerar PDF</button>
     </div>
 </div>
@@ -259,7 +259,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 </div>
 
 <!-- TITULO -->
-<div class="titulo">Procuração <em>Ad Judicia et Extra</em></div>
+<div class="titulo">Revogação de Procuração</div>
 
 <!-- ====== OUTORGANTE: NORMAL / RELATIVO / ANALFABETO ====== -->
 <div id="sec-outorgante-full" class="tipo-section active">
@@ -315,12 +315,21 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 </table>
 </div>
 
-<!-- OUTORGADO -->
-<p class="espaco-antes"><strong>OUTORGADO: CLAYTON GONÇALVES MENEZES</strong>, advogado inscrito na OAB/BA sob o nº 49.167, com endereço profissional na Av. Ascendino Melo nº 297, Shopping Itatiaia, Menezes Advocacia, Centro, Vitória da Conquista – BA.</p>
+<!-- PROCURADOR(ES) CUJA PROCURAÇÃO É REVOGADA -->
+<div style="font-weight:bold; margin-top:14pt; margin-bottom:2pt; font-size:12pt;">PROCURADOR(ES) CUJA PROCURAÇÃO É REVOGADA:</div>
+<table class="dados-table">
+<tr>
+    <td style="width:50%"><span class="label">Nome Completo:</span><input type="text" id="proc_nome" value="" maxlength="60"></td>
+    <td style="width:25%"><span class="label">OAB:</span><input type="text" id="proc_oab" value="" maxlength="20" placeholder="OAB/UF nº ..."></td>
+    <td style="width:25%"><span class="label">Data da procuração original (opcional):</span><input type="text" id="proc_data_orig" value="" maxlength="10" placeholder="DD/MM/AAAA"></td>
+</tr>
+</table>
 
-<!-- PODERES -->
-<div class="secao espaco-antes">PODERES:</div>
-<p>O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia</em> e <em>extra</em> dando enfim, <strong>amplos e irrestrito poderes</strong> para o foro em geral, inclusive no âmbito da administração pública, direta e indireta, em seus órgãos competentes, podendo, para tanto, praticar todos os atos necessários ao fiel desempenho da presente ação judicial ou administrativa, e qualquer procedimento que seja necessária a intervenção de advogado, representando-o, conjunta ou separadamente, <strong>perante o INSS</strong> ou qualquer juízo, comarca, instância ou Tribunal, para quem concedem os mais amplos e irrestritos poderes, sendo que estes podem, observados os poderes do advogado estabelecido em Lei, são conferidos para intentar ou acompanhar qualquer feito em nome do outorgante, como autor, réu, assistentes, opoente, ou terceiro interveniente, podendo, ainda, celebrar ajustes amigáveis, <strong>receber valores em seu nome</strong>, renunciar valores excedentes ao teto dos Juizados Especiais Federais, <strong>assinar declaração de hipossuficiência</strong>, requerer isenção de imposto de renda, <strong>requerer gratuidade da justiça</strong>, dar e receber quitação de crédito, negociar débito, suscitar incidente de falsidade, arguir exceções de impedimento ou de suspeição, transigir, firmar compromissos e receber citação e intimações, desistir, e <strong>substabelecer</strong>, se necessário, com ou sem reserva os poderes ora conferidos, bem como <strong>retirar alvarás e senhas do "MEU INSS"/GOV.BR</strong>.</p>
+<!-- TEXTO DE REVOGAÇÃO -->
+<div class="secao espaco-antes">DA REVOGAÇÃO:</div>
+<p>O Outorgante, por este instrumento particular, vem <strong>REVOGAR, de forma expressa e incondicional</strong>, a procuração anteriormente outorgada em favor do(s) procurador(es) acima identificado(s), tornando <strong>sem qualquer efeito</strong> todos os poderes nela conferidos a partir desta data, nos termos dos <strong>arts. 682, I, 686 e 687 do Código Civil</strong>.</p>
+<p>Fica o(a) procurador(a) ora desconstituído(a) <strong>ciente de que deve cessar imediatamente</strong> qualquer atuação em nome do Outorgante, abstendo-se de praticar qualquer ato em seu nome ou interesse, seja perante órgãos da administração pública — em especial o <strong>INSS</strong> —, seja perante qualquer juízo, Tribunal, instância administrativa ou terceiros, sob pena de responsabilidade civil e criminal.</p>
+<p>O Outorgante requer, desde já, que a presente revogação seja <strong>juntada aos autos</strong> de qualquer processo judicial ou administrativo em que o(a) procurador(a) revogado(a) tenha atuado em seu nome, comunicando-se a revogação para todos os fins de direito.</p>
 
 <!-- ====== ASSINATURA: NORMAL ====== -->
 <div id="sec-assinatura-normal" class="tipo-section active">
@@ -407,10 +416,10 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 function mudarTipo(tipo) {
     // Titles
     var titles = {
-        normal: 'Procuração Ad Judicia et Extra',
-        incapaz: 'Procuração Ad Judicia et Extra — Menor Impúbere (representação)',
-        relativo: 'Procuração Ad Judicia et Extra — Relativamente Incapaz (assistência)',
-        analfabeto: 'Procuração Ad Judicia et Extra — Analfabeto'
+        normal: 'Revogação de Procuração',
+        incapaz: 'Revogação de Procuração — Menor Impúbere (representação)',
+        relativo: 'Revogação de Procuração — Relativamente Incapaz (assistência)',
+        analfabeto: 'Revogação de Procuração — Analfabeto'
     };
     document.title = titles[tipo] || titles.normal;
 
@@ -523,7 +532,8 @@ var FIELDS = {
     cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
     rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
     assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
-    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'}
+    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'},
+    proc_nome: {fmt:'upper',allow:'text'}, proc_oab: {fmt:'upper',allow:null}, proc_data_orig: {fmt:null,allow:null}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true };
 function normalize(id, v) {
@@ -785,6 +795,7 @@ function validateForm() {
 
     // Se começou a preencher, exige conjunto base completo
     markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
+    markRequiredEmpty('proc_nome', errors, 'Nome do procurador cuja procuração é revogada');
     markRequiredEmpty('profissao', errors, 'Profissão');
     markRequiredEmpty('estado_civil', errors, 'Estado civil');
     markRequiredEmpty('telefone', errors, 'Telefone');
