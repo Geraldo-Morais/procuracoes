@@ -315,21 +315,13 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 </table>
 </div>
 
-<!-- PROCURADOR(ES) CUJA PROCURAÇÃO É REVOGADA -->
-<div style="font-weight:bold; margin-top:14pt; margin-bottom:2pt; font-size:12pt;">PROCURADOR(ES) CUJA PROCURAÇÃO É REVOGADA:</div>
-<table class="dados-table">
-<tr>
-    <td style="width:50%"><span class="label">Nome Completo:</span><input type="text" id="proc_nome" value="" maxlength="60"></td>
-    <td style="width:25%"><span class="label">OAB:</span><input type="text" id="proc_oab" value="" maxlength="20" placeholder="OAB/UF nº ..."></td>
-    <td style="width:25%"><span class="label">Data da procuração original (opcional):</span><input type="text" id="proc_data_orig" value="" maxlength="10" placeholder="DD/MM/AAAA"></td>
-</tr>
-</table>
+<!-- PROCURADOR REVOGADO (FIXO) -->
+<p class="espaco-antes"><strong>PROCURADOR CUJA PROCURAÇÃO É REVOGADA: CLAYTON GONÇALVES MENEZES</strong>, advogado inscrito na OAB/BA sob o nº 49.167, com endereço profissional na Av. Ascendino Melo nº 297, Shopping Itatiaia, Menezes Advocacia, Centro, Vitória da Conquista – BA.</p>
 
 <!-- TEXTO DE REVOGAÇÃO -->
 <div class="secao espaco-antes">DA REVOGAÇÃO:</div>
-<p>O Outorgante, por este instrumento particular, vem <strong>REVOGAR, de forma expressa e incondicional</strong>, a procuração anteriormente outorgada em favor do(s) procurador(es) acima identificado(s), tornando <strong>sem qualquer efeito</strong> todos os poderes nela conferidos a partir desta data, nos termos dos <strong>arts. 682, I, 686 e 687 do Código Civil</strong>.</p>
-<p>Fica o(a) procurador(a) ora desconstituído(a) <strong>ciente de que deve cessar imediatamente</strong> qualquer atuação em nome do Outorgante, abstendo-se de praticar qualquer ato em seu nome ou interesse, seja perante órgãos da administração pública — em especial o <strong>INSS</strong> —, seja perante qualquer juízo, Tribunal, instância administrativa ou terceiros, sob pena de responsabilidade civil e criminal.</p>
-<p>O Outorgante requer, desde já, que a presente revogação seja <strong>juntada aos autos</strong> de qualquer processo judicial ou administrativo em que o(a) procurador(a) revogado(a) tenha atuado em seu nome, comunicando-se a revogação para todos os fins de direito.</p>
+<p>O Outorgante, por este instrumento particular, vem <strong>REVOGAR, de forma expressa e incondicional</strong>, a procuração anteriormente outorgada em favor do procurador acima identificado, tornando <strong>sem qualquer efeito</strong> todos os poderes nela conferidos a partir desta data, nos termos dos <strong>arts. 682, I, 686 e 687 do Código Civil</strong>.</p>
+<p>Requer, ainda, que a presente revogação seja <strong>juntada aos autos</strong> de qualquer processo judicial ou administrativo em que o procurador revogado tenha atuado em seu nome, comunicando-se a revogação para todos os fins de direito.</p>
 
 <!-- ====== ASSINATURA: NORMAL ====== -->
 <div id="sec-assinatura-normal" class="tipo-section active">
@@ -532,8 +524,7 @@ var FIELDS = {
     cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
     rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'upper',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'},
     assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'upper',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'},
-    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'},
-    proc_nome: {fmt:'upper',allow:'text'}, proc_oab: {fmt:'upper',allow:null}, proc_data_orig: {fmt:null,allow:null}
+    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'upper',allow:null}, test2_cpf: {fmt:'cpf',allow:'num'}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true };
 function normalize(id, v) {
@@ -795,7 +786,6 @@ function validateForm() {
 
     // Se começou a preencher, exige conjunto base completo
     markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
-    markRequiredEmpty('proc_nome', errors, 'Nome do procurador cuja procuração é revogada');
     markRequiredEmpty('profissao', errors, 'Profissão');
     markRequiredEmpty('estado_civil', errors, 'Estado civil');
     markRequiredEmpty('telefone', errors, 'Telefone');
