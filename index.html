@@ -271,9 +271,9 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     <td style="width:25%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="rg" value="" maxlength="25"></td>
 </tr>
 <tr id="row-profissao">
-    <td><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></td>
-    <td><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="15"></td>
-    <td><span class="label">Telefone:</span><input type="text" id="telefone" value="" maxlength="16"></td>
+    <td id="td-profissao"><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></td>
+    <td id="td-estado-civil"><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="15"></td>
+    <td id="td-telefone"><span class="label">Telefone:</span><input type="text" id="telefone" value="" maxlength="16"></td>
 </tr>
 <tr>
     <td><span class="label">Endereço:</span><input type="text" id="endereco" value="" maxlength="45"></td>
@@ -431,6 +431,14 @@ function mudarTipo(tipo) {
 
     // Mantém a linha visível para garantir telefone sempre disponível
     document.getElementById('row-profissao').style.display = '';
+
+    // Absolutamente incapaz (menor de 16): não tem profissão nem estado civil.
+    // Esconde os 2 campos e expande Telefone para ocupar a linha inteira.
+    var hideProfEC = (tipo === 'incapaz');
+    document.getElementById('td-profissao').style.display = hideProfEC ? 'none' : '';
+    document.getElementById('td-estado-civil').style.display = hideProfEC ? 'none' : '';
+    var tdTel = document.getElementById('td-telefone');
+    if (hideProfEC) tdTel.setAttribute('colspan', '3'); else tdTel.removeAttribute('colspan');
 
     // Show/hide sections
     document.getElementById('sec-outorgante-full').className = 'tipo-section active';
@@ -784,9 +792,12 @@ function validateForm() {
     if (!hasAnyMeaningfulInput()) return errors;
 
     // Se começou a preencher, exige conjunto base completo
+    var _tipo = tipoAtual();
     markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
-    markRequiredEmpty('profissao', errors, 'Profissão');
-    markRequiredEmpty('estado_civil', errors, 'Estado civil');
+    if (_tipo !== 'incapaz') {
+        markRequiredEmpty('profissao', errors, 'Profissão');
+        markRequiredEmpty('estado_civil', errors, 'Estado civil');
+    }
     markRequiredEmpty('telefone', errors, 'Telefone');
     markRequiredEmpty('endereco', errors, 'Endereço');
     markRequiredEmpty('numero', errors, 'Número');
