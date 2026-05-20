@@ -293,7 +293,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
         <div class="grid-cell" id="cell-cpf"><span class="label">CPF:</span><input type="text" id="cpf" value="" maxlength="14"></div>
         <div class="grid-cell" id="cell-rg"><span class="label">RG / Órgão:</span><input type="text" id="rg" value="" maxlength="25"></div>
         <div class="grid-cell" id="cell-profissao"><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></div>
-        <div class="grid-cell" id="cell-estado-civil"><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="15"></div>
+        <div class="grid-cell" id="cell-estado-civil"><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
         <div class="grid-cell" id="cell-telefone"><span class="label">Telefone:</span><input type="text" id="telefone" value="" maxlength="16"></div>
     </div>
     <div class="grid-row" id="row-endereco">
@@ -309,6 +309,20 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 </div>
 <datalist id="estados-list"></datalist>
 <datalist id="cidades-list"></datalist>
+
+<datalist id="estado-civil-list">
+    <option value="Solteiro">
+    <option value="Solteira">
+    <option value="Casado">
+    <option value="Casada">
+    <option value="Divorciado">
+    <option value="Divorciada">
+    <option value="Viúvo">
+    <option value="Viúva">
+    <option value="Separado Judicialmente">
+    <option value="Separada Judicialmente">
+    <option value="União Estável">
+</datalist>
 
 <datalist id="qualidade-rep-list">
     <option value="Pai">
@@ -334,12 +348,12 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="rep_nome" value="" maxlength="50"></div>
-        <div class="grid-cell" style="flex: 0 0 20%"><span class="label">Qualidade:</span><input type="text" id="rep_qualidade" value="" maxlength="25" list="qualidade-rep-list" placeholder="Pai, Mãe, Tutor..."></div>
+        <div class="grid-cell" style="flex: 0 0 20%"><span class="label">CPF:</span><input type="text" id="rep_cpf" value="" maxlength="14"></div>
     </div>
     <div class="grid-row">
-        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Estado Civil:</span><input type="text" id="rep_estado_civil" value="" maxlength="20"></div>
-        <div class="grid-cell" style="flex: 0 0 25%"><span class="label">CPF:</span><input type="text" id="rep_cpf" value="" maxlength="14"></div>
-        <div class="grid-cell" style="flex: 0 0 45%"><span class="label">RG / Órgão:</span><input type="text" id="rep_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 40%"><span class="label">Estado Civil:</span><input type="text" id="rep_estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG / Órgão:</span><input type="text" id="rep_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Qualidade:</span><input type="text" id="rep_qualidade" value="" maxlength="25" list="qualidade-rep-list" placeholder="Pai, Mãe, Tutor..."></div>
     </div>
 </div>
 </div>
@@ -350,12 +364,12 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="assist_nome" value="" maxlength="50"></div>
-        <div class="grid-cell" style="flex: 0 0 20%"><span class="label">Qualidade:</span><input type="text" id="assist_qualidade" value="" maxlength="25" list="qualidade-assist-list" placeholder="Genitor, Curador..."></div>
+        <div class="grid-cell" style="flex: 0 0 20%"><span class="label">CPF:</span><input type="text" id="assist_cpf" value="" maxlength="14"></div>
     </div>
     <div class="grid-row">
-        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Estado Civil:</span><input type="text" id="assist_estado_civil" value="" maxlength="20"></div>
-        <div class="grid-cell" style="flex: 0 0 25%"><span class="label">CPF:</span><input type="text" id="assist_cpf" value="" maxlength="14"></div>
-        <div class="grid-cell" style="flex: 0 0 45%"><span class="label">RG / Órgão:</span><input type="text" id="assist_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 40%"><span class="label">Estado Civil:</span><input type="text" id="assist_estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG / Órgão:</span><input type="text" id="assist_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Qualidade:</span><input type="text" id="assist_qualidade" value="" maxlength="25" list="qualidade-assist-list" placeholder="Genitor, Curador..."></div>
     </div>
 </div>
 </div>
@@ -726,6 +740,13 @@ ALL_DATE_IDS.forEach(function(id) {
 });
 
 // Bind table fields
+function validateCPFLive(el) {
+    var d = onlyDigits(el.value);
+    if (d.length === 0) { el.classList.remove('input-error'); return; }
+    if (d.length < 11) { el.classList.remove('input-error'); return; } // ainda digitando
+    if (isValidCPF(el.value)) el.classList.remove('input-error');
+    else el.classList.add('input-error');
+}
 Object.keys(FIELDS).forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     var cfg = FIELDS[id];
@@ -734,8 +755,13 @@ Object.keys(FIELDS).forEach(function(id) {
         if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
         if (REALTIME[cfg.fmt]) el.value = normalize(id, el.value);
         el.setSelectionRange(Math.max(0, pos - (before.length - el.value.length)), Math.max(0, pos - (before.length - el.value.length)));
+        if (cfg.fmt === 'cpf') validateCPFLive(el);
     });
-    if (cfg.fmt) el.addEventListener('blur', function() { if (cfg.allow) el.value = filterInput(el.value, cfg.allow); el.value = normalize(id, el.value); });
+    if (cfg.fmt) el.addEventListener('blur', function() {
+        if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
+        el.value = normalize(id, el.value);
+        if (cfg.fmt === 'cpf') validateCPFLive(el);
+    });
 });
 
 // Bind date fields
