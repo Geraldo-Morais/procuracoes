@@ -562,14 +562,6 @@ function mudarTipo(tipo) {
     aplicarLayoutOutorgante(tipo);
     ajustarLabelsRogo(tipo);
 
-    // Absolutamente incapaz (menor de 16): não tem profissão nem estado civil.
-    // Esconde os 2 campos e expande Telefone para ocupar a linha inteira.
-    var hideProfEC = (tipo === 'incapaz');
-    document.getElementById('td-profissao').style.display = hideProfEC ? 'none' : '';
-    document.getElementById('td-estado-civil').style.display = hideProfEC ? 'none' : '';
-    var tdTel = document.getElementById('td-telefone');
-    if (hideProfEC) tdTel.setAttribute('colspan', '3'); else tdTel.removeAttribute('colspan');
-
     // Show/hide sections
     var temRepresentante = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto');
     document.getElementById('sec-outorgante-full').className = 'tipo-section active';
