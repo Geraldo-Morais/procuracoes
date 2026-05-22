@@ -248,9 +248,9 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
             <div class="help-popup">
                 <b>Normal:</b> Pessoa maior de 18 anos, capaz, que assina o documento.<br><br>
                 <b>Absolutamente Incapaz:</b> Menor de 16 anos. O representante legal (pai, mãe ou tutor) assina pela criança.<br><br>
-                <b>Abs. Incapaz (Rep. Analfabeto):</b> Titular menor de 16 anos / curatelado, e o representante legal (pai, mãe, tutor ou curador) é analfabeto. A 1ª testemunha assina a rogo do representante + impressão digital do representante.<br><br>
+                <b>Abs. Incapaz (Rep. Analfabeto):</b> Titular menor de 16 anos / curatelado, e o representante legal (pai, mãe, tutor ou curador) é analfabeto. Um terceiro (não testemunha) assina a rogo do representante + impressão digital do representante. As 2 testemunhas validam o ato.<br><br>
                 <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
-                <b>Analfabeto:</b> Pessoa que não sabe assinar. A 1ª testemunha assina a rogo (em nome do outorgante) + impressão digital.
+                <b>Analfabeto:</b> Pessoa que não sabe assinar. Um terceiro (não testemunha) assina a rogo em nome do outorgante + impressão digital. As 2 testemunhas validam o ato.
             </div>
         </span>
     </div>
@@ -418,7 +418,11 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     <td style="width:50%; vertical-align:middle; text-align:center; border:none; padding:0 8pt 0 0;">
         <div id="rogo-titulo" style="font-weight:bold; font-size:10pt; margin-bottom:4pt;">ASSINATURA A ROGO DO(A) OUTORGANTE:</div>
         <span style="display:inline-block; width:220pt; border-bottom:1pt solid #000; height:10pt;">&nbsp;</span>
-        <div id="rogo-sublabel" style="font-size:7.5pt; color:#555; margin-top:1pt;">(1ª testemunha assina a rogo do outorgante)</div>
+        <div id="rogo-sublabel" style="font-size:7.5pt; color:#555; margin-top:1pt;">(Terceiro assina a rogo do outorgante — não é testemunha)</div>
+        <div class="testemunha-campos" style="margin-top:4pt; max-width:220pt; margin-left:auto; margin-right:auto;">
+            <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="rogo_cpf" value="" maxlength="14"></div>
+            <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="rogo_rg" value="" maxlength="25"></div>
+        </div>
         <div class="local-data-line" style="margin-top:8pt; font-size:10pt;">
             <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade4" value="" maxlength="25" placeholder="CIDADE" style="font-size:10pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf4" value="" maxlength="2" placeholder="UF" style="font-size:10pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia4" value="" maxlength="2" placeholder="DD" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes4" value="" maxlength="12" placeholder="Mês" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano4" value="" maxlength="4" placeholder="AAAA" style="font-size:10pt;"><span class="date-sep">.</span></span>
         </div>
@@ -429,7 +433,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     </td>
     <td style="width:50%; vertical-align:top; border:none; padding:0 0 0 8pt;">
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">1ª TESTEMUNHA (assina a rogo):</div>
+            <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
             <div class="testemunha-nome-label">NOME:</div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
@@ -560,11 +564,11 @@ function ajustarLabelsRogo(tipo) {
     if (!titulo) return;
     if (tipo === 'incapaz-analfabeto') {
         titulo.textContent = 'ASSINATURA A ROGO DO(A) REPRESENTANTE LEGAL:';
-        sublabel.textContent = '(1ª testemunha assina a rogo do representante legal)';
+        sublabel.textContent = '(Terceiro assina a rogo do representante legal — não é testemunha)';
         digital.textContent = 'Impressão digital do representante legal (polegar direito):';
     } else {
         titulo.textContent = 'ASSINATURA A ROGO DO(A) OUTORGANTE:';
-        sublabel.textContent = '(1ª testemunha assina a rogo do outorgante)';
+        sublabel.textContent = '(Terceiro assina a rogo do outorgante — não é testemunha)';
         digital.textContent = 'Impressão digital (polegar direito):';
     }
 }
@@ -705,7 +709,8 @@ var FIELDS = {
     rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'rg',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'}, rep_estado_civil: {fmt:'upper',allow:'text'},
     assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'rg',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'}, assist_estado_civil: {fmt:'upper',allow:'text'},
     test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'rg',allow:null},
-    test2_cpf: {fmt:'cpf',allow:'num'}, test2_rg: {fmt:'rg',allow:null}
+    test2_cpf: {fmt:'cpf',allow:'num'}, test2_rg: {fmt:'rg',allow:null},
+    rogo_cpf: {fmt:'cpf',allow:'num'}, rogo_rg: {fmt:'rg',allow:null}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true, rg: true };
 function normalize(id, v) {
@@ -792,7 +797,7 @@ function applyRGFallback(id) {
     var el = document.getElementById(id); if (!el) return;
     if (!el.value || !el.value.trim()) el.value = '--';
 }
-['rg','rep_rg','assist_rg','test1_rg','test2_rg'].forEach(function(id) {
+['rg','rep_rg','assist_rg','test1_rg','test2_rg','rogo_rg'].forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     el.addEventListener('focus', function() { if (el.value === '--') el.value = ''; });
     el.addEventListener('blur', function() { applyRGFallback(id); });
@@ -942,7 +947,7 @@ var now = new Date();
 
 // Initial field normalization
 Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
-['rg','rep_rg','assist_rg','test1_rg','test2_rg'].forEach(function(id) { applyRGFallback(id); });
+['rg','rep_rg','assist_rg','test1_rg','test2_rg','rogo_rg'].forEach(function(id) { applyRGFallback(id); });
 
 function tipoAtual() { return (document.getElementById('tipoSelect') || {}).value || 'normal'; }
 function fieldValue(id) {
@@ -957,7 +962,7 @@ function hasAnyMeaningfulInput() {
         if (el.classList.contains('date-input')) continue;
         var v = (el.value || '').trim();
         if (!v) continue;
-        if (v === '--' && (el.id === 'rg' || el.id === 'rep_rg' || el.id === 'assist_rg' || el.id === 'test1_rg' || el.id === 'test2_rg')) continue;
+        if (v === '--' && (el.id === 'rg' || el.id === 'rep_rg' || el.id === 'assist_rg' || el.id === 'test1_rg' || el.id === 'test2_rg' || el.id === 'rogo_rg')) continue;
         return true;
     }
     return false;
