@@ -242,6 +242,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
             <option value="incapaz">Absolutamente Incapaz</option>
             <option value="incapaz-analfabeto">Abs. Incapaz (Rep. Analfabeto)</option>
             <option value="relativo">Relativamente Incapaz</option>
+            <option value="relativo-analfabeto">Rel. Incapaz (Assist. Analfabeto)</option>
             <option value="analfabeto">Analfabeto</option>
         </select>
         <span class="help-btn">?
@@ -250,6 +251,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
                 <b>Absolutamente Incapaz:</b> Menor de 16 anos. O representante legal (pai, mãe ou tutor) assina pela criança.<br><br>
                 <b>Abs. Incapaz (Rep. Analfabeto):</b> Titular menor de 16 anos / curatelado, e o representante legal (pai, mãe, tutor ou curador) é analfabeto. Um terceiro (não testemunha) assina a rogo do representante + impressão digital do representante. As 2 testemunhas validam o ato.<br><br>
                 <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
+                <b>Rel. Incapaz (Assist. Analfabeto):</b> Titular relativamente incapaz (16-17 anos / deficiente), e o assistente legal (genitor ou curador) é analfabeto. Um terceiro (não testemunha) assina a rogo do assistente + impressão digital do assistente. As 2 testemunhas validam o ato.<br><br>
                 <b>Analfabeto:</b> Pessoa que não sabe assinar. Um terceiro (não testemunha) assina a rogo em nome do outorgante + impressão digital. As 2 testemunhas validam o ato.
             </div>
         </span>
@@ -469,7 +471,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <script>
 // === TIPO SWITCHING ===
 function aplicarLayoutOutorgante(tipo) {
-    var isCompact = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto' || tipo === 'relativo');
+    var isCompact = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto' || tipo === 'relativo' || tipo === 'relativo-analfabeto');
     var rowNome = document.getElementById('row-nome');
     var rowIdent = document.getElementById('row-identidade');
     var rowEnd = document.getElementById('row-endereco');
@@ -566,6 +568,10 @@ function ajustarLabelsRogo(tipo) {
         titulo.textContent = 'ASSINATURA A ROGO DO(A) REPRESENTANTE LEGAL:';
         sublabel.textContent = '(Terceiro assina a rogo do representante legal — não é testemunha)';
         digital.textContent = 'Impressão digital do representante legal (polegar direito):';
+    } else if (tipo === 'relativo-analfabeto') {
+        titulo.textContent = 'ASSINATURA A ROGO DO(A) ASSISTENTE LEGAL:';
+        sublabel.textContent = '(Terceiro assina a rogo do assistente legal — não é testemunha)';
+        digital.textContent = 'Impressão digital do assistente legal (polegar direito):';
     } else {
         titulo.textContent = 'ASSINATURA A ROGO DO(A) OUTORGANTE:';
         sublabel.textContent = '(Terceiro assina a rogo do outorgante — não é testemunha)';
@@ -580,6 +586,7 @@ function mudarTipo(tipo) {
         incapaz: 'Procuração Ad Judicia et Extra — Menor Impúbere (representação)',
         'incapaz-analfabeto': 'Procuração Ad Judicia et Extra — Menor Impúbere / Curatelado (Representante Analfabeto)',
         relativo: 'Procuração Ad Judicia et Extra — Relativamente Incapaz (assistência)',
+        'relativo-analfabeto': 'Procuração Ad Judicia et Extra — Relativamente Incapaz (Assistente Analfabeto)',
         analfabeto: 'Procuração Ad Judicia et Extra — Analfabeto'
     };
     document.title = titles[tipo] || titles.normal;
@@ -590,6 +597,7 @@ function mudarTipo(tipo) {
         incapaz: 'OUTORGANTE (menor de 16 anos):',
         'incapaz-analfabeto': 'OUTORGANTE (absolutamente incapaz):',
         relativo: 'OUTORGANTE:',
+        'relativo-analfabeto': 'OUTORGANTE (relativamente incapaz):',
         analfabeto: 'OUTORGANTE (analfabeto):'
     };
     document.getElementById('lbl-outorgante').textContent = labels[tipo] || labels.normal;
@@ -597,7 +605,7 @@ function mudarTipo(tipo) {
     var page = document.querySelector('.page');
     if (tipo === 'normal') { page.classList.remove('compact'); page.classList.remove('compact-poderes'); }
     else { page.classList.add('compact'); }
-    if (tipo === 'relativo' || tipo === 'analfabeto' || tipo === 'incapaz-analfabeto') page.classList.add('compact-poderes');
+    if (tipo === 'relativo' || tipo === 'relativo-analfabeto' || tipo === 'analfabeto' || tipo === 'incapaz-analfabeto') page.classList.add('compact-poderes');
     else page.classList.remove('compact-poderes');
 
     // Reorganiza tabela do outorgante de acordo com o tipo
@@ -608,10 +616,10 @@ function mudarTipo(tipo) {
     var temRepresentante = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto');
     document.getElementById('sec-outorgante-full').className = 'tipo-section active';
     document.getElementById('sec-representante').className = 'tipo-section' + (temRepresentante ? ' active' : '');
-    document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
+    document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' || tipo === 'relativo-analfabeto' ? ' active' : '');
 
     // Signatures
-    var usaAssinaturaRogo = (tipo === 'analfabeto' || tipo === 'incapaz-analfabeto');
+    var usaAssinaturaRogo = (tipo === 'analfabeto' || tipo === 'incapaz-analfabeto' || tipo === 'relativo-analfabeto');
     document.getElementById('sec-assinatura-normal').className = 'tipo-section' + (tipo === 'normal' ? ' active' : '');
     document.getElementById('sec-assinatura-incapaz').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
     document.getElementById('sec-assinatura-relativo').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
@@ -985,7 +993,7 @@ function validateForm() {
 
     var tipo = tipoAtual();
     var titularIncapaz = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto');
-    var isCompact = (titularIncapaz || tipo === 'relativo');
+    var isCompact = (titularIncapaz || tipo === 'relativo' || tipo === 'relativo-analfabeto');
 
     // Se começou a preencher, exige conjunto base completo
     markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
@@ -1015,7 +1023,7 @@ function validateForm() {
             setError('rep_cpf', true);
         }
     }
-    if (tipo === 'relativo') {
+    if (tipo === 'relativo' || tipo === 'relativo-analfabeto') {
         markRequiredEmpty('assist_nome', errors, 'Nome do assistente legal');
         markRequiredEmpty('assist_qualidade', errors, 'Qualidade do assistente legal');
         var assistCpf = fieldValue('assist_cpf');
