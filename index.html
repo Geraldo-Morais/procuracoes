@@ -229,6 +229,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     .page { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
     .dados-table input[type="text"], .date-input, .testemunha-campo input { background: transparent !important; -webkit-appearance: none; }
     .footer-screen { display: none !important; }
+    #page-termo { page-break-before: always; }
 }
 </style>
 </head>
@@ -255,6 +256,25 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
                 <b>Analfabeto:</b> Pessoa que não sabe assinar. Um terceiro (não testemunha) assina a rogo em nome do outorgante + impressão digital. As 2 testemunhas validam o ato.
             </div>
         </span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:5px; font-size:10pt; cursor:pointer;">
+            <input type="checkbox" id="incluirTermo" onchange="syncTermo()"> Incluir Anexo X (Termo INSS)
+        </label>
+        <select id="termo_beneficio" onchange="syncTermo()" style="font-size:10pt;">
+            <option value="" selected disabled>Benefício…</option>
+            <option>Benefício Assistencial (BPC/LOAS)</option>
+            <option>Salário-Maternidade</option>
+            <option>Benefício por Incapacidade Rural</option>
+            <option>Benefício por Incapacidade Urbano</option>
+            <option>Salário-Maternidade Rural</option>
+            <option>Salário-Maternidade Urbano</option>
+            <option>Aposentadoria por Idade Rural</option>
+            <option>Aposentadoria por Idade Urbana</option>
+            <option>Aposentadoria por Incapacidade Permanente</option>
+            <option>Pensão por Morte Urbana</option>
+            <option>Pensão por Morte Rural</option>
+        </select>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
         <a href="revogacao.html" style="color:#fff; text-decoration:underline; font-size:10pt;">Revogar procuração →</a>
@@ -468,6 +488,63 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 
 </div><!-- .page -->
 
+<!-- ====== ANEXO X — TERMO DE REPRESENTAÇÃO (gerado a partir dos dados da procuração) ====== -->
+<div class="page" id="page-termo" style="display:none;">
+    <div class="header">
+        <table>
+            <tr>
+                <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
+                <td style="width:34%; text-align:center; vertical-align:bottom;">
+                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                </td>
+                <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
+                    Menezes &amp; Advogados Associados
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align:center; font-weight:bold; font-size:11pt;">ANEXO X</div>
+    <div style="text-align:center; font-weight:bold; font-size:11pt; margin-bottom:8pt;">PORTARIA PRES/INSS Nº 1.538, DE 19 DE DEZEMBRO DE 2022</div>
+    <div class="titulo">TERMO DE REPRESENTAÇÃO E AUTORIZAÇÃO DE ACESSO ÀS INFORMAÇÕES PREVIDENCIÁRIAS</div>
+
+    <p class="espaco-antes" style="text-align:justify;">
+        Eu, <strong><span id="t_nome">________</span></strong>, inscrito sob o CPF de nº <span id="t_cpf">________</span>,
+        RG nº <span id="t_rg">________</span>, residente e domiciliado na <span id="t_end">________</span>,
+        no município de <span id="t_mun">________</span><span id="t_repclause"></span>, representado pelo advogado
+        <strong>CLAYTON GONÇALVES MENEZES, OAB/BA nº BA49167</strong>, confiro poderes específicos para me
+        representar perante o INSS na solicitação do serviço ou benefício abaixo indicado e autorizo ter acesso
+        apenas às informações pessoais necessárias a subsidiar o requerimento eletrônico do serviço ou benefício
+        abaixo elencado:
+    </p>
+
+    <p style="font-weight:bold;">I – requerimento:</p>
+    <div style="padding-left:1.5cm;">
+        <p>( X )&nbsp;&nbsp;<strong><span id="t_beneficio">__________________________</span></strong></p>
+        <p style="text-align:justify;">( X )&nbsp;&nbsp;Atualizações para manutenção do benefício e outros serviços relacionados, na modalidade de atendimento à distância, bem como a preparação e instrução de requerimentos para posterior análise pelo INSS.</p>
+        <p style="text-align:justify;">( X )&nbsp;&nbsp;Orientações e informações sobre formas de acesso aos serviços digitais do INSS.</p>
+    </div>
+
+    <p style="text-align:justify;">Podendo, para tanto, praticar os atos necessários ao cumprimento deste mandato, em especial, prestar informações, acompanhar o requerimento, cumprir exigências, ter vistas e tomar ciência de decisões sobre o processo de requerimento especificado neste termo.</p>
+
+    <p style="text-align:justify;">Declaro também estar ciente de que devo acompanhar o andamento de meu pedido através do site do INSS e de que as informações ora prestadas são verídicas, estando sujeito às penalidades previstas nos art. 171 e 299 do Código Penal.</p>
+
+    <div style="text-align:center; margin:22pt 0 36pt;"><span id="t_local">________</span></div>
+
+    <div class="assinatura" style="text-align:center;">
+        <span class="assinatura-linha" style="display:inline-block; min-width:62%; border-bottom:1pt solid #000;">&nbsp;</span>
+        <div id="t_assinatura_label" style="font-size:11pt; margin-top:3pt;">Assinatura do(a) outorgante</div>
+    </div>
+
+    <div class="footer-screen">
+        <div class="footer-text">
+            Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
+            Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
+        </div>
+        <div class="footer-page">Anexo X</div>
+    </div>
+</div>
+
 <script>
 // === TIPO SWITCHING ===
 function aplicarLayoutOutorgante(tipo) {
@@ -624,6 +701,8 @@ function mudarTipo(tipo) {
     document.getElementById('sec-assinatura-incapaz').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
     document.getElementById('sec-assinatura-relativo').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
     document.getElementById('sec-assinatura-analfabeto').className = 'tipo-section' + (usaAssinaturaRogo ? ' active' : '');
+
+    if (typeof syncTermo === 'function') syncTermo();
 }
 
 // === NORMALIZATION ===
@@ -824,11 +903,13 @@ function updateUFSignatures(uf) {
     ['local_uf','local_uf2','local_uf3','local_uf4'].forEach(function(id) {
         var el = document.getElementById(id); if (el) { el.value = uf || ''; autoSize(el); }
     });
+    if (typeof syncTermo === 'function') syncTermo();
 }
 function updateCidadeSignatures(v) {
     ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
         var el = document.getElementById(id); if (el) { el.value = toTitleCase(v || ''); autoSize(el); }
     });
+    if (typeof syncTermo === 'function') syncTermo();
 }
 function normalizeEstadoToUFStrict(v) {
     var trimmed = (v || '').trim();
@@ -1045,6 +1126,10 @@ function validateForm() {
 }
 function gerarPDF() {
     var errors = validateForm();
+    var inc = document.getElementById('incluirTermo');
+    if (inc && inc.checked && !_termoVal('termo_beneficio')) {
+        errors.push('Selecione o tipo de benefício para o Anexo X (Termo INSS).');
+    }
     if (errors.length) {
         alert('Corrija antes de gerar PDF:\\n\\n- ' + errors.join('\\n- '));
         return;
@@ -1052,8 +1137,80 @@ function gerarPDF() {
     window.print();
 }
 
+// === ANEXO X — TERMO DE REPRESENTAÇÃO (espelha os dados da procuração) ===
+function _termoVal(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+function _termoSet(id, txt, fallback) {
+    var el = document.getElementById(id); if (!el) return;
+    el.textContent = (txt && txt.length) ? txt : (fallback !== undefined ? fallback : '________');
+}
+function _rgLimpo(id) { var r = _termoVal(id); return (r === '--') ? '' : r; }
+function termoEndereco() {
+    var e = _termoVal('endereco'), n = _termoVal('numero'), b = _termoVal('bairro'),
+        c = _termoVal('cidade'), uf = _termoVal('estado');
+    var partes = [];
+    if (e) partes.push(e + (n ? ', nº ' + n : ''));
+    if (b) partes.push(b);
+    var cidUf = [c, uf].filter(Boolean).join('/');
+    if (cidUf) partes.push(cidUf);
+    return partes.join(', ');
+}
+function termoMunicipio() { return [_termoVal('cidade'), _termoVal('estado')].filter(Boolean).join('/'); }
+function termoLocalData() {
+    var cid = _termoVal('local_cidade'), uf = _termoVal('local_uf'),
+        d = _termoVal('data_dia'), m = _termoVal('data_mes'), a = _termoVal('data_ano');
+    var cabe = cid ? (cid + (uf ? ' – ' + uf : '')) : '';
+    var dt = (d || '___') + ' de ' + (m || '__________') + ' de ' + (a || '____');
+    return (cabe ? cabe + ', ' : '') + dt + '.';
+}
+function termoPessoa(prefix) {
+    return {
+        nome: _termoVal(prefix + '_nome'), cpf: _termoVal(prefix + '_cpf'),
+        rg: _rgLimpo(prefix + '_rg'), q: _termoVal(prefix + '_qualidade')
+    };
+}
+function syncTermo() {
+    var page = document.getElementById('page-termo'); if (!page) return;
+    var incluir = document.getElementById('incluirTermo');
+    page.style.display = (incluir && incluir.checked) ? '' : 'none';
+
+    _termoSet('t_nome', _termoVal('nome'));
+    _termoSet('t_cpf', _termoVal('cpf'));
+    _termoSet('t_rg', _rgLimpo('rg'));
+    _termoSet('t_end', termoEndereco());
+    _termoSet('t_mun', termoMunicipio());
+    _termoSet('t_local', termoLocalData(), '________');
+    _termoSet('t_beneficio', _termoVal('termo_beneficio'), '__________________________');
+
+    var tipo = (typeof tipoAtual === 'function') ? tipoAtual() : 'normal';
+    var clause = document.getElementById('t_repclause');
+    var label = document.getElementById('t_assinatura_label');
+    function frase(p, verbo) {
+        return ', neste ato ' + verbo + ' por <strong>' + (p.nome || '________') + '</strong>, inscrito(a) no CPF nº '
+            + (p.cpf || '________') + ', RG nº ' + (p.rg || '________') + ', na qualidade de ' + (p.q || '________');
+    }
+    if (tipo === 'incapaz' || tipo === 'incapaz-analfabeto') {
+        clause.innerHTML = frase(termoPessoa('rep'), 'representado(a)');
+        label.textContent = (tipo === 'incapaz-analfabeto')
+            ? 'Assinatura a rogo do(a) representante legal (+ impressão digital)'
+            : 'Assinatura do(a) representante legal';
+    } else if (tipo === 'relativo' || tipo === 'relativo-analfabeto') {
+        clause.innerHTML = frase(termoPessoa('assist'), 'assistido(a)');
+        label.textContent = (tipo === 'relativo-analfabeto')
+            ? 'Assinatura do(a) outorgante, assistido(a), a rogo do(a) assistente (+ impressão digital)'
+            : 'Assinatura do(a) outorgante, assistido(a) pelo(a) assistente legal';
+    } else if (tipo === 'analfabeto') {
+        clause.innerHTML = '';
+        label.textContent = 'Assinatura a rogo do(a) outorgante (+ impressão digital)';
+    } else {
+        clause.innerHTML = '';
+        label.textContent = 'Assinatura do(a) outorgante';
+    }
+}
+document.addEventListener('input', syncTermo);
+
 mudarTipo((document.getElementById('tipoSelect') || {}).value || 'normal');
 loadEstadosIBGE().then(function() { syncEstadoCidade().then(function() { normalizeCidadeByIBGE(); }); });
+syncTermo();
 </script>
 
 </body>
