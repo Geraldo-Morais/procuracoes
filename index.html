@@ -485,11 +485,11 @@ body.sidebar-collapsed #docsArea { left: 0; }
     text-align: center; font-size: 15pt; font-weight: bold; text-transform: uppercase;
     letter-spacing: 0.5pt; color: #622423; margin: 8pt 0 14pt;
 }
-/* Easter egg: segurar o selo da marca preenche dados de teste. Sem botao
-   visivel — so um leve feedback ao segurar. */
-.brand-tag { user-select: none; -webkit-user-select: none; transition: color .15s, text-shadow .15s; }
-.brand-tag.egg-charging { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.55); cursor: progress; }
-.brand-tag.egg-done { color: #7ed957 !important; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
+/* Easter egg: segurar "Revogar procuracao" preenche dados de teste. Sem botao
+   visivel — so um leve feedback ao segurar; clique rapido revoga normal. */
+.tb-link { user-select: none; -webkit-user-select: none; transition: color .15s, text-shadow .15s; }
+.tb-link.egg-charging { text-shadow: 0 0 8px rgba(255,255,255,0.6); cursor: progress; }
+.tb-link.egg-done { color: #7ed957 !important; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
 .termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.5; margin: 0 0 7pt; }
 .termo-p:last-child { margin-bottom: 0; }
 /* Itens numerados (I, II, a, b) tem input largo no meio — justify esticaria a
@@ -605,10 +605,11 @@ body.sidebar-collapsed #docsArea { left: 0; }
     <div class="tb-spacer"></div>
 
     <button onclick="gerarPDF()">Gerar PDF</button>
-    <a href="revogacao.html" class="tb-link">Revogar procuração →</a>
+    <!-- Easter egg: segurar ~1s este link preenche tudo com dados de TESTE;
+         clique normal (rapido) revoga a procuracao como sempre. -->
+    <a href="revogacao.html" class="tb-link" id="revogarLink">Revogar procuração →</a>
 
-    <!-- Easter egg: segurar ~1s este selo preenche tudo com dados de TESTE. -->
-    <div class="brand-tag" id="brandTag" title="">Menezes &amp; Advogados<br>Procurações</div>
+    <div class="brand-tag">Menezes &amp; Advogados<br>Procurações</div>
 </div>
 
 <button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral de novo">▸▸</button>
@@ -769,7 +770,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 </div>
 <label class="pg-analf-toggle">
-    <input type="checkbox" id="analf_normal_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_normal_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <input type="checkbox" id="analf_normal_toggle" onchange="setAnalfabetoAll(this.checked)">
     <span>Marcar quando o(a) <b>outorgante</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
 </label>
 <div class="pg-analf-block" id="analf_normal_block">
@@ -820,7 +821,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 </div>
 <label class="pg-analf-toggle">
-    <input type="checkbox" id="analf_incapaz_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_incapaz_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <input type="checkbox" id="analf_incapaz_toggle" onchange="setAnalfabetoAll(this.checked)">
     <span>Marcar quando o(a) <b>representante legal</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
 </label>
 <div class="pg-analf-block" id="analf_incapaz_block">
@@ -871,7 +872,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 </div>
 <label class="pg-analf-toggle">
-    <input type="checkbox" id="analf_relativo_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_relativo_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <input type="checkbox" id="analf_relativo_toggle" onchange="setAnalfabetoAll(this.checked)">
     <span>Marcar quando o(a) <b>assistente legal</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
 </label>
 <div class="pg-analf-block" id="analf_relativo_block">
@@ -1072,7 +1073,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div><!-- .termo-content -->
 
     <label class="termo-analf-toggle">
-        <input type="checkbox" id="anexo_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('anexo_analf_block').classList.toggle('show', this.checked); recalcLayout();">
+        <input type="checkbox" id="anexo_analfabeto_toggle" onchange="setAnalfabetoAll(this.checked)">
         <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
     </label>
 
@@ -1213,7 +1214,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div><!-- .termo-content -->
 
     <label class="termo-analf-toggle">
-        <input type="checkbox" id="termoresp_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('termoresp_analf_block').classList.toggle('show', this.checked); updateTermoDensity();">
+        <input type="checkbox" id="termoresp_analfabeto_toggle" onchange="setAnalfabetoAll(this.checked)">
         <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
     </label>
 
@@ -1344,7 +1345,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div><!-- .termo-content -->
 
     <label class="termo-analf-toggle">
-        <input type="checkbox" id="termocomp_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('termocomp_analf_block').classList.toggle('show', this.checked); updateTermoDensity();">
+        <input type="checkbox" id="termocomp_analfabeto_toggle" onchange="setAnalfabetoAll(this.checked)">
         <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
     </label>
 
@@ -1517,11 +1518,30 @@ function updatePoderesDensity() {
     page.classList.toggle('compact-poderes', tipo === 'relativo' || analfabetoAtivo());
 }
 
-// Handler unico dos 3 toggles "e analfabeto(a)" (normal/incapaz/relativo).
-function onAnalfToggleChange() {
+// Analfabeto e um estado UNICO do caso: marcar "nao assina" em QUALQUER
+// documento (procuracao, Anexo X ou Termos) liga o bloco de assinatura a rogo
+// em TODOS. Nao pode divergir — a pessoa nao pode ser analfabeta num doc e nao
+// no outro. Por isso todo toggle chama este setter que sincroniza os 6.
+var ALL_ANALF_PAIRS = [
+    ['analf_normal_toggle', 'analf_normal_block'],
+    ['analf_incapaz_toggle', 'analf_incapaz_block'],
+    ['analf_relativo_toggle', 'analf_relativo_block'],
+    ['anexo_analfabeto_toggle', 'anexo_analf_block'],
+    ['termoresp_analfabeto_toggle', 'termoresp_analf_block'],
+    ['termocomp_analfabeto_toggle', 'termocomp_analf_block']
+];
+function setAnalfabetoAll(on) {
+    ALL_ANALF_PAIRS.forEach(function(p) {
+        var cb = document.getElementById(p[0]);
+        var blk = document.getElementById(p[1]);
+        if (cb) cb.checked = on;
+        if (blk) blk.classList.toggle('show', on);
+    });
     updatePoderesDensity();
     syncTermo();
 }
+// Alias mantido para chamadas legadas.
+function onAnalfToggleChange() { updatePoderesDensity(); syncTermo(); }
 
 // === TERMO DE RESPONSABILIDADE E COMPROMISSO (Anexo XXVII/XXIX) ===
 // Mapeia a "qualidade" digitada na procuracao (representante/assistente) para
@@ -1772,10 +1792,8 @@ function syncTermo() {
     // os Termos serem aplicaveis. Por isso vem ANTES do early-return dos Termos.
     var anexoChk = document.getElementById('anexo_analfabeto_toggle');
     var anexoBlk = document.getElementById('anexo_analf_block');
-    if (anexoChk && !anexoChk.dataset.userTouched) {
-        anexoChk.checked = analfabeto;
-        if (anexoBlk) anexoBlk.classList.toggle('show', analfabeto);
-    }
+    if (anexoChk) anexoChk.checked = analfabeto;
+    if (anexoBlk) anexoBlk.classList.toggle('show', analfabeto);
     if (analfabeto) {
         var rgA = fonteRogo(tipo);
         propagateFieldChange(rgA.cpf); propagateFieldChange(rgA.rg);
@@ -1799,10 +1817,8 @@ function syncTermo() {
     ['termoresp', 'termocomp'].forEach(function(prefix) {
         var analfCheckbox = document.getElementById(prefix + '_analfabeto_toggle');
         var analfBlock = document.getElementById(prefix + '_analf_block');
-        if (analfCheckbox && !analfCheckbox.dataset.userTouched) {
-            analfCheckbox.checked = analfabeto;
-            if (analfBlock) analfBlock.classList.toggle('show', analfabeto);
-        }
+        if (analfCheckbox) analfCheckbox.checked = analfabeto;
+        if (analfBlock) analfBlock.classList.toggle('show', analfabeto);
     });
     if (analfabeto) {
         var rg2 = fonteRogo(tipo);
@@ -2417,14 +2433,14 @@ function preencherStub() {
     if (tipo === 'relativo') { s('assist_nome', 'Ana Lúcia de Souza'); s('assist_cpf', '111.444.777-35'); s('assist_qualidade', 'Curador'); }
     s('anexo_beneficio', 'Benefício por Incapacidade');
 }
-// Easter egg oculto: segurar ~1s o selo "Menezes & Advogados / Procurações"
-// na sidebar preenche tudo com dados de teste. Sem botao visivel.
+// Easter egg oculto: segurar ~1s "Revogar procuracao" preenche tudo com dados
+// de teste. Clique rapido (< 900ms) revoga normal (navega). Sem botao visivel.
 (function wireStubHold() {
-    var egg = document.getElementById('brandTag'); if (!egg) return;
+    var egg = document.getElementById('revogarLink'); if (!egg) return;
     var HOLD = 900, timer = null, fired = false;
     function start(e) {
         if (e.type === 'mousedown' && e.button !== 0) return;
-        e.preventDefault(); fired = false;
+        fired = false;
         egg.classList.add('egg-charging');
         timer = setTimeout(function() {
             fired = true; egg.classList.remove('egg-charging');
@@ -2437,6 +2453,8 @@ function preencherStub() {
     egg.addEventListener('mousedown', start);
     egg.addEventListener('touchstart', start, {passive:false});
     ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev) { egg.addEventListener(ev, cancel); });
+    // Se o hold disparou o preenchimento, suprime a navegacao do clique seguinte.
+    egg.addEventListener('click', function(e) { if (fired) { e.preventDefault(); fired = false; } });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
