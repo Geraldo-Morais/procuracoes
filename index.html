@@ -50,14 +50,20 @@ body {
     padding: 1cm 2cm 2.5cm 2.5cm;
     background: #fff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-    transform-origin: top left;
+    /* top CENTER (nao top left): quando a pagina e escalada pra caber na altura
+       (--print-fit-scale < 1), encolhe simetrico e fica CENTRADA — sem a
+       "margemzona" a direita que jogava o conteudo dos termos pra esquerda. */
+    transform-origin: top center;
 }
 .header { margin-bottom: 6pt; margin-top: 0; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; overflow: visible; }
 .header table { width: 100%; border-collapse: collapse; border-bottom: none; }
 .header td { border: none; padding: 0; vertical-align: middle; }
-/* Nome do escritorio (celula direita) — fonte um pouco menor pra "Menezes
-   Advocacia e Consultoria Juridica" quebrar equilibrado, sem orfa. */
-.header table td:last-child { font-size: 10pt !important; line-height: 1.25; }
+/* Nome do escritorio (celula direita) — UMA linha so (sem quebra). A celula
+   ganha mais largura e a fonte encolhe o suficiente pra "Menezes Advocacia e
+   Consultoria Juridica" caber inteiro numa linha. */
+.header table td:first-child { width: 24% !important; }
+.header table td:nth-child(2) { width: 34% !important; }
+.header table td:last-child { width: 42% !important; font-size: 9pt !important; line-height: 1.2; white-space: nowrap; }
 .titulo { text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14pt; margin-top: 8pt; margin-bottom: 8pt; letter-spacing: 0.5pt; }
 .titulo em { font-style: italic; }
 .titulo + .tipo-section { margin-top: 6pt; }
@@ -259,6 +265,33 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
 .combo-opt:hover, .combo-opt.hi { background: #fdf3f2; color: #622423; }
 .combo-empty { padding: 8px 13px; font-size: 9pt; color: #999; font-style: italic; }
 @media print { .combo-pop { display: none !important; } }
+/* === Preenchimento por IA (anexar/arrastar identidade) ===================== */
+.ia-attach {
+    display: inline-flex; align-items: center; gap: 5px; margin: 0 0 6pt; padding: 4px 10px;
+    font-size: 8.5pt; font-family: Arial, sans-serif; color: #622423; background: #fdf3f2;
+    border: 1px dashed #cc9a98; border-radius: 6px; cursor: pointer;
+}
+.ia-attach:hover { background: #f7e4e2; border-color: #622423; }
+.ia-attach.busy { opacity: 0.6; pointer-events: none; }
+.dados-grid.ia-drop { outline: 2px dashed #622423; outline-offset: 3px; background: #fff8f7; }
+.ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
+.ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 12px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; }
+.ia-modal-title { font-size: 13pt; font-weight: bold; color: #622423; margin-bottom: 14px; }
+.ia-field { display: block; font-size: 9.5pt; color: #444; margin-bottom: 12px; }
+.ia-field input { width: 100%; margin-top: 4px; padding: 8px 10px; font-size: 10pt; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+.ia-field input:focus { border-color: #622423; outline: none; }
+.ia-note { font-size: 8.5pt; color: #777; line-height: 1.45; margin: 4px 0 14px; }
+.ia-note code { background: #f2ecec; padding: 1px 4px; border-radius: 3px; font-size: 8pt; }
+.ia-modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.ia-modal-actions button { padding: 8px 14px; font-size: 9.5pt; border-radius: 7px; border: 1px solid #622423; background: #622423; color: #fff; cursor: pointer; }
+.ia-modal-actions button:first-child { background: #fff; color: #622423; }
+.ia-toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 4100;
+    padding: 11px 18px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 9.5pt;
+    color: #fff; background: #37474f; box-shadow: 0 8px 24px rgba(0,0,0,0.3); max-width: 90vw; text-align: center;
+}
+.ia-toast--ok { background: #2e7d32; } .ia-toast--err { background: #b3261e; } .ia-toast--info { background: #37474f; }
+@media print { .ia-attach, .ia-modal-overlay, .ia-toast { display: none !important; } }
 
 .tb-hint { font-size: 7.5pt; opacity: 0.65; line-height: 1.35; }
 
@@ -634,6 +667,28 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
 <button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral de novo">▸▸</button>
 
+<!-- Preenchimento por IA: input de arquivo (compartilhado), painel de config
+     (chave OpenRouter + modelo, salvos no navegador) e toast de status. -->
+<input type="file" id="iaFileInput" accept="image/*" style="display:none">
+<div class="ia-modal-overlay" id="iaSettings" style="display:none">
+    <div class="ia-modal">
+        <div class="ia-modal-title">⚙️ Preenchimento por IA</div>
+        <label class="ia-field">Chave da API OpenRouter
+            <input type="password" id="iaKey" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
+        </label>
+        <label class="ia-field">Modelo com visão
+            <input type="text" id="iaModel" placeholder="google/gemini-2.5-flash-lite" autocomplete="off" spellcheck="false">
+        </label>
+        <p class="ia-note">A chave fica salva <b>só neste navegador</b> (localStorage) — não vai para lugar nenhum além do OpenRouter nas suas chamadas. A imagem do documento é enviada ao modelo escolhido para extrair nome, CPF e RG. Use uma chave sua. Sugestão de modelo barato com visão: <code>google/gemini-2.5-flash-lite</code>.</p>
+        <div class="ia-modal-actions">
+            <button type="button" onclick="preencherStub(); fecharIASettings();">🧪 Dados de teste</button>
+            <button type="button" onclick="salvarIAConfig()">Salvar</button>
+            <button type="button" onclick="fecharIASettings()">Fechar</button>
+        </div>
+    </div>
+</div>
+<div class="ia-toast" id="iaToast" style="display:none"></div>
+
 <span id="sizer"></span>
 
 <div id="docsArea">
@@ -660,7 +715,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
             </td>
             <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
-                Menezes Advocacia e<br>Consultoria Jurídica
+                Menezes Advocacia e Consultoria Jurídica
             </td>
         </tr>
     </table>
@@ -672,6 +727,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== OUTORGANTE: NORMAL / RELATIVO / ANALFABETO ====== -->
 <div id="sec-outorgante-full" class="tipo-section active">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;" id="lbl-outorgante">OUTORGANTE:</div>
+<button type="button" class="ia-attach" data-alvo="titular" title="Anexe ou arraste uma foto do RG/CNH/CPF do outorgante para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid" id="grid-outorgante">
     <div class="grid-row" id="row-nome">
         <div class="grid-cell" id="cell-nome" style="flex: 1 1 100%"><span class="label">Nome Completo:</span><input type="text" id="nome" value="" maxlength="50"></div>
@@ -743,6 +799,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
 <div id="sec-representante" class="tipo-section">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">REPRESENTANTE LEGAL:</div>
+<button type="button" class="ia-attach" data-alvo="rep" title="Anexe ou arraste uma foto do RG/CNH/CPF do representante para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="rep_nome" value="" maxlength="50"></div>
@@ -759,6 +816,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== ASSISTENTE LEGAL (relativamente incapaz) ====== -->
 <div id="sec-assistente" class="tipo-section">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">ASSISTENTE LEGAL:</div>
+<button type="button" class="ia-attach" data-alvo="assist" title="Anexe ou arraste uma foto do RG/CNH/CPF do assistente para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="assist_nome" value="" maxlength="50"></div>
@@ -958,7 +1016,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e<br>Consultoria Jurídica
+                    Menezes Advocacia e Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1121,7 +1179,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e<br>Consultoria Jurídica
+                    Menezes Advocacia e Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1262,7 +1320,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e<br>Consultoria Jurídica
+                    Menezes Advocacia e Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -2537,8 +2595,9 @@ function preencherStub() {
     if (tipo === 'relativo') { s('assist_nome', 'Ana Lúcia de Souza'); s('assist_cpf', '111.444.777-35'); s('assist_qualidade', 'Curador'); }
     s('anexo_beneficio', 'Benefício por Incapacidade');
 }
-// Easter egg oculto: segurar ~1s "Revogar procuracao" preenche tudo com dados
-// de teste. Clique rapido (< 900ms) revoga normal (navega). Sem botao visivel.
+// Easter egg oculto: segurar ~1s "Revogar procuracao" abre o menuzinho de
+// config da IA (chave OpenRouter + modelo + dados de teste). Clique rapido
+// (< 900ms) revoga normal (navega). Sem botao visivel.
 (function wireStubHold() {
     var egg = document.getElementById('revogarLink'); if (!egg) return;
     var HOLD = 900, timer = null, fired = false;
@@ -2548,7 +2607,7 @@ function preencherStub() {
         egg.classList.add('egg-charging');
         timer = setTimeout(function() {
             fired = true; egg.classList.remove('egg-charging');
-            preencherStub();
+            abrirIASettings();
             egg.classList.add('egg-done');
             setTimeout(function() { egg.classList.remove('egg-done'); }, 800);
         }, HOLD);
@@ -2557,8 +2616,154 @@ function preencherStub() {
     egg.addEventListener('mousedown', start);
     egg.addEventListener('touchstart', start, {passive:false});
     ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev) { egg.addEventListener(ev, cancel); });
-    // Se o hold disparou o preenchimento, suprime a navegacao do clique seguinte.
+    // Se o hold disparou (abriu o menu), suprime a navegacao do clique seguinte.
     egg.addEventListener('click', function(e) { if (fired) { e.preventDefault(); fired = false; } });
+})();
+
+// === PREENCHIMENTO POR IA (anexar/arrastar identidade -> OpenRouter visao) ====
+// A chave e o modelo ficam so no navegador (localStorage). A imagem do RG/CNH/
+// CPF vai ao modelo escolhido via OpenRouter, que devolve nome/CPF/RG em JSON e
+// preenche o campo do titular ou do representante/assistente.
+var IA_LS_KEY = 'proc_openrouter_key';
+var IA_LS_MODEL = 'proc_openrouter_model';
+var IA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+var IA_ALVOS = {
+    titular: { nome: 'nome', cpf: 'cpf', rg: 'rg', label: 'outorgante' },
+    rep:     { nome: 'rep_nome', cpf: 'rep_cpf', rg: 'rep_rg', label: 'representante' },
+    assist:  { nome: 'assist_nome', cpf: 'assist_cpf', rg: 'assist_rg', label: 'assistente' }
+};
+function getIAConfig() {
+    return {
+        key: localStorage.getItem(IA_LS_KEY) || '',
+        model: localStorage.getItem(IA_LS_MODEL) || IA_DEFAULT_MODEL
+    };
+}
+function abrirIASettings() {
+    var c = getIAConfig();
+    document.getElementById('iaKey').value = c.key;
+    document.getElementById('iaModel').value = c.model;
+    document.getElementById('iaSettings').style.display = 'flex';
+}
+function fecharIASettings() { document.getElementById('iaSettings').style.display = 'none'; }
+function salvarIAConfig() {
+    var k = document.getElementById('iaKey').value.trim();
+    var m = document.getElementById('iaModel').value.trim() || IA_DEFAULT_MODEL;
+    localStorage.setItem(IA_LS_KEY, k);
+    localStorage.setItem(IA_LS_MODEL, m);
+    iaToast('Configuração salva neste navegador.', 'ok');
+    fecharIASettings();
+}
+function iaToast(msg, kind) {
+    var t = document.getElementById('iaToast'); if (!t) return;
+    t.textContent = msg;
+    t.className = 'ia-toast ia-toast--' + (kind || 'info');
+    t.style.display = 'block';
+    clearTimeout(t._hideTimer);
+    t._hideTimer = setTimeout(function() { t.style.display = 'none'; }, kind === 'err' ? 7000 : 4000);
+}
+function iaFileToDataURL(file) {
+    return new Promise(function(res, rej) {
+        var r = new FileReader();
+        r.onload = function() { res(r.result); };
+        r.onerror = function() { rej(new Error('não consegui ler o arquivo')); };
+        r.readAsDataURL(file);
+    });
+}
+function iaPreencheCampo(id, val) {
+    var e = document.getElementById(id);
+    if (!e || !val) return;
+    e.value = val;
+    e.dispatchEvent(new Event('input', {bubbles:true}));
+    e.dispatchEvent(new Event('change', {bubbles:true}));
+    e.dispatchEvent(new Event('blur', {bubbles:true}));
+}
+function extrairIdentidade(file, alvoKey, btn) {
+    var cfg = getIAConfig();
+    var alvo = IA_ALVOS[alvoKey];
+    if (!alvo) return;
+    if (!file.type || file.type.indexOf('image/') !== 0) { iaToast('Anexe uma imagem (foto/print) do documento.', 'err'); return; }
+    if (!cfg.key) {
+        iaToast('Configure sua chave OpenRouter primeiro (segure "Revogar procuração").', 'err');
+        abrirIASettings();
+        return;
+    }
+    if (btn) btn.classList.add('busy');
+    iaToast('Lendo documento do ' + alvo.label + ' com IA…', 'info');
+    var prompt = 'Você recebe a imagem de um documento de identidade brasileiro (RG, CNH ou CPF). ' +
+        'Extraia apenas: nome completo do titular, número do CPF e número do RG com órgão emissor. ' +
+        'Responda SOMENTE um JSON, sem texto ao redor, no formato exato {"nome":"","cpf":"","rg":""}. ' +
+        'CPF formatado como 000.000.000-00. RG com órgão/UF se visível (ex.: "1234567 SSP/BA"). ' +
+        'Se algum campo não estiver legível, use string vazia.';
+    iaFileToDataURL(file).then(function(dataURL) {
+        return fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + cfg.key,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': location.origin,
+                'X-Title': 'Procuracoes Menezes'
+            },
+            body: JSON.stringify({
+                model: cfg.model,
+                temperature: 0,
+                messages: [{ role: 'user', content: [
+                    { type: 'text', text: prompt },
+                    { type: 'image_url', image_url: { url: dataURL } }
+                ]}]
+            })
+        });
+    }).then(function(resp) {
+        return resp.text().then(function(body) {
+            if (!resp.ok) throw new Error('OpenRouter HTTP ' + resp.status + ' — ' + body.slice(0, 200));
+            return JSON.parse(body);
+        });
+    }).then(function(data) {
+        var txt = (((data.choices || [])[0] || {}).message || {}).content || '';
+        if (typeof txt !== 'string') txt = JSON.stringify(txt);
+        var m = txt.match(/\{[\s\S]*\}/);
+        if (!m) throw new Error('a IA não retornou JSON: ' + txt.slice(0, 140));
+        var obj = JSON.parse(m[0]);
+        var got = [];
+        if (obj.nome) { iaPreencheCampo(alvo.nome, obj.nome); got.push('nome'); }
+        if (obj.cpf) { iaPreencheCampo(alvo.cpf, obj.cpf); got.push('CPF'); }
+        if (obj.rg) { iaPreencheCampo(alvo.rg, obj.rg); got.push('RG'); }
+        if (got.length) iaToast('Preenchido (' + alvo.label + '): ' + got.join(', ') + '. Confira e complemente endereço/profissão.', 'ok');
+        else iaToast('A IA não encontrou dados no documento do ' + alvo.label + '.', 'err');
+    }).catch(function(e) {
+        iaToast('Falha ao ler documento: ' + (e.message || e), 'err');
+    }).then(function() {
+        if (btn) btn.classList.remove('busy');
+    });
+}
+(function wireIA() {
+    var fileInput = document.getElementById('iaFileInput');
+    if (!fileInput) return;
+    var pendingAlvo = null, pendingBtn = null;
+    document.querySelectorAll('.ia-attach').forEach(function(btn) {
+        var alvo = btn.dataset.alvo;
+        btn.addEventListener('click', function() {
+            pendingAlvo = alvo; pendingBtn = btn;
+            fileInput.value = ''; fileInput.click();
+        });
+        var grid = btn.parentElement.querySelector('.dados-grid');
+        if (grid) {
+            grid.addEventListener('dragover', function(e) { e.preventDefault(); grid.classList.add('ia-drop'); });
+            grid.addEventListener('dragleave', function(e) { if (e.target === grid) grid.classList.remove('ia-drop'); });
+            grid.addEventListener('drop', function(e) {
+                e.preventDefault(); grid.classList.remove('ia-drop');
+                var f = e.dataTransfer && e.dataTransfer.files[0];
+                if (f) extrairIdentidade(f, alvo, btn);
+            });
+        }
+    });
+    fileInput.addEventListener('change', function() {
+        var f = fileInput.files[0];
+        if (f && pendingAlvo) extrairIdentidade(f, pendingAlvo, pendingBtn);
+    });
+    // Fecha o modal ao clicar fora ou Esc.
+    var overlay = document.getElementById('iaSettings');
+    if (overlay) overlay.addEventListener('mousedown', function(e) { if (e.target === overlay) fecharIASettings(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') fecharIASettings(); });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
@@ -2617,6 +2822,15 @@ var PRINT_TARGET_PX = 297 * MM_TO_PX; // altura de uma folha A4 inteira
 function updatePrintFitScaleForPage(pageEl) {
     var naturalH = pageEl.scrollHeight;
     if (!naturalH) return;
+    // Desconta elementos que so existem na TELA (somem no @media print): os
+    // botoes "Preencher por foto (IA)" e os toggles "e analfabeto". Sem isso
+    // eles inflam a altura medida e a pagina encolhe a toa na impressao.
+    pageEl.querySelectorAll('.ia-attach, .pg-analf-toggle, .termo-analf-toggle').forEach(function(el) {
+        var s = getComputedStyle(el);
+        if (s.display === 'none') return;
+        naturalH -= el.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
+    });
+    if (naturalH < 1) naturalH = 1;
     var scale = Math.min(1, PRINT_TARGET_PX / naturalH);
     // Nunca deixa a escala cair tanto que fique ilegivel no papel — se o
     // conteudo precisar de mais que isso, e sinal de bug de conteudo real,
@@ -2656,9 +2870,12 @@ function applyHasFallbacks() {
         var signBlock = section.querySelector('.sign-block');
         if (signBlock) signBlock.style.display = (toggle && toggle.checked) ? 'none' : '';
     });
-    ['termoresp', 'termocomp'].forEach(function(prefix) {
-        var block = document.getElementById(prefix + '_analf_block');
-        var page = document.getElementById(prefix === 'termoresp' ? 'page-termoresp' : 'page-termocomp');
+    // Quando analfabeto, a assinatura simples central ("Assinatura do(a) ...")
+    // nao faz sentido — quem nao assina usa o bloco a rogo. Some nos 2 Termos
+    // E no Anexo X (antes o Anexo mostrava as duas).
+    [['termoresp', 'page-termoresp'], ['termocomp', 'page-termocomp'], ['anexo', 'page-anexox']].forEach(function(pair) {
+        var block = document.getElementById(pair[0] + '_analf_block');
+        var page = document.getElementById(pair[1]);
         if (!page) return;
         var signBlock = page.querySelector('.termo-sign-block');
         if (signBlock) signBlock.style.display = (block && block.classList.contains('show')) ? 'none' : '';
