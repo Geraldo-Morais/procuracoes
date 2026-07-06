@@ -38,16 +38,19 @@ body {
     font-size: 12pt;
     line-height: 1.5;
     color: #000;
-    background: #d0d0d0;
+    background: #d8d3d0;
+    overflow: hidden;
 }
 .page {
     position: relative;
     width: 210mm;
     min-height: 297mm;
-    margin: 50px auto 40px;
+    flex: 0 0 auto;
+    margin: 0 auto;
     padding: 1cm 2cm 2.5cm 2.5cm;
     background: #fff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transform-origin: top left;
 }
 .header { margin-bottom: 6pt; margin-top: 0; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; overflow: visible; }
 .header table { width: 100%; border-collapse: collapse; border-bottom: none; }
@@ -104,6 +107,18 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     min-height: 16pt;
 }
 .dados-table input[type="text"]:focus { background: #fff3a0; }
+.inline-input {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: inherit;
+    color: #000;
+    border: none;
+    outline: none;
+    background: #fff8dc;
+    padding: 1pt 4pt;
+}
+.inline-input:focus { background: #fff3a0; }
+.inline-input.input-error { background: #ffe9e9 !important; box-shadow: inset 0 0 0 1px #b30000; }
 .dados-table input[type="text"].input-error,
 .date-input.input-error,
 .testemunha-campo input.input-error {
@@ -125,37 +140,139 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .date-input:focus { background: #fff3a0; }
 .toolbar {
     position: fixed;
-    top: 0; left: 0; right: 0;
-    background: #622423;
+    top: 0; left: 0; bottom: 0;
+    width: 202px;
+    background: linear-gradient(165deg, #6f2b27 0%, #5a201d 55%, #4c1a17 100%);
     color: #fff;
-    padding: 8px 20px;
+    padding: 20px 16px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
     z-index: 1000;
     font-family: Arial, sans-serif;
     font-size: 10pt;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    gap: 12px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.35);
+    gap: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.18s ease, padding 0.18s ease, opacity 0.15s ease;
 }
+.toolbar.collapsed { width: 0; padding: 20px 0; opacity: 0; pointer-events: none; box-shadow: none; }
+.toolbar .tb-group { display: flex; flex-direction: column; gap: 7px; }
+.toolbar .tb-label { font-weight: bold; font-size: 9pt; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.6pt; }
+.toolbar .tb-row { display: flex; align-items: center; gap: 6px; }
+.toolbar .tb-spacer { flex: 1 1 auto; }
 .toolbar select {
-    padding: 5px 10px;
+    padding: 6px 8px;
     font-size: 10pt;
     border-radius: 4px;
     border: none;
     font-weight: bold;
+    width: 100%;
 }
 .toolbar button {
     background: #fff;
     color: #622423;
     border: none;
-    padding: 6px 18px;
+    padding: 9px 12px;
     font-weight: bold;
     font-size: 10pt;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    width: 100%;
+    transition: background 0.12s ease, transform 0.08s ease;
 }
-.toolbar button:hover { background: #f0e0e0; }
+.toolbar button:hover { background: #f7e7e5; }
+.toolbar button:active { transform: scale(0.97); }
+.toolbar .tb-link {
+    display: block; text-align: center; width: 100%; margin-top: 8px;
+    color: rgba(255,255,255,0.85); text-decoration: underline; font-size: 9pt;
+    font-family: Arial, sans-serif;
+}
+.toolbar .tb-link:hover { color: #fff; }
+.toolbar hr { border: none; border-top: 1px solid rgba(255,255,255,0.18); width: 100%; margin: 0; }
+.sidebar-collapse-btn {
+    width: 100%; display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 6px;
+    padding: 7px 10px; font-size: 8.5pt; font-weight: bold; cursor: pointer;
+    font-family: Arial, sans-serif; letter-spacing: 0.2pt;
+}
+.sidebar-collapse-btn .sc-icon { font-size: 11px; flex: 0 0 auto; }
+.sidebar-collapse-btn:hover { background: rgba(255,255,255,0.2); }
+.sidebar-reopen {
+    position: fixed; top: 14px; left: 12px; z-index: 1001;
+    width: 36px; height: 36px; border-radius: 9px; border: none;
+    background: linear-gradient(165deg, #6f2b27, #4c1a17); color: #fff; font-size: 15px; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+.sidebar-reopen:hover { filter: brightness(1.12); }
+body.sidebar-collapsed .sidebar-reopen { display: flex; }
+.brand-tag {
+    margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.14);
+    font-size: 7.5pt; letter-spacing: 0.5pt; text-transform: uppercase; text-align: center;
+    opacity: 0.55; line-height: 1.5;
+}
+
+/* Dropdown customizado (substitui o <select> nativo do navegador) */
+.csel { position: relative; width: 100%; font-family: Arial, sans-serif; }
+.csel-btn {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    background: #fff; color: #622423; border: none; border-radius: 4px;
+    padding: 7px 10px; font-size: 9.5pt; font-weight: bold; cursor: pointer;
+    text-align: left; gap: 6px;
+}
+.csel-btn:hover { background: #f0e0e0; }
+.csel-btn.open { border-radius: 4px 4px 0 0; }
+.csel-arrow { font-size: 8pt; opacity: 0.7; transition: transform 0.15s; flex: 0 0 auto; }
+.csel-btn.open .csel-arrow { transform: rotate(180deg); }
+.csel-menu {
+    display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1500;
+    background: #fff; border-radius: 0 0 6px 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    overflow: hidden; max-height: 60vh; overflow-y: auto;
+}
+.csel-menu.open { display: block; }
+.csel-opt {
+    padding: 8px 10px; font-size: 9.5pt; color: #333; cursor: pointer;
+    border-top: 1px solid #eee; line-height: 1.3;
+}
+.csel-opt:first-child { border-top: none; }
+.csel-opt:hover { background: #fdf3f2; color: #622423; }
+.csel-opt.selected { background: #622423; color: #fff; font-weight: bold; }
+
+.tb-hint { font-size: 7.5pt; opacity: 0.65; line-height: 1.35; }
+
+/* Abas dos documentos (fixas no topo da area de documentos) — atalhos de
+   "pular para o documento" (a exibicao e em pilha vertical com rolagem). */
+.doc-tabs {
+    flex: 0 0 auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 10px 24px; background: #ece7e4; border-bottom: 1px solid #d6cdc9;
+    font-family: Arial, sans-serif;
+    transition: padding-left 0.18s ease;
+}
+.doc-tabs-label { font-size: 8.5pt; font-weight: bold; color: #8a6e6c; text-transform: uppercase; letter-spacing: 0.4pt; margin-right: 2px; }
+/* Com a sidebar recolhida, o botão flutuante de reabrir (▸▸) fica no canto
+   superior esquerdo — sem esse respiro ele cobre a primeira aba. */
+body.sidebar-collapsed .doc-tabs { padding-left: 60px; }
+.doc-tab {
+    background: #fff; color: #622423; border: 1px solid #d6cdc9;
+    padding: 6px 13px; font-size: 9pt; font-weight: bold; border-radius: 6px;
+    cursor: pointer; transition: background 0.12s ease, color 0.12s ease;
+}
+.doc-tab:hover { background: #622423; color: #fff; border-color: #622423; }
+.doc-tab[hidden] { display: none; }
+
+/* Area dos documentos: fixa a direita da sidebar, sem scroll de pagina */
+#docsArea {
+    position: fixed; top: 0; right: 0; bottom: 0; left: 202px;
+    display: flex; flex-direction: column;
+    background: #d8d3d0;
+    transition: left 0.18s ease;
+}
+body.sidebar-collapsed #docsArea { left: 0; }
+#docsViewport {
+    flex: 1 1 auto; overflow-y: auto; overflow-x: auto;
+}
 #sizer {
     position: absolute;
     visibility: hidden;
@@ -178,10 +295,10 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .footer-text { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; text-align: center; line-height: 1.4; flex: 1; }
 .footer-page { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; white-space: nowrap; padding-left: 12pt; }
 /* Testemunhas (analfabeto) */
-.testemunha-bloco { margin-bottom: 8pt; }
-.testemunha-titulo { font-weight: bold; font-size: 9pt; margin-bottom: 2pt; }
+.testemunha-bloco { margin-bottom: 4pt; }
+.testemunha-titulo { font-weight: bold; font-size: 9pt; margin-bottom: 1pt; }
 .testemunha-nome-label { font-size: 8pt; color: #555; }
-.testemunha-linha { display: block; width: 100%; border-bottom: 1pt solid #000; height: 10pt; margin-bottom: 2pt; }
+.testemunha-linha { display: block; width: 100%; border-bottom: 1pt solid #000; height: 6pt; margin-bottom: 2pt; }
 .testemunha-campos { display: flex; gap: 8pt; }
 .testemunha-campo { flex: 1; font-size: 9pt; }
 .testemunha-campo .label { font-size: 7pt; }
@@ -196,7 +313,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 }
 .help-btn:hover { background: rgba(255,255,255,0.4); }
 .help-popup {
-    display: none; position: absolute; top: 32px; left: -120px;
+    display: none; position: absolute; top: 0; left: 100%; margin-left: 8px;
     background: #fff; color: #333; padding: 12px 14px; border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.3); font-size: 9pt; line-height: 1.5;
     width: 320px; z-index: 2000; font-weight: normal; text-align: left;
@@ -206,65 +323,312 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 /* Sections hidden by default */
 .tipo-section { display: none; }
 .tipo-section.active { display: block; }
-.page.compact-poderes p { font-size: 11.5pt; }
+.page.compact-poderes p { font-size: 10.5pt; line-height: 1.28; }
 /* Compact mode for types with more content (incapaz, relativo, analfabeto) */
-.page.compact .dados-table { margin-bottom: 8pt; font-size: 10.5pt; }
+.page.compact .dados-table { margin-bottom: 6pt; font-size: 10.5pt; }
 .page.compact .dados-table td { padding: 2pt 4pt; }
 .page.compact .dados-table input[type="text"] { font-size: 10.5pt; min-height: 14pt; }
-.page.compact .secao { margin-top: 10pt; margin-bottom: 3pt; }
-.page.compact .espaco-antes { margin-top: 10pt; }
+.page.compact .secao { margin-top: 7pt; margin-bottom: 3pt; }
+.page.compact .espaco-antes { margin-top: 7pt; }
 .page.compact .assinatura { margin-top: 20pt; }
 .page.compact .local-data-line { margin-top: 12pt; }
-.page.compact p { margin-bottom: 5pt; line-height: 1.4; }
+.page.compact p { margin-bottom: 4pt; line-height: 1.3; }
 .page.compact .titulo { margin-top: 4pt; margin-bottom: 4pt; }
 /* Ajuste fino: no tipo incapaz, afastar assinatura do fim dos poderes sem colar no rodapé */
 .page.compact #sec-assinatura-incapaz .assinatura { margin-top: 32pt; }
 .page.compact #sec-assinatura-incapaz .local-data-line { margin-top: 16pt; }
 /* Relativamente incapaz: manter assinatura no mesmo nível visual do tipo normal */
 .page.compact #sec-assinatura-relativo .assinatura { margin-top: 32pt; }
+
+/* Assinatura a rogo (analfabeto) embutida em cada tipo — mesmo padrão do
+   TERMO DE RESPONSABILIDADE E COMPROMISSO.html de referência: um toggle que
+   revela o bloco de rogo+testemunhas e esconde a assinatura simples.
+   NOTA: a assinatura simples e escondida via JS (applyHasFallbacks/inline
+   style), nao via CSS :has() — confirmado que o Chromium usado no
+   page.pdf()/impressao real NAO honra :has() do mesmo jeito que a tela,
+   deixando as duas assinaturas juntas na pagina impressa. */
+.pg-analf-toggle {
+    margin-top: 10pt; display: flex; align-items: center; gap: 6pt; font-size: 9.5pt;
+    cursor: pointer; user-select: none; padding: 5pt 9pt;
+    background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
+}
+.pg-analf-toggle input { width: 14px; height: 14px; accent-color: #622423; flex: 0 0 auto; }
+.pg-analf-block { display: none; margin-top: 8pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 8pt; }
+.pg-analf-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; }
+.pg-analf-block .pg-analf-col-title { font-weight: bold; font-size: 10.5pt; margin-bottom: 6pt; text-align: center; color: #622423; text-transform: uppercase; letter-spacing: 0.3pt; line-height: 1.25; }
+.pg-analf-block .pg-analf-sign-line { display: inline-block; width: 100%; border-bottom: 1pt solid #000; height: 8pt; margin-bottom: 2pt; }
+.pg-analf-block .pg-analf-obs { font-size: 8pt; color: #622423; font-style: italic; text-align: center; margin-bottom: 5pt; }
+.pg-analf-block .pg-analf-digital { text-align: center; margin-top: 5pt; }
+.pg-analf-block .pg-analf-digital-label { font-size: 8pt; color: #555; }
+.pg-analf-block .pg-analf-digital-box { border: 1pt solid #999; width: 44pt; height: 22pt; margin: 2pt auto 0; border-radius: 2px; }
+/* incapaz/relativo (.compact) ja tem representante/assistente ocupando a
+   página — com o bloco de rogo+testemunhas embutido tambem ativo, estoura a
+   folha (confirmado: 91-92% de aproveitamento e ainda transborda 1 pagina
+   extra quase vazia). --print-fit-scale nao resolve sozinho porque so afeta
+   pintura, nao a decisao de quebra de pagina do motor de impressao — precisa
+   reduzir a altura de verdade. */
+.page.compact .pg-analf-block { margin-top: 4pt; padding-top: 4pt; font-size: 9pt; }
+.page.compact .pg-analf-block .pg-analf-col-title { margin-bottom: 3pt; font-size: 9.5pt; line-height: 1.15; }
+.page.compact .pg-analf-block .pg-analf-sign-line { height: 5pt; margin-bottom: 1pt; }
+.page.compact .pg-analf-block .pg-analf-obs { margin-bottom: 2pt; font-size: 7.5pt; }
+.page.compact .pg-analf-block .pg-analf-digital { margin-top: 2pt; }
+.page.compact .pg-analf-block .pg-analf-digital-box { height: 16pt; margin-top: 1pt; }
+.page.compact .pg-analf-block .testemunha-bloco { margin-bottom: 2pt; }
+.page.compact .pg-analf-block .testemunha-titulo { margin-bottom: 0; line-height: 1.1; }
+.page.compact .pg-analf-block .testemunha-linha { height: 4pt; margin-bottom: 1pt; }
+.page.compact .pg-analf-block .testemunha-campo,
+.page.compact .pg-analf-block .testemunha-campo input { font-size: 8.5pt; }
+@media print { .pg-analf-toggle, .termo-analf-toggle { display: none !important; } }
+/* Moldura de impressao: cada documento (procuracao / termo) fica dentro de um
+   "sheet" com altura FIXA de 297mm + overflow:hidden. Na tela, display:contents
+   faz esse wrapper desaparecer (o .page participa do flex de #docs-wrap
+   normalmente). Na impressao, o .page filho e escalado (--print-fit-scale,
+   calculado em recalcLayout/updatePrintFitScaleForPage) para caber dentro dos
+   297mm fixos do sheet — em vez de deixar o navegador criar uma folha extra
+   quase em branco quando sobra so um resto de conteudo. */
+.print-sheet { display: contents; }
 @media print {
-    body { background: #fff; }
-    .toolbar { display: none !important; }
+    body { background: #fff; padding-left: 0 !important; overflow: visible !important; }
+    .toolbar, .sidebar-reopen { display: none !important; }
     .help-btn { display: none !important; }
-    .page { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
-    .dados-table input[type="text"], .date-input, .testemunha-campo input { background: transparent !important; -webkit-appearance: none; }
+    .print-sheet {
+        display: block !important; position: relative;
+        /* height:297mm (absoluto) faz o Chromium do page.pdf()/impressao real
+           entender que ha overflow e criar uma folha extra em branco, mesmo
+           com o conteudo cabendo perfeitamente (confirmado isolando o bug em
+           HTML minimo). height:100vh resolve direto contra a pagina fisica
+           (nao depende de toda a cadeia de ancestrais ter altura definida,
+           diferente de height:100% — confirmado que height:100% aqui deixava
+           o .termo-content sem altura de verdade pra distribuir (space-between),
+           porque #docsViewport tem height:auto em impressao). */
+        height: 100vh; overflow: hidden;
+        page-break-after: always; break-after: page;
+        /* Quando a pagina e escalada pra baixo (--print-fit-scale < 1), o
+           transform encolhe so o .page, sobrando uma faixa do sheet que sem
+           isso mostraria o cinza de fundo herdado de #docsArea — acusado
+           pelo Codex na revisao. Sheet branco por baixo resolve. */
+        background: #fff;
+    }
+    /* :last-of-type nao serve aqui: ele conta por posicao no DOM, nao por
+       visibilidade — se o ultimo .print-sheet (termo de compromisso) estiver
+       display:none (tipo sem termo aplicavel), o penultimo visivel continua
+       tendo page-break-after:always sem nada de verdade depois, criando uma
+       folha extra em branco. .last-visible e calculado em JS (recalcLayout)
+       considerando so os sheets realmente aplicaveis. */
+    .print-sheet.last-visible { page-break-after: auto !important; break-after: auto !important; }
+    /* :has() nao e confiavel no pipeline de page.pdf()/impressao real deste
+       Chromium (confirmado via teste: emulate_media()+computed style mostra
+       :has() funcionando, mas o PDF gerado de verdade ignora) — por isso a
+       ocultacao do sheet inaplicavel e feita por classe calculada em JS
+       (updateLastVisibleSheet), nao por :has(). */
+    .print-sheet.print-sheet-hidden { display: none !important; }
+    .page {
+        width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none;
+        zoom: 1 !important;
+        transform: scale(var(--print-fit-scale, 1));
+    }
+    /* Forca visivel mesmo se o modo Foco escondeu esta pagina na tela
+       (display:none inline). Procuracao vira bloco normal; os termos
+       precisam continuar flex-column pro .termo-content (space-between)
+       distribuir o conteudo pela folha inteira tambem na impressao. */
+    .page:not(.page-termo):not(.page-anexo) { display: block !important; }
+    .page-termo.show, .page-anexo { display: flex !important; flex-direction: column !important; }
+    /* .termo-content (space-between) so distribui o conteudo se a .page tiver
+       altura real — min-height:auto (de cima) tira essa altura, entao devolve
+       ela igual a moldura fixa do .print-sheet. */
+    .page-termo, .page-anexo { height: 100%; }
+    .dados-table input[type="text"], .date-input, .testemunha-campo input, .inline-input, .dados-grid .grid-cell input[type="text"] { background: transparent !important; -webkit-appearance: none; }
     .footer-screen { display: none !important; }
+    #docsArea { position: static !important; left: 0 !important; display: block !important; }
+    .doc-tabs { display: none !important; }
+    #docsViewport { display: block !important; overflow: visible !important; height: auto !important; }
+    #docs-wrap { display: block !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; gap: 0 !important; }
+    #docs-wrap .page { flex: none !important; }
+}
+
+/* ====== TERMO DE RESPONSABILIDADE E COMPROMISSO (Anexo XXVII/XXIX — IN 128/2022) ====== */
+.page-termo { display: none; }
+/* Cada termo e uma folha A4 (flex-column). O cabecalho fica FIXO no topo;
+   o resto do conteudo vai dentro de .termo-content (flex:1) com
+   justify-content:space-between agrupado em .termo-blk. Assim o espaco
+   "extra" da folha vira espacamento UNIFORME entre as secoes, em vez de um
+   unico buraco branco no meio (problema do .termo-spacer antigo). Quando o
+   bloco de analfabeto aparece, o conteudo cresce e o space-between colapsa
+   sozinho, enchendo a folha inteira — igual a procuracao, que sempre
+   aproveita a A4 toda independente de ser analfabeto ou nao. */
+.page-termo.show { display: flex; flex-direction: column; }
+/* ANEXO X — sempre visível (obrigatório), mesma mecânica de conteúdo dos termos. */
+.page-anexo { display: flex; flex-direction: column; }
+.termo-content { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
+.termo-blk { flex: 0 0 auto; }
+/* Itens do box "Requerimento" do Anexo X (checkbox + rótulo/seleção). */
+.anexo-req-item { display: flex; align-items: flex-start; gap: 8pt; margin: 6pt 0; font-size: 10.5pt; text-align: justify; line-height: 1.4; }
+.anexo-req-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #622423; margin-top: 3px; flex: 0 0 auto; }
+.anexo-req-item > span { flex: 1; }
+.anexo-req-sel { flex: 1; }
+.anexo-req-sel select {
+    width: 100%; font-family: 'Times New Roman', Times, serif; font-size: 11pt; font-weight: bold;
+    color: #000; background: #fff8dc; border: 1pt solid #999; border-radius: 3px; padding: 3pt 4pt; outline: none;
+}
+.anexo-req-sel select:focus { background: #fff3a0; border-color: #622423; }
+.anexo-req-sel select.input-error { background: #ffe9e9; box-shadow: inset 0 0 0 1px #b30000; }
+@media print { .anexo-req-sel select { background: transparent !important; border: none !important; border-bottom: 1px solid #555 !important; border-radius: 0 !important; -webkit-appearance: none; appearance: none; } }
+.termo-header {
+    text-align: center; font-size: 10.5pt; line-height: 1.35; color: #622423; font-weight: 600;
+    border-bottom: 1.5pt solid #622423; padding-bottom: 6pt;
+    /* respiro entre a barra vermelha do cabecalho e o 1o bloco de conteudo —
+       sem isso o "Eu, ... inscrito no CPF" cola na linha. */
+    margin-bottom: 16pt;
+}
+/* Titulo dos Termos/Anexo — abaixo da linha do cabecalho (padrao procuracao). */
+.termo-titulo {
+    text-align: center; font-size: 15pt; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 0.5pt; color: #622423; margin: 8pt 0 14pt;
+}
+/* Easter egg: segurar o selo da marca preenche dados de teste. Sem botao
+   visivel — so um leve feedback ao segurar. */
+.brand-tag { user-select: none; -webkit-user-select: none; transition: color .15s, text-shadow .15s; }
+.brand-tag.egg-charging { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.55); cursor: progress; }
+.brand-tag.egg-done { color: #7ed957 !important; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
+.termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.5; margin: 0 0 7pt; }
+.termo-p:last-child { margin-bottom: 0; }
+/* Itens numerados (I, II, a, b) tem input largo no meio — justify esticaria a
+   linha com espacos gigantes. Left-align evita isso. */
+.termo-p.recuo { text-align: left; margin-left: 16pt; }
+.termo-p.recuo2 { text-align: left; margin-left: 34pt; }
+.termo-legal { font-style: italic; font-size: 9.5pt; line-height: 1.45; margin: 0 0 4pt 16pt; color: #333; }
+/* Termo de Compromisso tem menos texto que o de Responsabilidade — sem os
+   boxes de Beneficiario/Qualidade. Pra ele encher a folha igual (sem gaps
+   grandes), damos mais leading e respiro SO nele (mesmo tamanho de fonte,
+   entao as duas paginas continuam visualmente consistentes). */
+#page-termocomp .termo-p { line-height: 1.6; margin-bottom: 8pt; }
+.termo-box {
+    border: 0.8pt solid #622423; border-radius: 3px; padding: 7pt 14pt 9pt;
+}
+.termo-box + .termo-box { margin-top: 10pt; }
+.termo-box .termo-box-title {
+    background: #622423; color: #fff; text-align: center; font-weight: bold;
+    margin: -7pt -14pt 8pt; padding: 4pt 10pt; font-size: 11.5pt; text-transform: uppercase; letter-spacing: 0.4pt;
+}
+/* Box que envolve uma dados-grid (Outorgante, Representante, Beneficiario): a
+   grid ja tem borda propria; o box nao precisa de borda/padding — sem isso
+   ficava "tabela dentro de tabela" (borda dupla). A barra vermelha do titulo
+   encosta direto na grid. */
+.termo-box.tbl { border: none; padding: 0; }
+.termo-box.tbl > .termo-box-title { margin: 0 0 -1pt; }
+.termo-check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7pt 18pt; margin-top: 5pt; }
+.termo-check { display: flex; align-items: center; gap: 7pt; font-size: 11pt; }
+.termo-check input { width: 14px; height: 14px; accent-color: #622423; }
+/* Local/Data + Assinatura no padrao da procuracao: centralizados. */
+.termo-localdata { text-align: center; font-size: 12pt; font-weight: bold; margin-bottom: 20pt; }
+.termo-sign-block { text-align: center; }
+/* Espaco de assinatura ACIMA da linha (onde a pessoa assina). So existe
+   quando o bloco de assinatura simples esta visivel (analfabeto OFF) — ai
+   ajuda a encher a folha; no modo analfabeto o bloco todo some, entao nao
+   corre risco de estourar. */
+.termo-sign-space { height: 40pt; }
+.termo-sign-line { display: inline-block; border-top: 1.2pt solid #000; width: 62%; margin: 0 auto; }
+.termo-sign-caption { font-weight: bold; font-size: 11pt; margin-top: 4pt; }
+.termo-analf-toggle {
+    flex: 0 0 auto; margin-top: 8pt; display: flex; align-items: center; gap: 7pt; font-size: 9.5pt; cursor: pointer;
+    padding: 5pt 9pt; background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
+}
+.termo-analf-toggle input { width: 14px; height: 14px; accent-color: #622423; flex: 0 0 auto; }
+.termo-analf-block { display: none; margin-top: 10pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 8pt; }
+.termo-analf-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; }
+/* Evita assinatura duplicada: quando o bloco de rogo+testemunhas aparece, a
+   linha simples de "Assinatura" some — via JS (applyHasFallbacks), nao
+   :has(), que nao e confiavel no page.pdf()/impressao real (ver nota acima). */
+.termo-analf-block .termo-col-title { font-weight: bold; font-size: 10.5pt; margin-bottom: 6pt; text-align: center; color: #622423; text-transform: uppercase; }
+.termo-analf-block .termo-sign-rogo { border-top: 1pt solid #000; margin: 14pt 0 2pt; padding-top: 2pt; }
+.termo-analf-block .termo-obs-rogo { font-size: 8.5pt; color: #622423; font-style: italic; text-align: center; margin-bottom: 6pt; }
+.termo-lbl-top { font-size: 9pt; font-weight: bold; color: #622423; }
+.termo-digital-box { border: 1pt solid #622423; width: 48pt; height: 26pt; margin: 4pt auto 0; border-radius: 2px; }
+/* Exibição em pilha vertical (estilo github.io): documentos em tamanho A4 real,
+   um embaixo do outro, centralizados; rola pra baixo pra ver todos. Sem
+   escala/encolhimento. */
+#docs-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 34px;
+    padding: 40px 26px 60px;
+    min-width: min-content;
+}
+@media print {
+    .page-termo:not(.show) { display: none !important; }
 }
 </style>
 </head>
 <body>
 
-<div class="toolbar">
-    <div style="display:flex; align-items:center; gap:10px;">
-        <label style="font-weight:bold;">Tipo:</label>
-        <select id="tipoSelect" onchange="mudarTipo(this.value)">
+<div class="toolbar" id="toolbarEl">
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores">
+        <span class="sc-icon">◂◂</span> Recolher barra
+    </button>
+    <div class="tb-group">
+        <div class="tb-row">
+            <span class="tb-label">Tipo</span>
+            <span class="help-btn">?
+                <div class="help-popup">
+                    <b>Normal:</b> Pessoa maior de 18 anos, capaz, que assina o documento.<br><br>
+                    <b>Absolutamente Incapaz:</b> Menor de 16 anos ou curatelado. O representante legal (pai, mãe, tutor ou curador) assina pela pessoa.<br><br>
+                    <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
+                    Em qualquer um dos 3 tipos, marque a caixa <b>"é analfabeto(a)"</b> logo abaixo da assinatura se quem assina (outorgante, representante ou assistente, conforme o tipo) não sabe assinar — isso abre o bloco de assinatura a rogo + 2 testemunhas + impressão digital, na própria página, sem precisar trocar de tipo.
+                </div>
+            </span>
+        </div>
+        <select id="tipoSelect" onchange="mudarTipo(this.value)" style="display:none;">
             <option value="normal">Normal</option>
             <option value="incapaz">Absolutamente Incapaz</option>
-            <option value="incapaz-analfabeto">Abs. Incapaz (Rep. Analfabeto)</option>
             <option value="relativo">Relativamente Incapaz</option>
-            <option value="relativo-analfabeto">Rel. Incapaz (Assist. Analfabeto)</option>
-            <option value="analfabeto">Analfabeto</option>
         </select>
-        <span class="help-btn">?
-            <div class="help-popup">
-                <b>Normal:</b> Pessoa maior de 18 anos, capaz, que assina o documento.<br><br>
-                <b>Absolutamente Incapaz:</b> Menor de 16 anos. O representante legal (pai, mãe ou tutor) assina pela criança.<br><br>
-                <b>Abs. Incapaz (Rep. Analfabeto):</b> Titular menor de 16 anos / curatelado, e o representante legal (pai, mãe, tutor ou curador) é analfabeto. Um terceiro (não testemunha) assina a rogo do representante + impressão digital do representante. As 2 testemunhas validam o ato.<br><br>
-                <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
-                <b>Rel. Incapaz (Assist. Analfabeto):</b> Titular relativamente incapaz (16-17 anos / deficiente), e o assistente legal (genitor ou curador) é analfabeto. Um terceiro (não testemunha) assina a rogo do assistente + impressão digital do assistente. As 2 testemunhas validam o ato.<br><br>
-                <b>Analfabeto:</b> Pessoa que não sabe assinar. Um terceiro (não testemunha) assina a rogo em nome do outorgante + impressão digital. As 2 testemunhas validam o ato.
+        <div class="csel" id="tipoCustomSelect">
+            <button type="button" class="csel-btn" id="tipoCustomBtn" onclick="toggleTipoMenu()">
+                <span id="tipoCustomLabel">Normal</span>
+                <span class="csel-arrow">▾</span>
+            </button>
+            <div class="csel-menu" id="tipoCustomMenu">
+                <div class="csel-opt" data-value="normal">Normal</div>
+                <div class="csel-opt" data-value="incapaz">Absolutamente Incapaz</div>
+                <div class="csel-opt" data-value="relativo">Relativamente Incapaz</div>
             </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <label id="termo-toggle-wrap" class="tb-group" style="display:none; font-size:9pt; line-height:1.3; cursor:pointer;">
+        <span class="tb-row" style="align-items:flex-start;">
+            <input type="checkbox" id="termoIncluirCheck" onchange="this.dataset.userTouched='1'; syncTermo();" style="accent-color:#fff; margin-top:2px;">
+            <span>Incluir Termo de Responsabilidade e Compromisso</span>
         </span>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <a href="revogacao.html" style="color:#fff; text-decoration:underline; font-size:10pt;">Revogar procuração →</a>
-        <button onclick="gerarPDF()">Gerar PDF</button>
-    </div>
+    </label>
+
+    <div class="tb-spacer"></div>
+
+    <button onclick="gerarPDF()">Gerar PDF</button>
+    <a href="revogacao.html" class="tb-link">Revogar procuração →</a>
+
+    <!-- Easter egg: segurar ~1s este selo preenche tudo com dados de TESTE. -->
+    <div class="brand-tag" id="brandTag" title="">Menezes &amp; Advogados<br>Procurações</div>
 </div>
+
+<button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral de novo">▸▸</button>
 
 <span id="sizer"></span>
 
-<div class="page">
+<div id="docsArea">
+<div class="doc-tabs" id="docTabs">
+    <span class="doc-tabs-label">Ir para:</span>
+    <button type="button" class="doc-tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')">Procuração</button>
+    <button type="button" class="doc-tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')">Anexo X</button>
+    <button type="button" class="doc-tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')">Termo de Responsabilidade</button>
+    <button type="button" class="doc-tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')">Termo de Compromisso</button>
+</div>
+<div id="docsViewport">
+<!-- Documentos empilhados verticalmente (tamanho A4 real); rola pra ver todos.
+     Procuração primeiro; Anexo X (obrigatório) e Termos abaixo quando aplicáveis. -->
+<div id="docs-wrap">
+<div class="print-sheet">
+<div class="page" id="page-procuracao">
 
 <!-- CABECALHO -->
 <div class="header">
@@ -326,6 +690,10 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     <option value="União Estável">
 </datalist>
 
+<!-- Opções alinhadas às 6 caixas do Termo (Qualidade da Representação):
+     Pai/Mãe → Tutor Nato · Tutor → Tutor Legal · Curador → Curador ·
+     Guardião → Responsável Termo de Guarda · Administrador Provisório →
+     Administrador Provisório · Procurador → Procurador -->
 <datalist id="qualidade-rep-list">
     <option value="Pai">
     <option value="Mãe">
@@ -333,15 +701,22 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     <option value="Tutora">
     <option value="Curador">
     <option value="Curadora">
+    <option value="Administrador Provisório">
+    <option value="Administradora Provisória">
     <option value="Guardião">
     <option value="Guardiã">
+    <option value="Procurador">
+    <option value="Procuradora">
 </datalist>
 <datalist id="qualidade-assist-list">
     <option value="Genitor">
     <option value="Genitora">
     <option value="Curador">
     <option value="Curadora">
-    <option value="Assistente">
+    <option value="Administrador Provisório">
+    <option value="Administradora Provisória">
+    <option value="Procurador">
+    <option value="Procuradora">
 </datalist>
 
 <!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
@@ -385,62 +760,40 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 
 <!-- ====== ASSINATURA: NORMAL ====== -->
 <div id="sec-assinatura-normal" class="tipo-section active">
-<div class="assinatura">
-    <span class="assinatura-label">OUTORGANTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
-</div>
 <div class="local-data-line">
     <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
 </div>
-</div>
-
-<!-- ====== ASSINATURA: INCAPAZ ====== -->
-<div id="sec-assinatura-incapaz" class="tipo-section">
+<div class="sign-block">
 <div class="assinatura">
-    <span class="assinatura-label">REPRESENTANTE LEGAL:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
-</div>
-<div class="local-data-line">
-    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade2" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf2" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia2" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes2" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano2" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+    <span class="assinatura-label">OUTORGANTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
 </div>
 </div>
-
-<!-- ====== ASSINATURA: RELATIVO ====== -->
-<div id="sec-assinatura-relativo" class="tipo-section">
-<div class="assinatura">
-    <span class="assinatura-label">ASSISTENTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">_____</span>
-</div>
-<div class="local-data-line">
-    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade3" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf3" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia3" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes3" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano3" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
-</div>
-</div>
-
-<!-- ====== ASSINATURA: ANALFABETO ====== -->
-<div id="sec-assinatura-analfabeto" class="tipo-section">
-<table style="width:100%; margin-top:18pt; border:none; border-collapse:collapse;">
-<tr>
-    <td style="width:50%; vertical-align:middle; text-align:center; border:none; padding:0 8pt 0 0;">
-        <div id="rogo-titulo" style="font-weight:bold; font-size:10pt; margin-bottom:4pt;">ASSINATURA A ROGO DO(A) OUTORGANTE:</div>
-        <span style="display:inline-block; width:220pt; border-bottom:1pt solid #000; height:10pt;">&nbsp;</span>
-        <div id="rogo-sublabel" style="font-size:7.5pt; color:#555; margin-top:1pt;">(Terceiro assina a rogo do outorgante — não é testemunha)</div>
-        <div class="testemunha-campos" style="margin-top:4pt; max-width:220pt; margin-left:auto; margin-right:auto;">
-            <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="rogo_cpf" value="" maxlength="14"></div>
-            <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="rogo_rg" value="" maxlength="25"></div>
+<label class="pg-analf-toggle">
+    <input type="checkbox" id="analf_normal_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_normal_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <span>Marcar quando o(a) <b>outorgante</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
+</label>
+<div class="pg-analf-block" id="analf_normal_block">
+    <div>
+        <div class="pg-analf-col-title">ASSINATURA A ROGO<br>DO(A) OUTORGANTE:</div>
+        <span class="pg-analf-sign-line">&nbsp;</span>
+        <div class="pg-analf-obs">(Terceiro assina a rogo do outorgante — não é testemunha)</div>
+        <div class="testemunha-campos" style="max-width:220pt; margin:3pt auto 0;">
+            <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="rogo_cpf_normal" value="" maxlength="14"></div>
+            <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="rogo_rg_normal" value="" maxlength="25"></div>
         </div>
-        <div class="local-data-line" style="margin-top:8pt; font-size:10pt;">
-            <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade4" value="" maxlength="25" placeholder="CIDADE" style="font-size:10pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf4" value="" maxlength="2" placeholder="UF" style="font-size:10pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia4" value="" maxlength="2" placeholder="DD" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes4" value="" maxlength="12" placeholder="Mês" style="font-size:10pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano4" value="" maxlength="4" placeholder="AAAA" style="font-size:10pt;"><span class="date-sep">.</span></span>
+        <div class="pg-analf-digital">
+            <div class="pg-analf-digital-label">Impressão digital (polegar direito):</div>
+            <div class="pg-analf-digital-box"></div>
         </div>
-        <div style="margin-top:8pt; text-align:center;">
-            <div id="rogo-digital-label" style="font-size:8pt; color:#555;">Impressão digital (polegar direito):</div>
-            <div style="width:50pt; height:40pt; border:1pt solid #999; margin:3pt auto 0;"></div>
-        </div>
-    </td>
-    <td style="width:50%; vertical-align:top; border:none; padding:0 0 0 8pt;">
+    </div>
+    <div>
         <div class="testemunha-bloco">
             <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
             <div class="testemunha-nome-label">NOME:</div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
-                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf" value="" maxlength="14"></div>
-                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test1_rg" value="" maxlength="25"></div>
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_normal" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test1_rg_normal" value="" maxlength="25"></div>
             </div>
         </div>
         <div class="testemunha-bloco">
@@ -448,13 +801,114 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
             <div class="testemunha-nome-label">NOME:</div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
-                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf" value="" maxlength="14"></div>
-                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test2_rg" value="" maxlength="25"></div>
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_normal" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test2_rg_normal" value="" maxlength="25"></div>
             </div>
         </div>
-    </td>
-</tr>
-</table>
+    </div>
+</div>
+</div>
+
+<!-- ====== ASSINATURA: ABSOLUTAMENTE INCAPAZ (representante legal) ====== -->
+<div id="sec-assinatura-incapaz" class="tipo-section">
+<div class="local-data-line">
+    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade2" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf2" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia2" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes2" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano2" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+</div>
+<div class="sign-block">
+<div class="assinatura">
+    <span class="assinatura-label">REPRESENTANTE LEGAL:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+</div>
+</div>
+<label class="pg-analf-toggle">
+    <input type="checkbox" id="analf_incapaz_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_incapaz_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <span>Marcar quando o(a) <b>representante legal</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
+</label>
+<div class="pg-analf-block" id="analf_incapaz_block">
+    <div>
+        <div class="pg-analf-col-title">ASSINATURA A ROGO DO(A)<br>REPRESENTANTE LEGAL:</div>
+        <span class="pg-analf-sign-line">&nbsp;</span>
+        <div class="pg-analf-obs">(Terceiro assina a rogo do representante legal — não é testemunha)</div>
+        <div class="testemunha-campos" style="max-width:220pt; margin:3pt auto 0;">
+            <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="rogo_cpf_incapaz" value="" maxlength="14"></div>
+            <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="rogo_rg_incapaz" value="" maxlength="25"></div>
+        </div>
+        <div class="pg-analf-digital">
+            <div class="pg-analf-digital-label">Impressão digital do representante legal (polegar direito):</div>
+            <div class="pg-analf-digital-box"></div>
+        </div>
+    </div>
+    <div>
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_incapaz" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test1_rg_incapaz" value="" maxlength="25"></div>
+            </div>
+        </div>
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_incapaz" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test2_rg_incapaz" value="" maxlength="25"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ====== ASSINATURA: RELATIVAMENTE INCAPAZ (assistente legal) ====== -->
+<div id="sec-assinatura-relativo" class="tipo-section">
+<div class="local-data-line">
+    <span class="date-wrapper"><input type="text" class="date-input" id="local_cidade3" value="" maxlength="25" placeholder="CIDADE"><span class="date-sep">,</span><input type="text" class="date-input" id="local_uf3" value="" maxlength="2" placeholder="UF"><span class="date-sep">—</span><input type="text" class="date-input" id="data_dia3" value="" maxlength="2" placeholder="DD"><span class="date-sep">de</span><input type="text" class="date-input" id="data_mes3" value="" maxlength="12" placeholder="Mês"><span class="date-sep">de</span><input type="text" class="date-input" id="data_ano3" value="" maxlength="4" placeholder="AAAA"><span class="date-sep">.</span></span>
+</div>
+<div class="sign-block">
+<div class="assinatura">
+    <span class="assinatura-label">ASSISTENTE:</span>&nbsp;&nbsp;<span class="assinatura-linha">_____</span>
+</div>
+</div>
+<label class="pg-analf-toggle">
+    <input type="checkbox" id="analf_relativo_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('analf_relativo_block').classList.toggle('show', this.checked); onAnalfToggleChange();">
+    <span>Marcar quando o(a) <b>assistente legal</b> for analfabeto(a) (inclui assinatura a rogo + 2 testemunhas + impressão digital)</span>
+</label>
+<div class="pg-analf-block" id="analf_relativo_block">
+    <div>
+        <div class="pg-analf-col-title">ASSINATURA A ROGO DO(A)<br>ASSISTENTE LEGAL:</div>
+        <span class="pg-analf-sign-line">&nbsp;</span>
+        <div class="pg-analf-obs">(Terceiro assina a rogo do assistente legal — não é testemunha)</div>
+        <div class="testemunha-campos" style="max-width:220pt; margin:3pt auto 0;">
+            <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="rogo_cpf_relativo" value="" maxlength="14"></div>
+            <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="rogo_rg_relativo" value="" maxlength="25"></div>
+        </div>
+        <div class="pg-analf-digital">
+            <div class="pg-analf-digital-label">Impressão digital do assistente legal (polegar direito):</div>
+            <div class="pg-analf-digital-box"></div>
+        </div>
+    </div>
+    <div>
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_relativo" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test1_rg_relativo" value="" maxlength="25"></div>
+            </div>
+        </div>
+        <div class="testemunha-bloco">
+            <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+            <div class="testemunha-nome-label">NOME:</div>
+            <span class="testemunha-linha">&nbsp;</span>
+            <div class="testemunha-campos">
+                <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_relativo" value="" maxlength="14"></div>
+                <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="test2_rg_relativo" value="" maxlength="25"></div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- FOOTER screen -->
@@ -463,15 +917,455 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
         Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
         Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
     </div>
-    <div class="footer-page">1 de 1</div>
+    <div class="footer-page" id="footer-page-label">1 de 1</div>
 </div>
 
-</div><!-- .page -->
+</div><!-- .page-procuracao -->
+</div><!-- .print-sheet-procuracao -->
+
+<!-- ============================================================ -->
+<!-- ANEXO X — TERMO DE REPRESENTAÇÃO E AUTORIZAÇÃO DE ACESSO      -->
+<!-- (obrigatório — Portaria PRES/INSS 1.538/2022)                -->
+<!-- ============================================================ -->
+<div class="print-sheet">
+<div class="page page-anexo" id="page-anexox">
+    <div class="header">
+        <table>
+            <tr>
+                <td style="width:33%;">&nbsp;</td>
+                <td style="width:34%; text-align:center; vertical-align:bottom;">
+                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                </td>
+                <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
+                    Menezes &amp; Advogados Associados
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="termo-titulo">Termo de Representação e Autorização de Acesso às Informações Previdenciárias</div>
+
+    <div class="termo-content">
+    <div class="termo-blk termo-box tbl">
+        <div class="termo-box-title">Outorgante</div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row" style="border-bottom-color:#622423;">
+                <div class="grid-cell" style="flex:0 0 56%; border-right-color:#622423;"><span class="label">Nome completo:</span><input type="text" id="anexo_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 24%; border-right-color:#622423;"><span class="label">CPF:</span><input type="text" id="anexo_cpf" maxlength="14"></div>
+                <div class="grid-cell" style="flex:0 0 20%;"><span class="label">RG / Órgão:</span><input type="text" id="anexo_rg" maxlength="25"></div>
+            </div>
+            <div class="grid-row">
+                <div class="grid-cell" style="flex:0 0 40%; border-right-color:#622423;"><span class="label">Endereço:</span><input type="text" id="anexo_endereco" maxlength="60"></div>
+                <div class="grid-cell" style="flex:0 0 10%; border-right-color:#622423;"><span class="label">Nº:</span><input type="text" id="anexo_numero" maxlength="8"></div>
+                <div class="grid-cell" style="flex:0 0 39%; border-right-color:#622423;"><span class="label">Município:</span><input type="text" id="anexo_cidade" maxlength="25" list="cidades-list"></div>
+                <div class="grid-cell" style="flex:0 0 11%;"><span class="label">UF:</span><input type="text" id="anexo_uf" maxlength="2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk termo-box tbl" id="anexo-rep-box" style="display:none;">
+        <div class="termo-box-title"><span class="js-papel-anexo">Representante Legal</span></div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row">
+                <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="anexo_rep_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 22%;"><span class="label">CPF:</span><input type="text" id="anexo_rep_cpf" maxlength="14"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk">
+        <p class="termo-p">
+            <span id="anexo-eu-normal">Eu, outorgante acima qualificado(a),</span><span id="anexo-eu-rep" style="display:none;">Eu, <span class="js-papel-anexo-min">representante legal</span> acima qualificado(a), na condição de representante do(a) outorgante acima identificado(a),</span>
+            inscrito(a) no CPF e RG indicados, residente e domiciliado(a) no endereço acima,
+            representado(a) pelo advogado <b>CLAYTON GONÇALVES MENEZES</b>, OAB/BA nº <b>49.167</b>,
+            confiro poderes específicos para me representar perante o INSS na solicitação do serviço ou
+            benefício abaixo indicado e autorizo o acesso apenas às informações pessoais necessárias a
+            subsidiar o requerimento eletrônico do serviço ou benefício abaixo elencado:
+        </p>
+    </div>
+
+    <div class="termo-blk termo-box">
+        <div class="termo-box-title">I – Requerimento</div>
+        <div class="anexo-req-item">
+            <input type="checkbox" id="anexo_opt1" checked>
+            <div class="anexo-req-sel">
+                <select id="anexo_beneficio" onchange="onAnexoBeneficioChange()">
+                    <option value="">Selecione o tipo de benefício…</option>
+                    <option>Benefício de Prestação Continuada (BPC/LOAS)</option>
+                    <option>Aposentadoria por Idade Rural</option>
+                    <option>Aposentadoria por Idade Urbana</option>
+                    <option>Aposentadoria por Idade Híbrida</option>
+                    <option>Benefício por Incapacidade</option>
+                    <option>Auxílio-Acidente</option>
+                    <option>Auxílio-Reclusão</option>
+                    <option>Salário-Maternidade Rural</option>
+                    <option>Salário-Maternidade Urbano</option>
+                    <option>Pensão por Morte Rural</option>
+                    <option>Pensão por Morte Urbana</option>
+                    <option>Revisão de Benefício</option>
+                    <option>Outro (especificar):</option>
+                </select>
+                <input type="text" id="anexo_beneficio_outro" placeholder="(especifique se marcou 'outro')" maxlength="60" style="display:none; width:100%; margin-top:5pt;">
+            </div>
+        </div>
+        <label class="anexo-req-item"><input type="checkbox" id="anexo_opt2" checked><span>Atualizações para manutenção do benefício e outros serviços relacionados, na modalidade de atendimento à distância, bem como a preparação e instrução de requerimentos para posterior análise pelo INSS.</span></label>
+        <label class="anexo-req-item"><input type="checkbox" id="anexo_opt3" checked><span>Orientações e informações sobre formas de acesso aos serviços digitais do INSS.</span></label>
+    </div>
+
+    <div class="termo-blk">
+        <p class="termo-p">
+            Podendo, para tanto, praticar os atos necessários ao cumprimento deste mandato, em especial,
+            prestar informações, acompanhar o requerimento, cumprir exigências, ter vistas e tomar ciência
+            de decisões sobre o processo de requerimento especificado neste termo.
+        </p>
+        <p class="termo-p">
+            Declaro também estar ciente de que devo acompanhar o andamento do meu pedido através do site do
+            INSS e de que as informações ora prestadas são verídicas, estando sujeito(a) às penalidades
+            previstas nos arts. 171 e 299 do Código Penal.
+        </p>
+    </div>
+
+    <div class="termo-blk">
+        <div class="termo-localdata">
+            <span class="date-wrapper"><input type="text" class="date-input" id="anexo_local_cidade" value="" maxlength="25" placeholder="CIDADE" list="cidades-list" style="font-size:12pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="anexo_local_uf" value="" maxlength="2" placeholder="UF" style="font-size:12pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="anexo_dia" value="" maxlength="2" placeholder="DD" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="anexo_mes" value="" maxlength="12" placeholder="Mês" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="anexo_ano" value="" maxlength="4" placeholder="AAAA" style="font-size:12pt;"><span class="date-sep">.</span></span>
+        </div>
+        <div class="termo-sign-block">
+            <div class="termo-sign-space"></div>
+            <div class="termo-sign-line">&nbsp;</div>
+            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel-anexo">Outorgante</span></div>
+        </div>
+        <div class="termo-analf-block" id="anexo_analf_block">
+            <div>
+                <div class="termo-col-title">Assinatura a Rogo do(a)<br><span class="js-papel-anexo">Outorgante</span>:</div>
+                <span class="termo-sign-rogo" style="display:block;"></span>
+                <div class="termo-obs-rogo">(Terceiro assina a rogo do(a) <span class="js-papel-anexo-min">outorgante</span> — não é testemunha)</div>
+                <div class="testemunha-campos" style="margin-top:3pt; max-width:200pt; margin-left:auto; margin-right:auto;">
+                    <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_rogo_cpf" maxlength="14"></div>
+                    <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="anexo_rogo_rg" maxlength="25"></div>
+                </div>
+                <div style="text-align:center; margin-top:5pt;">
+                    <span class="termo-lbl-top">Impressão digital do(a) <span class="js-papel-anexo-min">outorgante</span> (polegar direito):</span>
+                    <div class="termo-digital-box"></div>
+                </div>
+            </div>
+            <div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">1ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="anexo_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t1_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="anexo_t1_rg" maxlength="25"></div>
+                    </div>
+                </div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">2ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="anexo_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t2_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="anexo_t2_rg" maxlength="25"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div><!-- .termo-content -->
+
+    <label class="termo-analf-toggle">
+        <input type="checkbox" id="anexo_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('anexo_analf_block').classList.toggle('show', this.checked); recalcLayout();">
+        <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
+    </label>
+
+    <div class="footer-screen">
+        <div class="footer-text">
+            Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
+            Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
+        </div>
+        <div class="footer-page">Anexo X</div>
+    </div>
+</div><!-- .page-anexox -->
+</div><!-- .print-sheet-anexox -->
+
+<!-- ============================================================ -->
+<!-- TERMOS DE RESPONSABILIDADE E COMPROMISSO                      -->
+<!-- (lado a lado na tela; cada um em folha A4 separada na impressão) -->
+<!-- ============================================================ -->
+<div class="print-sheet">
+<div class="page page-termo" id="page-termoresp">
+    <div class="header">
+        <table>
+            <tr>
+                <td style="width:33%;">&nbsp;</td>
+                <td style="width:34%; text-align:center; vertical-align:bottom;">
+                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                </td>
+                <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
+                    Menezes &amp; Advogados Associados
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="termo-titulo">Termo de Responsabilidade</div>
+
+    <div class="termo-content">
+    <div class="termo-blk termo-box tbl">
+        <div class="termo-box-title"><span class="js-papel">Representante Legal</span></div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row" style="border-bottom-color:#622423;">
+                <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termoresp_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 22%;"><span class="label">CPF:</span><input type="text" id="termoresp_cpf" maxlength="14"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk">
+        <p class="termo-p">
+            Eu, representante legal acima qualificado(a), inscrito(a) no Cadastro de Pessoas Físicas (CPF)
+            sob o número indicado, pelo presente Termo de Responsabilidade, exercendo a representação
+            indicada abaixo, comprometo-me a comunicar ao INSS qualquer evento que possa anular a
+            representação do(s) beneficiário(s) relacionado(s) a seguir, no prazo de 30 (trinta) dias, a
+            contar da data em que o evento ocorra. Os eventos a comunicar são: óbito do titular/dependente
+            do benefício ou cessação da representação legal.
+        </p>
+        <p class="termo-p">
+            Estou ciente de que o descumprimento do compromisso ora assumido, além da obrigação à devolução
+            de importâncias recebidas indevidamente, quando for o caso, estarei sujeito às penalidades
+            previstas nos artigos 171 e 299 do Código Penal.
+        </p>
+        <p class="termo-legal">
+            Art. 171 — Obter, para si ou para outrem, vantagem ilícita, em prejuízo alheio, induzindo ou
+            mantendo alguém em erro, mediante artifício, ardil, ou qualquer outro meio fraudulento.
+        </p>
+        <p class="termo-legal">
+            Art. 299 — Omitir, em documento público ou particular, declaração que devia constar, ou nele
+            inserir ou fazer inserir declaração falsa ou diversa da que devia ser escrita, com o fim de
+            prejudicar direito, criar obrigação ou alterar a verdade sobre fato juridicamente relevante.
+        </p>
+    </div>
+
+    <div class="termo-blk termo-box">
+        <div class="termo-box-title">Beneficiário</div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row" style="border-bottom-color:#622423;">
+                <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termoresp_benef_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 22%;"><span class="label">CPF:</span><input type="text" id="termoresp_benef_cpf" maxlength="14"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk termo-box">
+        <div class="termo-box-title">Qualidade da Representação</div>
+        <div class="termo-check-grid" id="termoresp-qualidade-grid">
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="TutorNato" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Tutor Nato</label>
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="TutorLegal" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Tutor Legal</label>
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="Curador" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Curador</label>
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="ResponsavelTermoGuarda" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Responsável Termo de Guarda</label>
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="AdministradorProvisorio" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Administrador Provisório</label>
+            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="Procurador" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Procurador</label>
+        </div>
+    </div>
+
+    <div class="termo-blk">
+        <div class="termo-localdata">
+            <span class="date-wrapper"><input type="text" class="date-input" id="termoresp_local_cidade" value="" maxlength="25" placeholder="CIDADE" list="cidades-list" style="font-size:12pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="termoresp_local_uf" value="" maxlength="2" placeholder="UF" style="font-size:12pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="termoresp_dia" value="" maxlength="2" placeholder="DD" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="termoresp_mes" value="" maxlength="12" placeholder="Mês" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="termoresp_ano" value="" maxlength="4" placeholder="AAAA" style="font-size:12pt;"><span class="date-sep">.</span></span>
+        </div>
+        <div class="termo-sign-block">
+            <div class="termo-sign-space"></div>
+            <div class="termo-sign-line">&nbsp;</div>
+            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel">Representante Legal</span></div>
+        </div>
+        <div class="termo-analf-block" id="termoresp_analf_block">
+            <div>
+                <div class="termo-col-title">Assinatura a Rogo do(a)<br><span class="js-papel">Representante Legal</span>:</div>
+                <div class="termo-sign-rogo"></div>
+                <div class="termo-obs-rogo">(Terceiro assina a rogo do(a) <span class="js-papel" data-case="lower">representante legal</span> — não é testemunha)</div>
+                <div class="testemunha-campos" style="margin-top:3pt; max-width:200pt; margin-left:auto; margin-right:auto;">
+                    <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_rogo_cpf" maxlength="14"></div>
+                    <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termoresp_rogo_rg" maxlength="25"></div>
+                </div>
+                <div style="text-align:center; margin-top:5pt;">
+                    <span class="termo-lbl-top">Impressão digital do(a) <span class="js-papel" data-case="lower">representante legal</span> (polegar direito):</span>
+                    <div class="termo-digital-box"></div>
+                </div>
+            </div>
+            <div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">1ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="termoresp_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t1_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termoresp_t1_rg" maxlength="25"></div>
+                    </div>
+                </div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">2ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="termoresp_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t2_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termoresp_t2_rg" maxlength="25"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div><!-- .termo-content -->
+
+    <label class="termo-analf-toggle">
+        <input type="checkbox" id="termoresp_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('termoresp_analf_block').classList.toggle('show', this.checked); updateTermoDensity();">
+        <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
+    </label>
+
+    <!-- Rodape na tela (igual a procuracao) — na impressao vem do @page. -->
+    <div class="footer-screen">
+        <div class="footer-text">
+            Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
+            Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
+        </div>
+        <div class="footer-page">2 de 3</div>
+    </div>
+</div><!-- .page-termoresp -->
+</div><!-- .print-sheet-termoresp -->
+
+<!-- ============================================================ -->
+<!-- PÁGINA 3 — TERMO DE COMPROMISSO (Anexo XXIX)                  -->
+<!-- ============================================================ -->
+<div class="print-sheet">
+<div class="page page-termo" id="page-termocomp">
+    <div class="header">
+        <table>
+            <tr>
+                <td style="width:33%;">&nbsp;</td>
+                <td style="width:34%; text-align:center; vertical-align:bottom;">
+                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                </td>
+                <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
+                    Menezes &amp; Advogados Associados
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="termo-titulo">Termo de Compromisso</div>
+
+    <div class="termo-content">
+    <div class="termo-blk termo-box tbl">
+        <div class="termo-box-title"><span class="js-papel">Representante Legal</span></div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row" style="border-bottom-color:#622423;">
+                <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termocomp_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 22%;"><span class="label">CPF:</span><input type="text" id="termocomp_cpf" maxlength="14"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk">
+        <p class="termo-p">
+            Eu, acima qualificado(a), inscrito(a) no Cadastro de Pessoas Físicas (CPF) sob o número
+            indicado, declaro para fins de recebimento de benefícios que:
+        </p>
+    </div>
+
+    <div class="termo-blk termo-box tbl">
+        <div class="termo-box-title">Beneficiário Representado (Titular)</div>
+        <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
+            <div class="grid-row">
+                <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termocomp_benef_nome" maxlength="50"></div>
+                <div class="grid-cell" style="flex:0 0 22%;"><span class="label">CPF:</span><input type="text" id="termocomp_benef_cpf" maxlength="14"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="termo-blk">
+        <p class="termo-p recuo">
+            I – represento o(a) beneficiário(a) acima identificado(a) e que este não está sob
+            responsabilidade dos pais (tutores natos), tutor, curador ou guardião; e
+        </p>
+        <p class="termo-p recuo">
+            II – estou ciente de que, no prazo de 6 (seis) meses a contar desta data, deverei apresentar:
+        </p>
+        <p class="termo-p recuo2">a) documento para comprovação de representação legal do beneficiário; ou</p>
+        <p class="termo-p recuo2">b) comprovante do requerimento/andamento judicial de representação legal.</p>
+    </div>
+    <div class="termo-blk">
+        <p class="termo-p">
+            Na hipótese da apresentação do comprovante do requerimento ou do andamento de processo judicial
+            de representação legal, a cada 6 (seis) meses essa comprovação será necessária até que seja
+            expedido o documento judicial que conceda a representação.
+        </p>
+        <p class="termo-p" style="font-weight:bold;">Concordo em assumir o compromisso deste termo.</p>
+    </div>
+
+    <div class="termo-blk">
+        <div class="termo-localdata">
+            <span class="date-wrapper">Local e Data: <input type="text" class="date-input" id="termocomp_local_cidade" value="" maxlength="25" placeholder="CIDADE" list="cidades-list" style="font-size:12pt;"><span class="date-sep">,</span><input type="text" class="date-input" id="termocomp_local_uf" value="" maxlength="2" placeholder="UF" style="font-size:12pt;"><span class="date-sep">—</span><input type="text" class="date-input" id="termocomp_dia" value="" maxlength="2" placeholder="DD" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="termocomp_mes" value="" maxlength="12" placeholder="Mês" style="font-size:12pt;"><span class="date-sep">de</span><input type="text" class="date-input" id="termocomp_ano" value="" maxlength="4" placeholder="AAAA" style="font-size:12pt;"><span class="date-sep">.</span></span>
+        </div>
+        <div class="termo-sign-block">
+            <div class="termo-sign-space"></div>
+            <div class="termo-sign-line">&nbsp;</div>
+            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel">Representante Legal</span></div>
+        </div>
+        <div class="termo-analf-block" id="termocomp_analf_block">
+            <div>
+                <div class="termo-col-title">Assinatura a Rogo do(a)<br><span class="js-papel">Representante Legal</span>:</div>
+                <div class="termo-sign-rogo"></div>
+                <div class="termo-obs-rogo">(Terceiro assina a rogo do(a) <span class="js-papel" data-case="lower">representante legal</span> — não é testemunha)</div>
+                <div class="testemunha-campos" style="margin-top:3pt; max-width:200pt; margin-left:auto; margin-right:auto;">
+                    <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_rogo_cpf" maxlength="14"></div>
+                    <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termocomp_rogo_rg" maxlength="25"></div>
+                </div>
+                <div style="text-align:center; margin-top:5pt;">
+                    <span class="termo-lbl-top">Impressão digital do(a) <span class="js-papel" data-case="lower">representante legal</span> (polegar direito):</span>
+                    <div class="termo-digital-box"></div>
+                </div>
+            </div>
+            <div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">1ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="termocomp_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t1_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termocomp_t1_rg" maxlength="25"></div>
+                    </div>
+                </div>
+                <div class="testemunha-bloco">
+                    <div class="testemunha-titulo">2ª Testemunha:</div>
+                    <div class="testemunha-nome-label">Nome:</div>
+                    <input type="text" id="termocomp_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-campos">
+                        <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t2_cpf" maxlength="14"></div>
+                        <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termocomp_t2_rg" maxlength="25"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div><!-- .termo-content -->
+
+    <label class="termo-analf-toggle">
+        <input type="checkbox" id="termocomp_analfabeto_toggle" onchange="this.dataset.userTouched='1'; document.getElementById('termocomp_analf_block').classList.toggle('show', this.checked); updateTermoDensity();">
+        <span>Signatário(a) analfabeto(a) — incluir assinatura a rogo + 2 testemunhas + impressão digital</span>
+    </label>
+
+    <!-- Rodape na tela (igual a procuracao) — na impressao vem do @page. -->
+    <div class="footer-screen">
+        <div class="footer-text">
+            Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
+            Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
+        </div>
+        <div class="footer-page">3 de 3</div>
+    </div>
+</div><!-- .page-termocomp -->
+</div><!-- .print-sheet-termocomp -->
+</div><!-- #docs-wrap -->
+</div><!-- #docsViewport -->
+</div><!-- #docsArea -->
 
 <script>
 // === TIPO SWITCHING ===
 function aplicarLayoutOutorgante(tipo) {
-    var isCompact = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto' || tipo === 'relativo' || tipo === 'relativo-analfabeto');
+    var isCompact = (tipo === 'incapaz' || tipo === 'relativo');
     var rowNome = document.getElementById('row-nome');
     var rowIdent = document.getElementById('row-identidade');
     var rowEnd = document.getElementById('row-endereco');
@@ -517,7 +1411,7 @@ function aplicarLayoutOutorgante(tipo) {
         setFlex(c.est, '15%');
         rowEnd.style.display = '';
 
-        // L3: Cidade | Bairro | Telefone (mesmo layout para incapaz / incapaz-analfabeto / relativo)
+        // L3: Cidade | Bairro | Telefone (mesmo layout para incapaz / relativo)
         rowCid.appendChild(c.cid);
         rowCid.appendChild(c.bai);
         rowCid.appendChild(c.tel);
@@ -559,71 +1453,364 @@ function aplicarLayoutOutorgante(tipo) {
     }
 }
 
-function ajustarLabelsRogo(tipo) {
-    var titulo = document.getElementById('rogo-titulo');
-    var sublabel = document.getElementById('rogo-sublabel');
-    var digital = document.getElementById('rogo-digital-label');
-    if (!titulo) return;
-    if (tipo === 'incapaz-analfabeto') {
-        titulo.textContent = 'ASSINATURA A ROGO DO(A) REPRESENTANTE LEGAL:';
-        sublabel.textContent = '(Terceiro assina a rogo do representante legal — não é testemunha)';
-        digital.textContent = 'Impressão digital do representante legal (polegar direito):';
-    } else if (tipo === 'relativo-analfabeto') {
-        titulo.textContent = 'ASSINATURA A ROGO DO(A) ASSISTENTE LEGAL:';
-        sublabel.textContent = '(Terceiro assina a rogo do assistente legal — não é testemunha)';
-        digital.textContent = 'Impressão digital do assistente legal (polegar direito):';
-    } else {
-        titulo.textContent = 'ASSINATURA A ROGO DO(A) OUTORGANTE:';
-        sublabel.textContent = '(Terceiro assina a rogo do outorgante — não é testemunha)';
-        digital.textContent = 'Impressão digital (polegar direito):';
-    }
-}
-
 function mudarTipo(tipo) {
+    atualizarTipoCustomSelect(tipo);
     // Titles
     var titles = {
         normal: 'Procuração Ad Judicia et Extra',
-        incapaz: 'Procuração Ad Judicia et Extra — Menor Impúbere (representação)',
-        'incapaz-analfabeto': 'Procuração Ad Judicia et Extra — Menor Impúbere / Curatelado (Representante Analfabeto)',
-        relativo: 'Procuração Ad Judicia et Extra — Relativamente Incapaz (assistência)',
-        'relativo-analfabeto': 'Procuração Ad Judicia et Extra — Relativamente Incapaz (Assistente Analfabeto)',
-        analfabeto: 'Procuração Ad Judicia et Extra — Analfabeto'
+        incapaz: 'Procuração Ad Judicia et Extra — Absolutamente Incapaz (representação)',
+        relativo: 'Procuração Ad Judicia et Extra — Relativamente Incapaz (assistência)'
     };
     document.title = titles[tipo] || titles.normal;
 
     // Outorgante label
     var labels = {
         normal: 'OUTORGANTE:',
-        incapaz: 'OUTORGANTE (menor de 16 anos):',
-        'incapaz-analfabeto': 'OUTORGANTE (absolutamente incapaz):',
-        relativo: 'OUTORGANTE:',
-        'relativo-analfabeto': 'OUTORGANTE (relativamente incapaz):',
-        analfabeto: 'OUTORGANTE (analfabeto):'
+        incapaz: 'OUTORGANTE (absolutamente incapaz):',
+        relativo: 'OUTORGANTE (relativamente incapaz):'
     };
     document.getElementById('lbl-outorgante').textContent = labels[tipo] || labels.normal;
     // Add compact class for types with extra sections
     var page = document.querySelector('.page');
-    if (tipo === 'normal') { page.classList.remove('compact'); page.classList.remove('compact-poderes'); }
-    else { page.classList.add('compact'); }
-    if (tipo === 'relativo' || tipo === 'relativo-analfabeto' || tipo === 'analfabeto' || tipo === 'incapaz-analfabeto') page.classList.add('compact-poderes');
-    else page.classList.remove('compact-poderes');
+    if (tipo === 'normal') page.classList.remove('compact');
+    else page.classList.add('compact');
 
     // Reorganiza tabela do outorgante de acordo com o tipo
     aplicarLayoutOutorgante(tipo);
-    ajustarLabelsRogo(tipo);
 
     // Show/hide sections
-    var temRepresentante = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto');
+    var temRepresentante = (tipo === 'incapaz');
     document.getElementById('sec-outorgante-full').className = 'tipo-section active';
     document.getElementById('sec-representante').className = 'tipo-section' + (temRepresentante ? ' active' : '');
-    document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' || tipo === 'relativo-analfabeto' ? ' active' : '');
+    document.getElementById('sec-assistente').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
 
-    // Signatures
-    var usaAssinaturaRogo = (tipo === 'analfabeto' || tipo === 'incapaz-analfabeto' || tipo === 'relativo-analfabeto');
+    // Signatures — cada tipo tem sua propria secao com o toggle "e analfabeto"
+    // embutido (sem secao "-analfabeto" separada); so precisa mostrar a secao
+    // do tipo ativo, o proprio toggle de cada uma controla seu bloco de rogo.
     document.getElementById('sec-assinatura-normal').className = 'tipo-section' + (tipo === 'normal' ? ' active' : '');
     document.getElementById('sec-assinatura-incapaz').className = 'tipo-section' + (tipo === 'incapaz' ? ' active' : '');
     document.getElementById('sec-assinatura-relativo').className = 'tipo-section' + (tipo === 'relativo' ? ' active' : '');
-    document.getElementById('sec-assinatura-analfabeto').className = 'tipo-section' + (usaAssinaturaRogo ? ' active' : '');
+
+    updatePoderesDensity();
+    atualizarPapelSignatario(tipo);
+    atualizarPapelAnexo(tipo);
+    // Empurra os valores atuais para o Anexo X (sempre visivel) ao trocar de tipo.
+    ['nome','cpf','rg','endereco','numero','cidade','estado'].forEach(propagateFieldChange);
+    var fAnexo = fonteResponsavel(tipo);
+    if (fAnexo) { propagateFieldChange(fAnexo.nome); propagateFieldChange(fAnexo.cpf); }
+
+    // Reseta overrides manuais do Termo ao trocar de tipo e resincroniza
+    var qGrid = document.getElementById('termoresp-qualidade-grid'); if (qGrid) delete qGrid.dataset.userTouched;
+    var incluirChk = document.getElementById('termoIncluirCheck'); if (incluirChk) delete incluirChk.dataset.userTouched;
+    syncTermo();
+}
+
+// Chamado ao trocar de tipo E ao marcar/desmarcar "e analfabeto(a)" em qualquer
+// dos 3 tipos — o bloco de assinatura a rogo (2 testemunhas + digital) e mais
+// alto que a assinatura simples, entao o paragrafo de PODERES precisa ficar
+// mais denso pra sobrar folga. Relativamente incapaz ja e denso por natureza
+// (tem o bloco de assistente extra), independente do analfabeto.
+function updatePoderesDensity() {
+    var page = document.querySelector('.page');
+    if (!page) return;
+    var tipo = tipoAtual();
+    page.classList.toggle('compact-poderes', tipo === 'relativo' || analfabetoAtivo());
+}
+
+// Handler unico dos 3 toggles "e analfabeto(a)" (normal/incapaz/relativo).
+function onAnalfToggleChange() {
+    updatePoderesDensity();
+    syncTermo();
+}
+
+// === TERMO DE RESPONSABILIDADE E COMPROMISSO (Anexo XXVII/XXIX) ===
+// Mapeia a "qualidade" digitada na procuracao (representante/assistente) para
+// UMA das 6 caixas do Termo (Qualidade da Representacao). Por palavra-chave
+// (tolerante a acento/variacao/typo), com a semantica do escritorio:
+//   • Pai/Mãe/Genitor            → Tutor Nato   (pais sao tutores natos)
+//   • Tutor (nomeado)            → Tutor Legal
+//   • Curador (curatela CONCEDIDA) → Curador
+//   • Guardião (guarda definitiva) → Responsável Termo de Guarda
+//   • Administrador Provisório   → Administrador Provisório
+//     (providenciando/aguardando curatela, ou com guarda só provisória)
+//   • Procurador                 → Procurador
+// A ordem importa: "provisório" vence — indica que a curatela/guarda ainda
+// não é definitiva, então é Administrador Provisório, não Curador/Guarda.
+function qualidadeParaCheckbox(qv) {
+    var s = stripDiacritics(qv || '').toUpperCase();
+    if (!s) return null;
+    if (/PROVIS|ADMINISTRADOR/.test(s)) return 'AdministradorProvisorio';
+    if (/PROCURAD/.test(s)) return 'Procurador';
+    if (/GUARD/.test(s)) return 'ResponsavelTermoGuarda';
+    if (/CURADOR|CURATELA/.test(s)) return 'Curador';
+    if (/TUTOR/.test(s)) return 'TutorLegal';
+    if (/\bPAI\b|MAE|GENITOR|PATERN|MATERN/.test(s)) return 'TutorNato';
+    return null;
+}
+function termoAplicavel(tipo) {
+    return tipo === 'incapaz' || tipo === 'relativo';
+}
+// Analfabetismo agora e um toggle embutido em CADA tipo (normal/incapaz/relativo),
+// nao mais um tipo separado — le o checkbox do tipo ativo no momento.
+function analfabetoAtivo() {
+    var tipo = tipoAtual();
+    var el = document.getElementById('analf_' + tipo + '_toggle');
+    return !!(el && el.checked);
+}
+// IDs dos campos de assinatura a rogo + testemunhas, um conjunto por tipo
+// (cada tipo tem seu proprio bloco embutido — ver #analf_<tipo>_block no HTML).
+function fonteRogo(tipo) {
+    return {
+        cpf: 'rogo_cpf_' + tipo, rg: 'rogo_rg_' + tipo,
+        t1cpf: 'test1_cpf_' + tipo, t1rg: 'test1_rg_' + tipo,
+        t2cpf: 'test2_cpf_' + tipo, t2rg: 'test2_rg_' + tipo
+    };
+}
+function fonteResponsavel(tipo) {
+    if (tipo === 'incapaz') return {nome:'rep_nome', cpf:'rep_cpf', qualidade:'rep_qualidade'};
+    if (tipo === 'relativo') return {nome:'assist_nome', cpf:'assist_cpf', qualidade:'assist_qualidade'};
+    return null;
+}
+function fonteLocalData(tipo) {
+    if (tipo === 'incapaz') return {cidade:'local_cidade2', uf:'local_uf2', dia:'data_dia2', mes:'data_mes2', ano:'data_ano2'};
+    if (tipo === 'relativo') return {cidade:'local_cidade3', uf:'local_uf3', dia:'data_dia3', mes:'data_mes3', ano:'data_ano3'};
+    return {cidade:'local_cidade', uf:'local_uf', dia:'data_dia', mes:'data_mes', ano:'data_ano'};
+}
+// --- Sincronizacao BIDIRECIONAL entre procuracao e os 2 termos -----------
+// Cada grupo e uma lista de IDs que devem sempre conter o mesmo valor.
+// A pessoa pode preencher em QUALQUER um dos 3 documentos (procuracao,
+// Termo de Responsabilidade, Termo de Compromisso) que o valor se propaga
+// para os outros dois. SYNC_LOCK evita loop infinito (A atualiza B atualiza A).
+var SYNC_LOCK = {};
+function mirrorGroup(key, ids, changedId) {
+    if (SYNC_LOCK[key]) return;
+    var src = document.getElementById(changedId);
+    if (!src) return;
+    SYNC_LOCK[key] = true;
+    try {
+        ids.forEach(function(id) {
+            if (id === changedId) return;
+            var el = document.getElementById(id);
+            if (!el || el.value === src.value) return;
+            el.value = src.value;
+            autoSize(el);
+        });
+    } finally {
+        SYNC_LOCK[key] = false;
+    }
+}
+function activeSyncGroups() {
+    var tipo = tipoAtual();
+    var fonte = fonteResponsavel(tipo);
+    var ld = fonteLocalData(tipo);
+    var termoRogo = termoAplicavel(tipo);
+    var groups = [];
+    // Representante/assistente (quem assina, quando incapaz/relativo): procuração +
+    // termos + Anexo X.
+    if (fonte) {
+        groups.push({key:'resp_nome', ids:[fonte.nome, 'termoresp_nome', 'termocomp_nome', 'anexo_rep_nome']});
+        groups.push({key:'resp_cpf', ids:[fonte.cpf, 'termoresp_cpf', 'termocomp_cpf', 'anexo_rep_cpf']});
+    }
+    // Titular (outorgante/beneficiário) — nome/CPF/RG e endereço vão pro Anexo X também.
+    groups.push({key:'benef_nome', ids:['nome', 'termoresp_benef_nome', 'termocomp_benef_nome', 'anexo_nome']});
+    groups.push({key:'benef_cpf', ids:['cpf', 'termoresp_benef_cpf', 'termocomp_benef_cpf', 'anexo_cpf']});
+    groups.push({key:'titular_rg', ids:['rg', 'anexo_rg']});
+    groups.push({key:'titular_end', ids:['endereco', 'anexo_endereco']});
+    groups.push({key:'titular_num', ids:['numero', 'anexo_numero']});
+    groups.push({key:'titular_cid', ids:['cidade', 'anexo_cidade']});
+    groups.push({key:'titular_uf', ids:['estado', 'anexo_uf']});
+    // Local/data da assinatura (procuração + termos + Anexo X).
+    groups.push({key:'local_cidade', ids:[ld.cidade, 'termoresp_local_cidade', 'termocomp_local_cidade', 'anexo_local_cidade']});
+    groups.push({key:'local_uf', ids:[ld.uf, 'termoresp_local_uf', 'termocomp_local_uf', 'anexo_local_uf']});
+    groups.push({key:'data_dia', ids:[ld.dia, 'termoresp_dia', 'termocomp_dia', 'anexo_dia']});
+    groups.push({key:'data_mes', ids:[ld.mes, 'termoresp_mes', 'termocomp_mes', 'anexo_mes']});
+    groups.push({key:'data_ano', ids:[ld.ano, 'termoresp_ano', 'termocomp_ano', 'anexo_ano']});
+    // Rogo/testemunhas (analfabeto): Anexo X sempre; Termos só quando aplicáveis.
+    var rg2 = fonteRogo(tipo);
+    var tRogo = termoRogo ? ['termoresp_rogo_cpf','termocomp_rogo_cpf'] : [];
+    groups.push({key:'rogo_cpf', ids:[rg2.cpf,'anexo_rogo_cpf'].concat(tRogo)});
+    groups.push({key:'rogo_rg', ids:[rg2.rg,'anexo_rogo_rg'].concat(termoRogo?['termoresp_rogo_rg','termocomp_rogo_rg']:[])});
+    groups.push({key:'t1_cpf', ids:[rg2.t1cpf,'anexo_t1_cpf'].concat(termoRogo?['termoresp_t1_cpf','termocomp_t1_cpf']:[])});
+    groups.push({key:'t1_rg', ids:[rg2.t1rg,'anexo_t1_rg'].concat(termoRogo?['termoresp_t1_rg','termocomp_t1_rg']:[])});
+    groups.push({key:'t2_cpf', ids:[rg2.t2cpf,'anexo_t2_cpf'].concat(termoRogo?['termoresp_t2_cpf','termocomp_t2_cpf']:[])});
+    groups.push({key:'t2_rg', ids:[rg2.t2rg,'anexo_t2_rg'].concat(termoRogo?['termoresp_t2_rg','termocomp_t2_rg']:[])});
+    // nomes das testemunhas (procuração usa só linha em branco): Anexo X + termos.
+    groups.push({key:'t1_nome', ids:['anexo_t1_nome'].concat(termoRogo?['termoresp_t1_nome','termocomp_t1_nome']:[])});
+    groups.push({key:'t2_nome', ids:['anexo_t2_nome'].concat(termoRogo?['termoresp_t2_nome','termocomp_t2_nome']:[])});
+    return groups;
+}
+function propagateFieldChange(changedId) {
+    activeSyncGroups().forEach(function(g) {
+        if (g.ids.indexOf(changedId) !== -1) mirrorGroup(g.key, g.ids, changedId);
+    });
+    updateFooterPagina();
+}
+// IDs de origem que, ao serem editados (procuracao OU qualquer termo),
+// propagam para os demais documentos do grupo ativo.
+var SYNC_FIELD_IDS = [
+    'rep_nome','rep_cpf','assist_nome','assist_cpf','nome','cpf',
+    'rg','endereco','numero','cidade','estado',
+    'local_cidade2','local_uf2','data_dia2','data_mes2','data_ano2',
+    'local_cidade3','local_uf3','data_dia3','data_mes3','data_ano3',
+    'rogo_cpf_normal','rogo_rg_normal','test1_cpf_normal','test1_rg_normal','test2_cpf_normal','test2_rg_normal',
+    'rogo_cpf_incapaz','rogo_rg_incapaz','test1_cpf_incapaz','test1_rg_incapaz','test2_cpf_incapaz','test2_rg_incapaz',
+    'rogo_cpf_relativo','rogo_rg_relativo','test1_cpf_relativo','test1_rg_relativo','test2_cpf_relativo','test2_rg_relativo',
+    'termoresp_nome','termoresp_cpf','termoresp_benef_nome','termoresp_benef_cpf',
+    'termoresp_local_cidade','termoresp_local_uf','termoresp_dia','termoresp_mes','termoresp_ano',
+    'termoresp_rogo_cpf','termoresp_rogo_rg','termoresp_t1_nome','termoresp_t1_cpf','termoresp_t1_rg',
+    'termoresp_t2_nome','termoresp_t2_cpf','termoresp_t2_rg',
+    'termocomp_nome','termocomp_cpf','termocomp_benef_nome','termocomp_benef_cpf',
+    'termocomp_local_cidade','termocomp_local_uf','termocomp_dia','termocomp_mes','termocomp_ano',
+    'termocomp_rogo_cpf','termocomp_rogo_rg','termocomp_t1_nome','termocomp_t1_cpf','termocomp_t1_rg',
+    'termocomp_t2_nome','termocomp_t2_cpf','termocomp_t2_rg',
+    'anexo_nome','anexo_cpf','anexo_rg','anexo_endereco','anexo_numero','anexo_cidade','anexo_uf',
+    'anexo_rep_nome','anexo_rep_cpf',
+    'anexo_local_cidade','anexo_local_uf','anexo_dia','anexo_mes','anexo_ano',
+    'anexo_rogo_cpf','anexo_rogo_rg','anexo_t1_nome','anexo_t1_cpf','anexo_t1_rg',
+    'anexo_t2_nome','anexo_t2_cpf','anexo_t2_rg'
+];
+function wireBidirectionalSync() {
+    SYNC_FIELD_IDS.forEach(function(id) {
+        var el = document.getElementById(id); if (!el) return;
+        el.addEventListener('input', function() { propagateFieldChange(id); });
+        el.addEventListener('blur', function() { propagateFieldChange(id); });
+    });
+    // UF de qualquer um dos 3 documentos tambem alimenta a lista de cidades via IBGE
+    ['local_uf2','local_uf3','termoresp_local_uf','termocomp_local_uf'].forEach(function(id) {
+        var el = document.getElementById(id); if (!el) return;
+        el.addEventListener('blur', function() {
+            var uf = normalizeEstadoToUFStrict(el.value);
+            if (uf) ensureCitiesForUF(uf);
+        });
+    });
+}
+function remapQualidade() {
+    var fonte = fonteResponsavel(tipoAtual());
+    if (!fonte) return;
+    var qGridEl = document.getElementById('termoresp-qualidade-grid');
+    if (qGridEl && qGridEl.dataset.userTouched) return;
+    var mapped = qualidadeParaCheckbox(fieldValue(fonte.qualidade));
+    document.querySelectorAll('input[name="termoresp_qualidade"]').forEach(function(cb) {
+        cb.checked = (cb.value === mapped);
+    });
+}
+// Quem assina os Termos é o Representante Legal (Abs. Incapaz) ou o Assistente
+// Legal (Rel. Incapaz). Os Termos são compartilhados pelos 2 tipos, então os
+// rótulos (box do signatário, legenda da assinatura, bloco de rogo) trocam via
+// os <span class="js-papel"> — só nos Termos, não na procuração (que já tem
+// seções próprias por tipo). data-case="lower" para os que ficam em minúscula.
+function atualizarPapelSignatario(tipo) {
+    var isAssist = (tipo === 'relativo');
+    var titulo = isAssist ? 'Assistente Legal' : 'Representante Legal';
+    var minusc = isAssist ? 'assistente legal' : 'representante legal';
+    document.querySelectorAll('.js-papel').forEach(function(el) {
+        el.textContent = (el.dataset.case === 'lower') ? minusc : titulo;
+    });
+}
+
+// ANEXO X — papel do signatario acompanha o tipo da procuracao:
+// normal -> o proprio outorgante assina; incapaz -> representante legal;
+// relativo -> assistente legal. Alem dos rotulos, mostra/esconde o box do
+// representante e alterna o paragrafo "Eu, ..." (proprio vs. em nome de).
+function atualizarPapelAnexo(tipo) {
+    var temRep = (tipo === 'incapaz' || tipo === 'relativo');
+    var titulo, minusc;
+    if (tipo === 'incapaz') { titulo = 'Representante Legal'; minusc = 'representante legal'; }
+    else if (tipo === 'relativo') { titulo = 'Assistente Legal'; minusc = 'assistente legal'; }
+    else { titulo = 'Outorgante'; minusc = 'outorgante'; }
+    document.querySelectorAll('.js-papel-anexo').forEach(function(el) { el.textContent = titulo; });
+    document.querySelectorAll('.js-papel-anexo-min').forEach(function(el) { el.textContent = minusc; });
+    var repBox = document.getElementById('anexo-rep-box');
+    if (repBox) repBox.style.display = temRep ? '' : 'none';
+    var euNormal = document.getElementById('anexo-eu-normal');
+    var euRep = document.getElementById('anexo-eu-rep');
+    if (euNormal) euNormal.style.display = temRep ? 'none' : '';
+    if (euRep) euRep.style.display = temRep ? '' : 'none';
+}
+
+// Requerimento do ANEXO X — revela o campo livre quando "Outro" e escolhido.
+function onAnexoBeneficioChange() {
+    var sel = document.getElementById('anexo_beneficio');
+    var outro = document.getElementById('anexo_beneficio_outro');
+    if (!sel || !outro) return;
+    var isOutro = /outro/i.test(sel.value);
+    outro.style.display = isOutro ? '' : 'none';
+    if (!isOutro) outro.value = '';
+    recalcLayout();
+}
+function updateFooterPagina() {
+    var el = document.getElementById('footer-page-label'); if (!el) return;
+    var chk = document.getElementById('termoIncluirCheck');
+    var total = (chk && chk.checked && termoAplicavel(tipoAtual())) ? 3 : 1;
+    el.textContent = '1 de ' + total;
+}
+// O .termo-content (flex-column + space-between no CSS) ja distribui o conteudo
+// dos Termos pela pagina inteira sozinho — nao precisa de classe de densidade
+// alternando font-size. So dispara o recalculo de layout/escala de impressao.
+function updateTermoDensity() {
+    recalcLayout();
+}
+function syncTermo() {
+    var tipo = tipoAtual();
+    var aplicavel = termoAplicavel(tipo);
+    var analfabeto = analfabetoAtivo();
+    var wrap = document.getElementById('termo-toggle-wrap');
+    var chk = document.getElementById('termoIncluirCheck');
+    if (wrap) wrap.style.display = aplicavel ? 'flex' : 'none';
+    if (!aplicavel && chk) chk.checked = false;
+    if (aplicavel && chk && !chk.dataset.userTouched) chk.checked = true;
+
+    var show = !!(aplicavel && chk && chk.checked);
+    ['page-termoresp', 'page-termocomp'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.toggle('show', show);
+    });
+    updateFooterPagina();
+
+    // Anexo X esta SEMPRE presente (obrigatorio) — seu bloco a rogo (2 testemunhas
+    // + impressao digital) acompanha o "nao assina" da procuracao, independente de
+    // os Termos serem aplicaveis. Por isso vem ANTES do early-return dos Termos.
+    var anexoChk = document.getElementById('anexo_analfabeto_toggle');
+    var anexoBlk = document.getElementById('anexo_analf_block');
+    if (anexoChk && !anexoChk.dataset.userTouched) {
+        anexoChk.checked = analfabeto;
+        if (anexoBlk) anexoBlk.classList.toggle('show', analfabeto);
+    }
+    if (analfabeto) {
+        var rgA = fonteRogo(tipo);
+        propagateFieldChange(rgA.cpf); propagateFieldChange(rgA.rg);
+        propagateFieldChange(rgA.t1cpf); propagateFieldChange(rgA.t1rg);
+        propagateFieldChange(rgA.t2cpf); propagateFieldChange(rgA.t2rg);
+    }
+
+    recalcLayout();
+    if (!show) return;
+
+    // Ao trocar de tipo, empurra os valores atuais da fonte ativa para os termos
+    var fonte = fonteResponsavel(tipo);
+    if (fonte) { propagateFieldChange(fonte.nome); propagateFieldChange(fonte.cpf); }
+    propagateFieldChange('nome'); propagateFieldChange('cpf');
+    var ld = fonteLocalData(tipo);
+    propagateFieldChange(ld.cidade); propagateFieldChange(ld.uf);
+    propagateFieldChange(ld.dia); propagateFieldChange(ld.mes); propagateFieldChange(ld.ano);
+
+    remapQualidade();
+
+    ['termoresp', 'termocomp'].forEach(function(prefix) {
+        var analfCheckbox = document.getElementById(prefix + '_analfabeto_toggle');
+        var analfBlock = document.getElementById(prefix + '_analf_block');
+        if (analfCheckbox && !analfCheckbox.dataset.userTouched) {
+            analfCheckbox.checked = analfabeto;
+            if (analfBlock) analfBlock.classList.toggle('show', analfabeto);
+        }
+    });
+    if (analfabeto) {
+        var rg2 = fonteRogo(tipo);
+        propagateFieldChange(rg2.cpf); propagateFieldChange(rg2.rg);
+        propagateFieldChange(rg2.t1cpf); propagateFieldChange(rg2.t1rg);
+        propagateFieldChange(rg2.t2cpf); propagateFieldChange(rg2.t2rg);
+    }
+    updateTermoDensity();
 }
 
 // === NORMALIZATION ===
@@ -716,9 +1903,32 @@ var FIELDS = {
     cidade: {fmt:'upper',allow:'text'}, bairro: {fmt:'upper',allow:null},
     rep_nome: {fmt:'upper',allow:'text'}, rep_cpf: {fmt:'cpf',allow:'num'}, rep_rg: {fmt:'rg',allow:null}, rep_qualidade: {fmt:'upper',allow:'text'}, rep_estado_civil: {fmt:'upper',allow:'text'},
     assist_nome: {fmt:'upper',allow:'text'}, assist_cpf: {fmt:'cpf',allow:'num'}, assist_rg: {fmt:'rg',allow:null}, assist_qualidade: {fmt:'upper',allow:'text'}, assist_estado_civil: {fmt:'upper',allow:'text'},
-    test1_cpf: {fmt:'cpf',allow:'num'}, test1_rg: {fmt:'rg',allow:null},
-    test2_cpf: {fmt:'cpf',allow:'num'}, test2_rg: {fmt:'rg',allow:null},
-    rogo_cpf: {fmt:'cpf',allow:'num'}, rogo_rg: {fmt:'rg',allow:null}
+    test1_cpf_normal: {fmt:'cpf',allow:'num'}, test1_rg_normal: {fmt:'rg',allow:null},
+    test2_cpf_normal: {fmt:'cpf',allow:'num'}, test2_rg_normal: {fmt:'rg',allow:null},
+    rogo_cpf_normal: {fmt:'cpf',allow:'num'}, rogo_rg_normal: {fmt:'rg',allow:null},
+    test1_cpf_incapaz: {fmt:'cpf',allow:'num'}, test1_rg_incapaz: {fmt:'rg',allow:null},
+    test2_cpf_incapaz: {fmt:'cpf',allow:'num'}, test2_rg_incapaz: {fmt:'rg',allow:null},
+    rogo_cpf_incapaz: {fmt:'cpf',allow:'num'}, rogo_rg_incapaz: {fmt:'rg',allow:null},
+    test1_cpf_relativo: {fmt:'cpf',allow:'num'}, test1_rg_relativo: {fmt:'rg',allow:null},
+    test2_cpf_relativo: {fmt:'cpf',allow:'num'}, test2_rg_relativo: {fmt:'rg',allow:null},
+    rogo_cpf_relativo: {fmt:'cpf',allow:'num'}, rogo_rg_relativo: {fmt:'rg',allow:null},
+    termoresp_nome: {fmt:'upper',allow:'text'}, termoresp_cpf: {fmt:'cpf',allow:'num'},
+    termoresp_benef_nome: {fmt:'upper',allow:'text'}, termoresp_benef_cpf: {fmt:'cpf',allow:'num'},
+    termoresp_rogo_cpf: {fmt:'cpf',allow:'num'}, termoresp_rogo_rg: {fmt:'rg',allow:null},
+    termoresp_t1_nome: {fmt:'upper',allow:'text'}, termoresp_t1_cpf: {fmt:'cpf',allow:'num'}, termoresp_t1_rg: {fmt:'rg',allow:null},
+    termoresp_t2_nome: {fmt:'upper',allow:'text'}, termoresp_t2_cpf: {fmt:'cpf',allow:'num'}, termoresp_t2_rg: {fmt:'rg',allow:null},
+    termocomp_nome: {fmt:'upper',allow:'text'}, termocomp_cpf: {fmt:'cpf',allow:'num'},
+    termocomp_benef_nome: {fmt:'upper',allow:'text'}, termocomp_benef_cpf: {fmt:'cpf',allow:'num'},
+    termocomp_rogo_cpf: {fmt:'cpf',allow:'num'}, termocomp_rogo_rg: {fmt:'rg',allow:null},
+    termocomp_t1_nome: {fmt:'upper',allow:'text'}, termocomp_t1_cpf: {fmt:'cpf',allow:'num'}, termocomp_t1_rg: {fmt:'rg',allow:null},
+    termocomp_t2_nome: {fmt:'upper',allow:'text'}, termocomp_t2_cpf: {fmt:'cpf',allow:'num'}, termocomp_t2_rg: {fmt:'rg',allow:null},
+    anexo_nome: {fmt:'upper',allow:'text'}, anexo_cpf: {fmt:'cpf',allow:'num'}, anexo_rg: {fmt:'rg',allow:null},
+    anexo_endereco: {fmt:'upper',allow:null}, anexo_numero: {fmt:null,allow:null},
+    anexo_cidade: {fmt:'upper',allow:'text'}, anexo_uf: {fmt:'upper',allow:'text'},
+    anexo_rep_nome: {fmt:'upper',allow:'text'}, anexo_rep_cpf: {fmt:'cpf',allow:'num'},
+    anexo_rogo_cpf: {fmt:'cpf',allow:'num'}, anexo_rogo_rg: {fmt:'rg',allow:null},
+    anexo_t1_nome: {fmt:'upper',allow:'text'}, anexo_t1_cpf: {fmt:'cpf',allow:'num'}, anexo_t1_rg: {fmt:'rg',allow:null},
+    anexo_t2_nome: {fmt:'upper',allow:'text'}, anexo_t2_cpf: {fmt:'cpf',allow:'num'}, anexo_t2_rg: {fmt:'rg',allow:null}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true, rg: true };
 function normalize(id, v) {
@@ -737,13 +1947,50 @@ function normalize(id, v) {
 
 // === AUTO-SIZE ===
 var sizer = document.getElementById('sizer');
-function autoSize(el) { sizer.textContent = el.value || el.placeholder || 'M'; el.style.width = (sizer.offsetWidth + 6) + 'px'; }
+// Inputs dentro de um .grid-cell (boxes da procuracao e do Anexo X) tem largura
+// fixa (width:100% da celula). Nao se alarga o input — se o texto nao cabe
+// (ex.: "VITÓRIA DA CONQUISTA" no municipio), encolhe a fonte ate caber.
+function autoFitGridFont(el) {
+    el.style.fontSize = '';
+    var avail = el.clientWidth;               // largura fixa da celula (menos padding)
+    if (!avail) return;                        // box oculto — refit quando aparecer
+    var base = parseFloat(getComputedStyle(el).fontSize) || 15;
+    // Mede o texto com o #sizer (mesma fonte Times bold) — deterministico,
+    // ao contrario de input.scrollWidth que oscila entre reflows.
+    var savedFS = sizer.style.fontSize;
+    sizer.textContent = el.value || '';
+    // Folga de 9px: o input reserva ~2px pro cursor e a midia de impressao
+    // renderiza um pouco mais largo que a tela — sem folga o texto encosta na
+    // borda e corta no PDF mesmo "cabendo" na tela.
+    var size = base, guard = 0;
+    while (size > 7.5 && guard < 40) {
+        sizer.style.fontSize = size + 'px';
+        if (sizer.offsetWidth <= avail - 9) break;
+        size -= 0.5; guard++;
+    }
+    sizer.style.fontSize = savedFS;
+    el.style.fontSize = (size < base) ? (size + 'px') : '';
+}
+function autoSize(el) {
+    if (el && el.closest && el.closest('.grid-cell')) {
+        el.style.width = '';        // mantem width:100% do CSS
+        autoFitGridFont(el);
+        return;
+    }
+    sizer.textContent = el.value || el.placeholder || 'M';
+    // Campos de cidade recebem folga maior — nomes longos ("Vitória da
+    // Conquista") cortavam a ultima letra com a folga padrao de +6px.
+    var extra = (el.id || '').indexOf('cidade') >= 0 ? 26 : 6;
+    el.style.width = (sizer.offsetWidth + extra) + 'px';
+}
 
 // Date fields across all signature sections
 var ALL_DATE_IDS = ['local_cidade','local_uf','data_dia','data_mes','data_ano',
     'local_cidade2','local_uf2','data_dia2','data_mes2','data_ano2',
     'local_cidade3','local_uf3','data_dia3','data_mes3','data_ano3',
-    'local_cidade4','local_uf4','data_dia4','data_mes4','data_ano4'];
+    'termoresp_local_cidade','termoresp_local_uf','termoresp_dia','termoresp_mes','termoresp_ano',
+    'termocomp_local_cidade','termocomp_local_uf','termocomp_dia','termocomp_mes','termocomp_ano',
+    'anexo_local_cidade','anexo_local_uf','anexo_dia','anexo_mes','anexo_ano'];
 var DATE_FIELDS = {};
 ALL_DATE_IDS.forEach(function(id) {
     if (id.includes('cidade')) DATE_FIELDS[id] = {fmt:'title',allow:'text'};
@@ -796,6 +2043,53 @@ ALL_DATE_IDS.forEach(function(id) {
     autoSize(el);
 });
 
+// Sincronizacao bidirecional: qualquer um dos 3 documentos (procuracao,
+// Termo de Responsabilidade, Termo de Compromisso) pode ser preenchido
+// primeiro; o valor se propaga para os outros dois.
+// === DROPDOWN CUSTOMIZADO DO TIPO (substitui <select> nativo) ===
+var TIPO_LABELS = {
+    normal: 'Normal',
+    incapaz: 'Absolutamente Incapaz',
+    relativo: 'Relativamente Incapaz'
+};
+function atualizarTipoCustomSelect(tipo) {
+    var lbl = document.getElementById('tipoCustomLabel');
+    if (lbl) lbl.textContent = TIPO_LABELS[tipo] || TIPO_LABELS.normal;
+    document.querySelectorAll('#tipoCustomMenu .csel-opt').forEach(function(opt) {
+        opt.classList.toggle('selected', opt.dataset.value === tipo);
+    });
+}
+function toggleTipoMenu(forceClose) {
+    var btn = document.getElementById('tipoCustomBtn');
+    var menu = document.getElementById('tipoCustomMenu');
+    if (!btn || !menu) return;
+    var abrir = forceClose === true ? false : !menu.classList.contains('open');
+    menu.classList.toggle('open', abrir);
+    btn.classList.toggle('open', abrir);
+}
+document.getElementById('tipoCustomMenu').addEventListener('click', function(ev) {
+    var opt = ev.target.closest('.csel-opt');
+    if (!opt) return;
+    var val = opt.dataset.value;
+    document.getElementById('tipoSelect').value = val;
+    mudarTipo(val);
+    toggleTipoMenu(true);
+});
+document.addEventListener('click', function(ev) {
+    var wrap = document.getElementById('tipoCustomSelect');
+    if (wrap && !wrap.contains(ev.target)) toggleTipoMenu(true);
+});
+document.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Escape') toggleTipoMenu(true);
+});
+
+wireBidirectionalSync();
+['rep_qualidade','assist_qualidade'].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.addEventListener('input', remapQualidade);
+    el.addEventListener('blur', remapQualidade);
+});
+
 function setError(id, hasError) {
     var el = document.getElementById(id); if (!el) return;
     if (hasError) el.classList.add('input-error');
@@ -805,7 +2099,10 @@ function applyRGFallback(id) {
     var el = document.getElementById(id); if (!el) return;
     if (!el.value || !el.value.trim()) el.value = '--';
 }
-['rg','rep_rg','assist_rg','test1_rg','test2_rg','rogo_rg'].forEach(function(id) {
+['rg','rep_rg','assist_rg',
+ 'test1_rg_normal','test2_rg_normal','rogo_rg_normal',
+ 'test1_rg_incapaz','test2_rg_incapaz','rogo_rg_incapaz',
+ 'test1_rg_relativo','test2_rg_relativo','rogo_rg_relativo'].forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     el.addEventListener('focus', function() { if (el.value === '--') el.value = ''; });
     el.addEventListener('blur', function() { applyRGFallback(id); });
@@ -821,14 +2118,18 @@ var CURRENT_UF = '';
 
 function normalizeKey(v) { return stripDiacritics(v || '').toUpperCase().replace(/[^A-Z]/g, ''); }
 function updateUFSignatures(uf) {
-    ['local_uf','local_uf2','local_uf3','local_uf4'].forEach(function(id) {
+    ['local_uf','local_uf2','local_uf3'].forEach(function(id) {
         var el = document.getElementById(id); if (el) { el.value = uf || ''; autoSize(el); }
     });
+    // Propaga a UF da assinatura ativa para os Termos e o Anexo X (Local/Data).
+    if (typeof propagateFieldChange === 'function') propagateFieldChange(fonteLocalData(tipoAtual()).uf);
 }
 function updateCidadeSignatures(v) {
-    ['local_cidade','local_cidade2','local_cidade3','local_cidade4'].forEach(function(id) {
+    ['local_cidade','local_cidade2','local_cidade3'].forEach(function(id) {
         var el = document.getElementById(id); if (el) { el.value = toTitleCase(v || ''); autoSize(el); }
     });
+    // Propaga a cidade da assinatura ativa para os Termos e o Anexo X (Local/Data).
+    if (typeof propagateFieldChange === 'function') propagateFieldChange(fonteLocalData(tipoAtual()).cidade);
 }
 function normalizeEstadoToUFStrict(v) {
     var trimmed = (v || '').trim();
@@ -942,20 +2243,38 @@ async function normalizeCidadeByIBGE() {
 cidadeEl.addEventListener('blur', function() { normalizeCidadeByIBGE(); });
 estadoEl.addEventListener('blur', function() { syncEstadoCidade(); });
 
-// Auto-fill date
+// Auto-fill date — data atual sozinha, sem o usuario preencher, tanto nas
+// assinaturas da procuracao (suffix ''/2/3/4) quanto nos dois Termos.
 var now = new Date();
-['','2','3','4'].forEach(function(suffix) {
-    var d = document.getElementById('data_dia' + suffix);
-    var m = document.getElementById('data_mes' + suffix);
-    var a = document.getElementById('data_ano' + suffix);
+function autoData(diaId, mesId, anoId) {
+    var d = document.getElementById(diaId);
+    var m = document.getElementById(mesId);
+    var a = document.getElementById(anoId);
     if (d && !d.value) { d.value = String(now.getDate()); autoSize(d); }
     if (m && !m.value) { m.value = MESES[now.getMonth()]; autoSize(m); }
     if (a && !a.value) { a.value = String(now.getFullYear()); autoSize(a); }
+}
+['','2','3','4'].forEach(function(suffix) {
+    autoData('data_dia' + suffix, 'data_mes' + suffix, 'data_ano' + suffix);
+});
+autoData('termoresp_dia', 'termoresp_mes', 'termoresp_ano');
+autoData('termocomp_dia', 'termocomp_mes', 'termocomp_ano');
+autoData('anexo_dia', 'anexo_mes', 'anexo_ano');
+
+// Auto-fit de fonte nos inputs de largura fixa dos boxes (procuracao + Anexo X).
+document.querySelectorAll('.dados-grid .grid-cell input[type="text"]').forEach(function(el) {
+    el.addEventListener('input', function() { autoFitGridFont(el); });
+    el.addEventListener('blur', function() { autoFitGridFont(el); });
+    autoFitGridFont(el);
 });
 
 // Initial field normalization
 Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
-['rg','rep_rg','assist_rg','test1_rg','test2_rg','rogo_rg'].forEach(function(id) { applyRGFallback(id); });
+['rg','rep_rg','assist_rg',
+ 'test1_rg_normal','test2_rg_normal','rogo_rg_normal',
+ 'test1_rg_incapaz','test2_rg_incapaz','rogo_rg_incapaz',
+ 'test1_rg_relativo','test2_rg_relativo','rogo_rg_relativo',
+ 'anexo_rg','anexo_rogo_rg','anexo_t1_rg','anexo_t2_rg'].forEach(function(id) { applyRGFallback(id); });
 
 function tipoAtual() { return (document.getElementById('tipoSelect') || {}).value || 'normal'; }
 function fieldValue(id) {
@@ -992,8 +2311,8 @@ function validateForm() {
     if (!hasAnyMeaningfulInput()) return errors;
 
     var tipo = tipoAtual();
-    var titularIncapaz = (tipo === 'incapaz' || tipo === 'incapaz-analfabeto');
-    var isCompact = (titularIncapaz || tipo === 'relativo' || tipo === 'relativo-analfabeto');
+    var titularIncapaz = (tipo === 'incapaz');
+    var isCompact = (titularIncapaz || tipo === 'relativo');
 
     // Se começou a preencher, exige conjunto base completo
     markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
@@ -1023,7 +2342,7 @@ function validateForm() {
             setError('rep_cpf', true);
         }
     }
-    if (tipo === 'relativo' || tipo === 'relativo-analfabeto') {
+    if (tipo === 'relativo') {
         markRequiredEmpty('assist_nome', errors, 'Nome do assistente legal');
         markRequiredEmpty('assist_qualidade', errors, 'Qualidade do assistente legal');
         var assistCpf = fieldValue('assist_cpf');
@@ -1041,19 +2360,230 @@ function validateForm() {
         }
     }
 
+    // ANEXO X é obrigatório e só emite informando o tipo de benefício requerido.
+    setError('anexo_beneficio', false);
+    setError('anexo_beneficio_outro', false);
+    var benef = fieldValue('anexo_beneficio');
+    if (!benef) {
+        errors.push('Tipo de benefício (ANEXO X) é obrigatório para emitir a procuração.');
+        setError('anexo_beneficio', true);
+    } else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) {
+        errors.push('Especifique o benefício no campo "Outro" do ANEXO X.');
+        setError('anexo_beneficio_outro', true);
+    }
+
     return errors;
 }
-function gerarPDF() {
+function runPdfValidation() {
     var errors = validateForm();
     if (errors.length) {
         alert('Corrija antes de gerar PDF:\\n\\n- ' + errors.join('\\n- '));
-        return;
+        return false;
     }
+    return true;
+}
+function gerarPDF() {
+    if (!runPdfValidation()) return;
     window.print();
 }
+// Ctrl+P nativo dispara o mesmo aviso de validacao que o botao Gerar PDF.
+// O navegador nao permite cancelar a caixa de impressao a partir do beforeprint,
+// mas os campos obrigatorios ficam destacados em vermelho do mesmo jeito.
+window.addEventListener('beforeprint', function() { runPdfValidation(); });
+
+// === PREENCHER TESTE (dados stub) — segurar o botao ~1s para acionar ==========
+// CPFs abaixo sao validos para passar no isValidCPF (nao pertencem a ninguem).
+function preencherStub() {
+    function s(id, v) {
+        var e = document.getElementById(id); if (!e) return;
+        e.value = v;
+        e.dispatchEvent(new Event('input', {bubbles:true}));
+        e.dispatchEvent(new Event('change', {bubbles:true}));
+        e.dispatchEvent(new Event('blur', {bubbles:true}));
+    }
+    var tipo = tipoAtual();
+    s('nome', 'Maria Aparecida de Souza');
+    s('cpf', '529.982.247-25');
+    s('rg', '1234567 SSP/BA');
+    s('profissao', 'Lavradora');
+    s('estado_civil', 'Solteira');
+    s('telefone', '(77) 9 9927-1876');
+    s('endereco', 'Avenida Ascendino Melo');
+    s('numero', '297');
+    s('bairro', 'Centro');
+    s('estado', 'BA');
+    s('cidade', 'Vitória da Conquista');
+    if (tipo === 'incapaz') { s('rep_nome', 'João Carlos de Souza'); s('rep_cpf', '111.444.777-35'); s('rep_qualidade', 'Mãe'); }
+    if (tipo === 'relativo') { s('assist_nome', 'Ana Lúcia de Souza'); s('assist_cpf', '111.444.777-35'); s('assist_qualidade', 'Curador'); }
+    s('anexo_beneficio', 'Benefício por Incapacidade');
+}
+// Easter egg oculto: segurar ~1s o selo "Menezes & Advogados / Procurações"
+// na sidebar preenche tudo com dados de teste. Sem botao visivel.
+(function wireStubHold() {
+    var egg = document.getElementById('brandTag'); if (!egg) return;
+    var HOLD = 900, timer = null, fired = false;
+    function start(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        e.preventDefault(); fired = false;
+        egg.classList.add('egg-charging');
+        timer = setTimeout(function() {
+            fired = true; egg.classList.remove('egg-charging');
+            preencherStub();
+            egg.classList.add('egg-done');
+            setTimeout(function() { egg.classList.remove('egg-done'); }, 800);
+        }, HOLD);
+    }
+    function cancel() { if (timer) { clearTimeout(timer); timer = null; } egg.classList.remove('egg-charging'); }
+    egg.addEventListener('mousedown', start);
+    egg.addEventListener('touchstart', start, {passive:false});
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev) { egg.addEventListener(ev, cancel); });
+})();
+
+// === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
+var LS_SIDEBAR = 'procuracao_sidebar_collapsed';
+
+function toggleSidebar(forceCollapsed) {
+    var collapsed = typeof forceCollapsed === 'boolean' ? forceCollapsed : !document.body.classList.contains('sidebar-collapsed');
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
+    var toolbarEl = document.getElementById('toolbarEl');
+    if (toolbarEl) toolbarEl.classList.toggle('collapsed', collapsed);
+    try { localStorage.setItem(LS_SIDEBAR, collapsed ? '1' : '0'); } catch (e) {}
+    requestAnimationFrame(recalcLayout);
+}
+
+function getActiveDocEls() {
+    var els = [document.getElementById('page-procuracao'),
+               document.getElementById('page-anexox')]; // Anexo X é obrigatório
+    var tr = document.getElementById('page-termoresp');
+    if (tr && tr.classList.contains('show')) els.push(tr);
+    var tc = document.getElementById('page-termocomp');
+    if (tc && tc.classList.contains('show')) els.push(tc);
+    return els.filter(Boolean);
+}
+
+// Exibição em pilha vertical: as abas viram atalhos de "pular para o documento"
+// (scrollIntoView). Não há mais modos Foco/2/Todos — todos os docs aplicáveis
+// ficam empilhados em tamanho real e rola-se pra vê-los.
+function focusDoc(id) {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateDocTabsUI(active) {
+    var activeIds = active.map(function(el) { return el.id; });
+    var tabResp = document.getElementById('tabTermoResp');
+    var tabComp = document.getElementById('tabTermoComp');
+    if (tabResp) tabResp.hidden = activeIds.indexOf('page-termoresp') === -1;
+    if (tabComp) tabComp.hidden = activeIds.indexOf('page-termocomp') === -1;
+    var tabAnexo = document.getElementById('tabAnexo');
+    if (tabAnexo) tabAnexo.hidden = activeIds.indexOf('page-anexox') === -1;
+}
+
+// Conversao mm->px exata deste navegador/DPI, medida uma vez com uma sonda
+// invisivel (nao depende de nenhuma classe/estado de .page, entao funciona
+// igual em tela e sob emulacao de impressao).
+var MM_TO_PX = (function() {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute; visibility:hidden; height:100mm; width:0; top:-9999px; left:-9999px;';
+    document.body.appendChild(probe);
+    var px = probe.getBoundingClientRect().height / 100;
+    document.body.removeChild(probe);
+    return px || 3.7795; // fallback ~96dpi se a sonda falhar por algum motivo
+})();
+var PRINT_TARGET_PX = 297 * MM_TO_PX; // altura de uma folha A4 inteira
+
+function updatePrintFitScaleForPage(pageEl) {
+    var naturalH = pageEl.scrollHeight;
+    if (!naturalH) return;
+    var scale = Math.min(1, PRINT_TARGET_PX / naturalH);
+    // Nunca deixa a escala cair tanto que fique ilegivel no papel — se o
+    // conteudo precisar de mais que isso, e sinal de bug de conteudo real,
+    // nao so overflow normal, e a pagina deve mesmo virar 2 folhas.
+    scale = Math.max(scale, 0.75);
+    pageEl.style.setProperty('--print-fit-scale', scale.toFixed(4));
+}
+
+// Marca qual .print-sheet e o ultimo REALMENTE aplicavel (procuracao sempre
+// conta; termo so conta se .show) pra zerar o page-break-after so nele —
+// evita folha extra em branco quando o ultimo <div> do DOM nao e o ultimo
+// visivel (ex.: tipo sem Termo, onde os 2 .print-sheet de termo ficam
+// display:none mas ainda existem no DOM depois da procuracao).
+function updateLastVisibleSheet() {
+    var sheets = document.querySelectorAll('#docs-wrap > .print-sheet');
+    var visivel = [];
+    sheets.forEach(function(s) {
+        var termo = s.querySelector('.page-termo');
+        var aplicavel = !termo || termo.classList.contains('show');
+        s.classList.toggle('print-sheet-hidden', !aplicavel);
+        s.classList.remove('last-visible');
+        if (aplicavel) visivel.push(s);
+    });
+    if (visivel.length) visivel[visivel.length - 1].classList.add('last-visible');
+}
+
+// Substitui os 3 usos de CSS :has() que decidiam esconder uma assinatura
+// simples quando o bloco de rogo (analfabeto) ao lado esta ativo — :has()
+// funciona certinho na tela (emulate_media confirma), mas o pipeline real de
+// impressao/page.pdf() deste Chromium nao honra, deixando as 2 assinaturas
+// juntas na pagina impressa. Aplica via display inline, sem depender de :has().
+function applyHasFallbacks() {
+    ['normal', 'incapaz', 'relativo'].forEach(function(tipo) {
+        var toggle = document.getElementById('analf_' + tipo + '_toggle');
+        var section = document.getElementById('sec-assinatura-' + tipo);
+        if (!section) return;
+        var signBlock = section.querySelector('.sign-block');
+        if (signBlock) signBlock.style.display = (toggle && toggle.checked) ? 'none' : '';
+    });
+    ['termoresp', 'termocomp'].forEach(function(prefix) {
+        var block = document.getElementById(prefix + '_analf_block');
+        var page = document.getElementById(prefix === 'termoresp' ? 'page-termoresp' : 'page-termocomp');
+        if (!page) return;
+        var signBlock = page.querySelector('.termo-sign-block');
+        if (signBlock) signBlock.style.display = (block && block.classList.contains('show')) ? 'none' : '';
+    });
+}
+
+var _recalcScheduled = false;
+function recalcLayout() {
+    if (_recalcScheduled) return;
+    _recalcScheduled = true;
+    requestAnimationFrame(function() {
+        _recalcScheduled = false;
+        _doRecalcLayout();
+    });
+}
+
+function _doRecalcLayout() {
+    var wrap = document.getElementById('docs-wrap');
+    if (!wrap) return;
+    var active = getActiveDocEls();
+    var allPages = wrap.querySelectorAll('.page');
+    // Sem escala de tela (exibição em pilha, tamanho real). Só as tarefas de
+    // segurança da IMPRESSÃO: esconder assinatura redundante, calcular
+    // --print-fit-scale por página e marcar o último sheet visível.
+    applyHasFallbacks();
+    allPages.forEach(updatePrintFitScaleForPage);
+    updateLastVisibleSheet();
+    updateDocTabsUI(active);
+}
+
+var _resizeTimer = null;
+window.addEventListener('resize', function() {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(recalcLayout, 120);
+});
+
+(function restoreDisplayPrefs() {
+    var sidebarCollapsed = false;
+    try { sidebarCollapsed = localStorage.getItem(LS_SIDEBAR) === '1'; } catch (e) {}
+    document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+    var toolbarEl = document.getElementById('toolbarEl');
+    if (toolbarEl) toolbarEl.classList.toggle('collapsed', sidebarCollapsed);
+})();
 
 mudarTipo((document.getElementById('tipoSelect') || {}).value || 'normal');
 loadEstadosIBGE().then(function() { syncEstadoCidade().then(function() { normalizeCidadeByIBGE(); }); });
+recalcLayout();
 </script>
 
 </body>
