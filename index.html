@@ -55,6 +55,9 @@ body {
 .header { margin-bottom: 6pt; margin-top: 0; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; overflow: visible; }
 .header table { width: 100%; border-collapse: collapse; border-bottom: none; }
 .header td { border: none; padding: 0; vertical-align: middle; }
+/* Nome do escritorio (celula direita) — fonte um pouco menor pra "Menezes
+   Advocacia e Consultoria Juridica" quebrar equilibrado, sem orfa. */
+.header table td:last-child { font-size: 10pt !important; line-height: 1.25; }
 .titulo { text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14pt; margin-top: 8pt; margin-bottom: 8pt; letter-spacing: 0.5pt; }
 .titulo em { font-style: italic; }
 .titulo + .tipo-section { margin-top: 6pt; }
@@ -218,27 +221,44 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
 .csel { position: relative; width: 100%; font-family: Arial, sans-serif; }
 .csel-btn {
     width: 100%; display: flex; align-items: center; justify-content: space-between;
-    background: #fff; color: #622423; border: none; border-radius: 4px;
-    padding: 7px 10px; font-size: 9.5pt; font-weight: bold; cursor: pointer;
+    background: #fff; color: #622423; border: 1px solid rgba(0,0,0,0.06); border-radius: 7px;
+    padding: 8px 12px; font-size: 9.5pt; font-weight: bold; cursor: pointer;
     text-align: left; gap: 6px;
 }
-.csel-btn:hover { background: #f0e0e0; }
-.csel-btn.open { border-radius: 4px 4px 0 0; }
-.csel-arrow { font-size: 8pt; opacity: 0.7; transition: transform 0.15s; flex: 0 0 auto; }
+.csel-btn:hover { background: #fdf3f2; }
+.csel-arrow { font-size: 9pt; opacity: 0.6; transition: transform 0.15s; flex: 0 0 auto; }
 .csel-btn.open .csel-arrow { transform: rotate(180deg); }
 .csel-menu {
-    display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1500;
-    background: #fff; border-radius: 0 0 6px 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1500;
+    background: #fff; border: 1px solid #d8c4c2; border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(60,20,20,0.28);
     overflow: hidden; max-height: 60vh; overflow-y: auto;
 }
 .csel-menu.open { display: block; }
 .csel-opt {
-    padding: 8px 10px; font-size: 9.5pt; color: #333; cursor: pointer;
-    border-top: 1px solid #eee; line-height: 1.3;
+    padding: 8px 13px; font-size: 10pt; color: #333; cursor: pointer;
+    border-top: 1px solid #f2ecec; line-height: 1.3;
 }
 .csel-opt:first-child { border-top: none; }
 .csel-opt:hover { background: #fdf3f2; color: #622423; }
 .csel-opt.selected { background: #622423; color: #fff; font-weight: bold; }
+/* Combobox custom — substitui o <datalist> nativo (feio, sem estilo, fonte
+   minuscula e inconsistente entre navegadores) nos campos qualidade, estado
+   civil, estado e cidade/municipio. Popup fixo, ancorado ao input. */
+.combo-pop {
+    position: fixed; z-index: 3000; display: none; font-family: Arial, sans-serif;
+    background: #fff; border: 1px solid #d8c4c2; border-radius: 8px;
+    box-shadow: 0 10px 28px rgba(60,20,20,0.28); overflow-y: auto;
+    max-height: 260px; min-width: 170px;
+}
+.combo-opt {
+    padding: 8px 13px; font-size: 10pt; color: #333; cursor: pointer;
+    border-top: 1px solid #f2ecec; white-space: nowrap; line-height: 1.3;
+}
+.combo-opt:first-child { border-top: none; }
+.combo-opt:hover, .combo-opt.hi { background: #fdf3f2; color: #622423; }
+.combo-empty { padding: 8px 13px; font-size: 9pt; color: #999; font-style: italic; }
+@media print { .combo-pop { display: none !important; } }
 
 .tb-hint { font-size: 7.5pt; opacity: 0.65; line-height: 1.35; }
 
@@ -609,7 +629,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
          clique normal (rapido) revoga a procuracao como sempre. -->
     <a href="revogacao.html" class="tb-link" id="revogarLink">Revogar procuração →</a>
 
-    <div class="brand-tag">Menezes &amp; Advogados<br>Procurações</div>
+    <div class="brand-tag">Menezes Advocacia<br>Procurações</div>
 </div>
 
 <button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral de novo">▸▸</button>
@@ -640,7 +660,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
             </td>
             <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
-                Menezes &amp; Advogados Associados
+                Menezes Advocacia e<br>Consultoria Jurídica
             </td>
         </tr>
     </table>
@@ -938,7 +958,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes &amp; Advogados Associados
+                    Menezes Advocacia e<br>Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1101,7 +1121,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes &amp; Advogados Associados
+                    Menezes Advocacia e<br>Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1242,7 +1262,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes &amp; Advogados Associados
+                    Menezes Advocacia e<br>Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -2098,6 +2118,90 @@ document.addEventListener('click', function(ev) {
 document.addEventListener('keydown', function(ev) {
     if (ev.key === 'Escape') toggleTipoMenu(true);
 });
+
+// === COMBOBOX custom (troca o <datalist> nativo por popup estilizado) ========
+// Aplica a TODO input[list]: qualidade (pai/mae/tutor...), estado civil, estado
+// e cidade/municipio. Le as opcoes do proprio <datalist> (que continua sendo a
+// fonte de dados, populada dinamicamente para cidades/estados), so troca a
+// renderizacao nativa por um popup bonito, com busca sem acento e teclado.
+(function initComboboxes() {
+    var pop = document.createElement('div');
+    pop.className = 'combo-pop';
+    document.body.appendChild(pop);
+    var active = null, opts = [], hi = -1, suppress = false;
+
+    function norm(s) { return stripDiacritics(String(s || '')).toLowerCase(); }
+    function sourceOptions(input) {
+        var dl = document.getElementById(input.dataset.comboList);
+        if (!dl) return [];
+        return Array.prototype.map.call(dl.options, function(o) { return o.value; })
+            .filter(function(v, i, a) { return v && a.indexOf(v) === i; });
+    }
+    function render(input) {
+        var q = norm(input.value);
+        var all = sourceOptions(input);
+        var filt = q ? all.filter(function(o) { return norm(o).indexOf(q) >= 0; }) : all;
+        filt.sort(function(a, b) {
+            return (norm(a).indexOf(q) === 0 ? 0 : 1) - (norm(b).indexOf(q) === 0 ? 0 : 1);
+        });
+        filt = filt.slice(0, 60);
+        opts = filt; hi = -1;
+        pop.innerHTML = '';
+        if (!filt.length) { pop.style.display = 'none'; return; }
+        filt.forEach(function(o, i) {
+            var d = document.createElement('div');
+            d.className = 'combo-opt'; d.dataset.i = i; d.textContent = o;
+            pop.appendChild(d);
+        });
+        position(input);
+        pop.style.display = 'block';
+    }
+    function position(input) {
+        var r = input.getBoundingClientRect();
+        pop.style.left = Math.round(r.left) + 'px';
+        pop.style.top = Math.round(r.bottom + 3) + 'px';
+        pop.style.minWidth = Math.max(r.width, 170) + 'px';
+    }
+    function choose(val) {
+        if (!active) return;
+        suppress = true;
+        active.value = val;
+        active.dispatchEvent(new Event('input', {bubbles:true}));
+        active.dispatchEvent(new Event('change', {bubbles:true}));
+        active.dispatchEvent(new Event('blur', {bubbles:true}));
+        suppress = false;
+        close();
+    }
+    function close() { pop.style.display = 'none'; active = null; }
+    function highlight() {
+        Array.prototype.forEach.call(pop.children, function(c, i) {
+            c.classList.toggle('hi', i === hi);
+            if (i === hi) c.scrollIntoView({block:'nearest'});
+        });
+    }
+    pop.addEventListener('mousedown', function(e) {
+        var o = e.target.closest('.combo-opt'); if (!o) return;
+        e.preventDefault(); choose(opts[+o.dataset.i]);
+    });
+    function wire(input) {
+        input.dataset.comboList = input.getAttribute('list') || '';
+        input.removeAttribute('list');
+        input.setAttribute('autocomplete', 'off');
+        input.addEventListener('focus', function() { if (suppress) return; active = input; render(input); });
+        input.addEventListener('input', function() { if (suppress) return; active = input; render(input); });
+        input.addEventListener('blur', function() { setTimeout(function() { if (active === input) close(); }, 150); });
+        input.addEventListener('keydown', function(e) {
+            if (pop.style.display === 'none') return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); hi = Math.min(hi + 1, opts.length - 1); highlight(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); hi = Math.max(hi - 1, 0); highlight(); }
+            else if (e.key === 'Enter' && hi >= 0) { e.preventDefault(); choose(opts[hi]); }
+            else if (e.key === 'Escape') { close(); }
+        });
+    }
+    window.addEventListener('scroll', function() { if (active) position(active); }, true);
+    window.addEventListener('resize', function() { if (active) position(active); });
+    document.querySelectorAll('input[list]').forEach(wire);
+})();
 
 wireBidirectionalSync();
 ['rep_qualidade','assist_qualidade'].forEach(function(id) {
