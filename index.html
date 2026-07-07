@@ -276,9 +276,16 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
 }
 .ia-choose-opt:hover { background: #fdf3f2; border-color: #622423; color: #622423; }
 .ia-choose-opt b { color: #622423; }
-/* Lista de erros no modal de validacao. */
-.val-list { margin: 2px 0 14px; padding-left: 20px; max-height: 46vh; overflow-y: auto; }
-.val-list li { font-size: 9.5pt; color: #444; line-height: 1.5; margin-bottom: 4px; }
+/* Lista de erros no modal de validacao — cada item e um botao clicavel. */
+.val-list { list-style: none; margin: 2px 0 8px; padding: 0; max-height: 44vh; overflow-y: auto; }
+.val-list li { margin-bottom: 5px; }
+.val-item {
+    display: block; width: 100%; text-align: left; padding: 8px 12px 8px 26px; position: relative;
+    font-size: 9.5pt; color: #444; line-height: 1.4; font-family: Arial, sans-serif;
+    background: #fff; border: 1px solid #e6dede; border-radius: 7px; cursor: pointer;
+}
+.val-item::before { content: "→"; position: absolute; left: 10px; color: #b3261e; font-weight: bold; }
+.val-item:hover { background: #fdf3f2; border-color: #622423; color: #622423; }
 .ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
 .ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 12px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; }
 .ia-modal-title { font-size: 13pt; font-weight: bold; color: #622423; margin-bottom: 14px; }
@@ -707,9 +714,10 @@ body.sidebar-collapsed #docsArea { left: 0; }
         <div class="ia-modal-title">Faltam campos obrigatórios</div>
         <p class="ia-note">Preencha o que falta antes de gerar o PDF:</p>
         <ul class="val-list" id="valList"></ul>
+        <p class="ia-note" style="margin:-6px 0 12px;">Clique num item para ir direto ao campo.</p>
         <div class="ia-modal-actions">
-            <button type="button" onclick="fecharValModal(false)">Fechar</button>
-            <button type="button" onclick="fecharValModal(true)">Ir ao 1º campo</button>
+            <button type="button" onclick="fecharValModal()">Fechar</button>
+            <button type="button" onclick="valProximoCampo()">Ir ao próximo campo →</button>
         </div>
     </div>
 </div>
@@ -2494,107 +2502,103 @@ function hasAnyMeaningfulInput() {
     }
     return false;
 }
-function markRequiredEmpty(id, errors, label) {
+function markRequiredEmpty(id, det, label) {
     var v = fieldValue(id);
     if (!v || v === '--') {
-        errors.push(label + ' é obrigatório.');
+        det.push({ id: id, msg: label + ' é obrigatório.' });
         setError(id, true);
     }
 }
+// Guarda o ultimo resultado detalhado ({id,msg}) pro modal de validacao clicavel.
+var VAL_ERRORS = [];
 function validateForm() {
-    var errors = [];
+    var det = [];
     ['nome','profissao','estado_civil','telefone','endereco','numero','estado','cidade','bairro',
      'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade']
         .forEach(function(id) { setError(id, false); });
 
     // Permite gerar modelo em branco para preenchimento manual
-    if (!hasAnyMeaningfulInput()) return errors;
+    if (!hasAnyMeaningfulInput()) { VAL_ERRORS = []; return []; }
 
     var tipo = tipoAtual();
     var titularIncapaz = (tipo === 'incapaz');
     var isCompact = (titularIncapaz || tipo === 'relativo');
 
-    // Se começou a preencher, exige conjunto base completo
-    markRequiredEmpty('nome', errors, 'Nome completo do outorgante');
+    // Se começou a preencher, exige conjunto base completo (telefone é OPCIONAL).
+    markRequiredEmpty('nome', det, 'Nome completo do outorgante');
     if (!isCompact) {
-        markRequiredEmpty('profissao', errors, 'Profissão');
-        markRequiredEmpty('estado_civil', errors, 'Estado civil');
-        markRequiredEmpty('telefone', errors, 'Telefone');
+        markRequiredEmpty('profissao', det, 'Profissão');
+        markRequiredEmpty('estado_civil', det, 'Estado civil');
     }
-    markRequiredEmpty('endereco', errors, 'Endereço');
-    markRequiredEmpty('numero', errors, 'Número');
-    markRequiredEmpty('estado', errors, 'Estado');
-    markRequiredEmpty('cidade', errors, 'Cidade');
-    markRequiredEmpty('bairro', errors, 'Bairro');
+    markRequiredEmpty('endereco', det, 'Endereço');
+    markRequiredEmpty('numero', det, 'Número');
+    markRequiredEmpty('estado', det, 'Estado');
+    markRequiredEmpty('cidade', det, 'Cidade');
+    markRequiredEmpty('bairro', det, 'Bairro');
 
     var cpfOutorgante = fieldValue('cpf');
-    if (cpfOutorgante && !isValidCPF(cpfOutorgante)) {
-        errors.push('CPF do outorgante inválido.');
-        setError('cpf', true);
-    }
+    if (cpfOutorgante && !isValidCPF(cpfOutorgante)) { det.push({ id: 'cpf', msg: 'CPF do outorgante inválido.' }); setError('cpf', true); }
 
     if (titularIncapaz) {
-        markRequiredEmpty('rep_nome', errors, 'Nome do representante legal');
-        markRequiredEmpty('rep_qualidade', errors, 'Qualidade do representante legal');
+        markRequiredEmpty('rep_nome', det, 'Nome do representante legal');
+        markRequiredEmpty('rep_qualidade', det, 'Qualidade do representante legal');
         var repCpf = fieldValue('rep_cpf');
-        if (!repCpf || !isValidCPF(repCpf)) {
-            errors.push('CPF do representante legal é obrigatório e deve ser válido.');
-            setError('rep_cpf', true);
-        }
+        if (!repCpf || !isValidCPF(repCpf)) { det.push({ id: 'rep_cpf', msg: 'CPF do representante legal é obrigatório e deve ser válido.' }); setError('rep_cpf', true); }
     }
     if (tipo === 'relativo') {
-        markRequiredEmpty('assist_nome', errors, 'Nome do assistente legal');
-        markRequiredEmpty('assist_qualidade', errors, 'Qualidade do assistente legal');
+        markRequiredEmpty('assist_nome', det, 'Nome do assistente legal');
+        markRequiredEmpty('assist_qualidade', det, 'Qualidade do assistente legal');
         var assistCpf = fieldValue('assist_cpf');
-        if (!assistCpf || !isValidCPF(assistCpf)) {
-            errors.push('CPF do assistente legal é obrigatório e deve ser válido.');
-            setError('assist_cpf', true);
-        }
+        if (!assistCpf || !isValidCPF(assistCpf)) { det.push({ id: 'assist_cpf', msg: 'CPF do assistente legal é obrigatório e deve ser válido.' }); setError('assist_cpf', true); }
     }
 
+    // Telefone nao e obrigatorio; se preenchido, so avisa o formato.
     if (!isCompact) {
         var telefone = fieldValue('telefone');
-        if (telefone && !isTelefoneCompleto(telefone)) {
-            errors.push('Telefone obrigatório no formato (XX) X XXXX-XXXX.');
-            setError('telefone', true);
-        }
+        if (telefone && !isTelefoneCompleto(telefone)) { det.push({ id: 'telefone', msg: 'Telefone no formato (XX) X XXXX-XXXX.' }); setError('telefone', true); }
     }
 
-    // ANEXO X é obrigatório e só emite informando o tipo de benefício requerido.
+    // Tipo de benefício (Termo de Benefício) é obrigatório para emitir.
     setError('anexo_beneficio', false);
     setError('anexo_beneficio_outro', false);
     var benef = fieldValue('anexo_beneficio');
-    if (!benef) {
-        errors.push('Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.');
-        setError('anexo_beneficio', true);
-    } else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) {
-        errors.push('Especifique o benefício no campo "Outro" do Termo de Benefício.');
-        setError('anexo_beneficio_outro', true);
-    }
+    if (!benef) { det.push({ id: 'anexo_beneficio', msg: 'Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.' }); setError('anexo_beneficio', true); }
+    else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) { det.push({ id: 'anexo_beneficio_outro', msg: 'Especifique o benefício no campo "Outro" do Termo de Benefício.' }); setError('anexo_beneficio_outro', true); }
 
-    return errors;
+    VAL_ERRORS = det;
+    return det.map(function(e) { return e.msg; });
 }
-// Modal proprio de validacao (nada de alert() do navegador).
-function fecharValModal(irCampo) {
-    document.getElementById('valModal').style.display = 'none';
-    if (irCampo) {
-        var primeiro = document.querySelector('.input-error');
-        if (primeiro) {
-            try { primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { primeiro.scrollIntoView(); }
-            setTimeout(function() { try { primeiro.focus({ preventScroll: true }); } catch (e) {} }, 350);
-        }
-    }
+// Modal proprio de validacao (nada de alert() do navegador). Cada item e
+// CLICAVEL (leva ao campo) e o botao "Ir ao proximo" percorre os pendentes.
+var _valIdx = -1;
+function fecharValModal() { document.getElementById('valModal').style.display = 'none'; }
+function iaVaiParaCampo(id) {
+    fecharValModal();
+    var el = document.getElementById(id); if (!el) return;
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { el.scrollIntoView(); }
+    setTimeout(function() { try { el.focus({ preventScroll: true }); } catch (e) {} }, 350);
+}
+// Percorre os campos pendentes um a um (usado pelo botao e ao repetir Gerar PDF).
+function valProximoCampo() {
+    if (!VAL_ERRORS.length) return;
+    _valIdx = (_valIdx + 1) % VAL_ERRORS.length;
+    iaVaiParaCampo(VAL_ERRORS[_valIdx].id);
 }
 function runPdfValidation() {
     var errors = validateForm();
-    if (errors.length) {
-        var ul = document.getElementById('valList');
-        ul.innerHTML = '';
-        errors.forEach(function(e) { var li = document.createElement('li'); li.textContent = e; ul.appendChild(li); });
-        document.getElementById('valModal').style.display = 'flex';
-        return false;
-    }
-    return true;
+    if (!errors.length) { _valIdx = -1; return true; }
+    var ul = document.getElementById('valList');
+    ul.innerHTML = '';
+    VAL_ERRORS.forEach(function(e) {
+        var li = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'val-item'; btn.textContent = e.msg;
+        btn.setAttribute('data-id', e.id);
+        li.appendChild(btn);
+        ul.appendChild(li);
+    });
+    document.getElementById('valModal').style.display = 'flex';
+    return false;
 }
 function gerarPDF() {
     if (!runPdfValidation()) return;
@@ -2904,6 +2908,12 @@ function extrairIdentidade(file, alvoKey, grid) {
             if (f) extrairIdentidade(f, z.alvo, grid);
         });
     });
+    // Validacao: clique num item da lista leva direto ao campo faltante.
+    var valBox = document.getElementById('valList');
+    if (valBox) valBox.addEventListener('click', function(e) {
+        var b = e.target.closest('.val-item'); if (!b) return;
+        iaVaiParaCampo(b.getAttribute('data-id'));
+    });
     // Chooser: clique numa pessoa a define como outorgante (a outra vira rep).
     var chooserBox = document.getElementById('iaChooserOpts');
     if (chooserBox) chooserBox.addEventListener('click', function(e) {
@@ -2917,7 +2927,7 @@ function extrairIdentidade(file, alvoKey, grid) {
         var ov = document.getElementById(id);
         if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) ov.style.display = 'none'; });
     });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); fecharValModal(false); } });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); fecharValModal(); } });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
