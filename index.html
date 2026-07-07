@@ -456,7 +456,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
            HTML minimo). height:100vh resolve direto contra a pagina fisica
            (nao depende de toda a cadeia de ancestrais ter altura definida,
            diferente de height:100% — confirmado que height:100% aqui deixava
-           o .termo-content sem altura de verdade pra distribuir (space-between),
+           o .termo-content sem altura real para empurrar o rodape dos termos,
            porque #docsViewport tem height:auto em impressao). */
         height: 100vh; overflow: hidden;
         page-break-after: always; break-after: page;
@@ -486,13 +486,13 @@ body.sidebar-collapsed #docsArea { left: 0; }
     }
     /* Forca visivel mesmo se o modo Foco escondeu esta pagina na tela
        (display:none inline). Procuracao vira bloco normal; os termos
-       precisam continuar flex-column pro .termo-content (space-between)
-       distribuir o conteudo pela folha inteira tambem na impressao. */
+       precisam continuar flex-column para o .termo-content ocupar a folha e
+       manter o rodape no fundo tambem na impressao. */
     .page:not(.page-termo):not(.page-anexo) { display: block !important; }
     .page-termo.show, .page-anexo { display: flex !important; flex-direction: column !important; }
-    /* .termo-content (space-between) so distribui o conteudo se a .page tiver
-       altura real — min-height:auto (de cima) tira essa altura, entao devolve
-       ela igual a moldura fixa do .print-sheet. */
+    /* .termo-content so consegue empurrar o ultimo bloco para o fundo se a
+       .page tiver altura real — min-height:auto (de cima) tira essa altura,
+       entao devolve ela igual a moldura fixa do .print-sheet. */
     .page-termo, .page-anexo { height: 100%; }
     .dados-table input[type="text"], .date-input, .testemunha-campo input, .inline-input, .dados-grid .grid-cell input[type="text"] { background: transparent !important; -webkit-appearance: none; }
     .footer-screen { display: none !important; }
@@ -506,18 +506,15 @@ body.sidebar-collapsed #docsArea { left: 0; }
 /* ====== TERMO DE RESPONSABILIDADE E COMPROMISSO (Anexo XXVII/XXIX — IN 128/2022) ====== */
 .page-termo { display: none; }
 /* Cada termo e uma folha A4 (flex-column). O cabecalho fica FIXO no topo;
-   o resto do conteudo vai dentro de .termo-content (flex:1) com
-   justify-content:space-between agrupado em .termo-blk. Assim o espaco
-   "extra" da folha vira espacamento UNIFORME entre as secoes, em vez de um
-   unico buraco branco no meio (problema do .termo-spacer antigo). Quando o
-   bloco de analfabeto aparece, o conteudo cresce e o space-between colapsa
-   sozinho, enchendo a folha inteira — igual a procuracao, que sempre
-   aproveita a A4 toda independente de ser analfabeto ou nao. */
+   o resto do conteudo vai dentro de .termo-content (flex:1). Os blocos de
+   texto fluem do topo com margens normais; so o ultimo bloco (Local/Data +
+   assinatura/rogo) recebe o espaco livre e desce para o fundo da folha. */
 .page-termo.show { display: flex; flex-direction: column; }
 /* ANEXO X — sempre visível (obrigatório), mesma mecânica de conteúdo dos termos. */
 .page-anexo { display: flex; flex-direction: column; }
-.termo-content { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
+.termo-content { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; }
 .termo-blk { flex: 0 0 auto; }
+.termo-content > .termo-blk:last-child { margin-top: auto; }
 /* Itens do box "Requerimento" do Anexo X (checkbox + rótulo/seleção). */
 .anexo-req-item { display: flex; align-items: flex-start; gap: 8pt; margin: 4pt 0; font-size: 10.5pt; text-align: justify; line-height: 1.32; }
 .anexo-req-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #622423; margin-top: 3px; flex: 0 0 auto; }
@@ -578,7 +575,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .termo-check { display: flex; align-items: center; gap: 7pt; font-size: 11pt; }
 .termo-check input { width: 14px; height: 14px; accent-color: #622423; }
 /* Local/Data + Assinatura no padrao da procuracao: centralizados. */
-.termo-localdata { text-align: center; font-size: 12pt; font-weight: bold; margin-bottom: 12pt; }
+.termo-localdata { text-align: center; font-size: 12pt; font-weight: bold; margin-top: 18pt; margin-bottom: 12pt; }
 .termo-sign-block { text-align: center; }
 /* Espaco de assinatura ACIMA da linha (onde a pessoa assina). So existe
    quando o bloco de assinatura simples esta visivel (analfabeto OFF) — ai
@@ -1891,9 +1888,9 @@ function updateFooterPagina() {
     var total = (chk && chk.checked && termoAplicavel(tipoAtual())) ? 3 : 1;
     el.textContent = '1 de ' + total;
 }
-// O .termo-content (flex-column + space-between no CSS) ja distribui o conteudo
-// dos Termos pela pagina inteira sozinho — nao precisa de classe de densidade
-// alternando font-size. So dispara o recalculo de layout/escala de impressao.
+// O .termo-content ja organiza os Termos pela pagina inteira: conteudo no topo
+// e rodape no fundo. Nao precisa de classe de densidade alternando font-size.
+// So dispara o recalculo de layout/escala de impressao.
 function updateTermoDensity() {
     recalcLayout();
 }
