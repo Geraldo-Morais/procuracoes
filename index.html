@@ -1385,24 +1385,39 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
     </div>
 
+    <div class="termo-blk termo-box tbl">
+        <div class="termo-box-title">Qualidade da Representação</div>
+        <div class="termo-check-grid" id="termocomp-qualidade-grid">
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="TutorNato" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Tutor Nato (pai/mãe)</label>
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="TutorLegal" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Tutor Legal</label>
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="Curador" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Curador</label>
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="ResponsavelTermoGuarda" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Responsável Termo de Guarda</label>
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="AdministradorProvisorio" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Administrador Provisório</label>
+            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="Procurador" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Procurador</label>
+        </div>
+    </div>
+
     <div class="termo-blk">
         <p class="termo-p recuo">
             I – represento o(a) beneficiário(a) acima identificado(a) e que este não está sob
-            responsabilidade dos pais (tutores natos), tutor, curador ou guardião; e
+            responsabilidade dos pais (tutores natos), tutor, curador ou guardião<span id="termocomp-i-fim">; e</span>
         </p>
-        <p class="termo-p recuo">
-            II – estou ciente de que, no prazo de 6 (seis) meses a contar desta data, deverei apresentar:
-        </p>
-        <p class="termo-p recuo2">a) documento para comprovação de representação legal do beneficiário; ou</p>
-        <p class="termo-p recuo2">b) comprovante do requerimento/andamento judicial de representação legal.</p>
-    </div>
-    <div class="termo-blk">
-        <p class="termo-p">
-            Na hipótese da apresentação do comprovante do requerimento ou do andamento de processo judicial
-            de representação legal, a cada 6 (seis) meses essa comprovação será necessária até que seja
-            expedido o documento judicial que conceda a representação.
-        </p>
-        <p class="termo-p" style="font-weight:bold;">Concordo em assumir o compromisso deste termo.</p>
+        <!-- Item II so aparece para quem AINDA nao tem representacao formal
+             (adm. provisorio, etc.). Pai/mae (tutor nato) ja e representante
+             legal por natureza -> item II e ocultado. -->
+        <div id="termocomp-item-ii">
+            <p class="termo-p recuo">
+                II – estou ciente de que, no prazo de 6 (seis) meses a contar desta data, deverei apresentar:
+            </p>
+            <p class="termo-p recuo2">a) documento para comprovação de representação legal do beneficiário; ou</p>
+            <p class="termo-p recuo2">b) comprovante do requerimento/andamento judicial de representação legal.</p>
+            <p class="termo-p" style="margin-top:6pt;">
+                Na hipótese da apresentação do comprovante do requerimento ou do andamento de processo judicial
+                de representação legal, a cada 6 (seis) meses essa comprovação será necessária até que seja
+                expedido o documento judicial que conceda a representação.
+            </p>
+        </div>
+        <p class="termo-p" style="font-weight:bold; margin-top:8pt;">Concordo em assumir o compromisso deste termo.</p>
     </div>
 
     <div class="termo-blk">
@@ -1610,6 +1625,7 @@ function mudarTipo(tipo) {
 
     // Reseta overrides manuais do Termo ao trocar de tipo e resincroniza
     var qGrid = document.getElementById('termoresp-qualidade-grid'); if (qGrid) delete qGrid.dataset.userTouched;
+    var qGrid2 = document.getElementById('termocomp-qualidade-grid'); if (qGrid2) delete qGrid2.dataset.userTouched;
     var incluirChk = document.getElementById('termoIncluirCheck'); if (incluirChk) delete incluirChk.dataset.userTouched;
     syncTermo();
 }
@@ -1815,12 +1831,30 @@ function wireBidirectionalSync() {
 function remapQualidade() {
     var fonte = fonteResponsavel(tipoAtual());
     if (!fonte) return;
-    var qGridEl = document.getElementById('termoresp-qualidade-grid');
-    if (qGridEl && qGridEl.dataset.userTouched) return;
     var mapped = qualidadeParaCheckbox(fieldValue(fonte.qualidade));
-    document.querySelectorAll('input[name="termoresp_qualidade"]').forEach(function(cb) {
-        cb.checked = (cb.value === mapped);
+    // A qualidade da procuracao alimenta os DOIS termos (Responsabilidade e
+    // Compromisso), cada um respeitando seu proprio override manual.
+    ['termoresp', 'termocomp'].forEach(function(prefix) {
+        var gridEl = document.getElementById(prefix + '-qualidade-grid');
+        if (!gridEl || gridEl.dataset.userTouched) return;
+        document.querySelectorAll('input[name="' + prefix + '_qualidade"]').forEach(function(cb) {
+            cb.checked = (cb.value === mapped);
+        });
     });
+    atualizarCompromissoII();
+}
+// No Termo de Compromisso, o item II (prazo de 6 meses para apresentar a
+// representacao legal) so vale para quem AINDA nao a tem (adm. provisorio,
+// etc.). Pai/mae (Tutor Nato) ja e representante legal -> some o item II e o
+// conector "; e" do item I vira ".".
+function atualizarCompromissoII() {
+    var checked = document.querySelector('input[name="termocomp_qualidade"]:checked');
+    var isTutorNato = !!(checked && checked.value === 'TutorNato');
+    var bloco = document.getElementById('termocomp-item-ii');
+    if (bloco) bloco.style.display = isTutorNato ? 'none' : '';
+    var fim = document.getElementById('termocomp-i-fim');
+    if (fim) fim.textContent = isTutorNato ? '.' : '; e';
+    recalcLayout();
 }
 // Quem assina os Termos é o Representante Legal (Abs. Incapaz) ou o Assistente
 // Legal (Rel. Incapaz). Os Termos são compartilhados pelos 2 tipos, então os
