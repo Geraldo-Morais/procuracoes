@@ -4,33 +4,16 @@
 <meta charset="UTF-8">
 <title>Procuração Ad Judicia et Extra</title>
 <style>
+/* Margens A4 identicas na tela (.page padding) e na impressao (@page margin),
+   pra o preview sair EXATAMENTE igual ao impresso. Sem rodape (removido a
+   pedido) — a margem inferior menor devolve espaco pro conteudo, entao os
+   termos escalam menos (ficam mais largos) e a biometria nao corta. */
 @page {
     size: A4;
-    margin-top: 0.8cm;
-    margin-bottom: 2.7cm;
+    margin-top: 1cm;
+    margin-bottom: 1.5cm;
     margin-left: 2.5cm;
     margin-right: 2cm;
-    @bottom-center {
-        content: "Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA\A Telefone: 77 99927-1876  ·  E-mail: menezesadv49@gmail.com";
-        font-family: 'Times New Roman', serif;
-        font-size: 8pt;
-        color: #555;
-        border-top: 1.5pt solid #aaa;
-        padding-top: 14pt;
-        text-align: center;
-        white-space: pre-wrap;
-        vertical-align: top;
-    }
-    @bottom-right {
-        content: counter(page) " de " counter(pages);
-        font-family: 'Times New Roman', serif;
-        font-size: 8pt;
-        color: #555;
-        border-top: 1.5pt solid #aaa;
-        padding-top: 14pt;
-        text-align: right;
-        vertical-align: top;
-    }
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -47,7 +30,7 @@ body {
     min-height: 297mm;
     flex: 0 0 auto;
     margin: 0 auto;
-    padding: 1cm 2cm 2.5cm 2.5cm;
+    padding: 1cm 2cm 1.5cm 2.5cm; /* == @page margin (preview idêntico à impressão) */
     background: #fff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
     /* top CENTER (nao top left): quando a pagina e escalada pra caber na altura
@@ -354,17 +337,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
     font-weight: bold;
     font-size: 12pt;
 }
-.footer-screen {
-    position: absolute;
-    bottom: 0.5cm;
-    left: 2.5cm;
-    right: 2cm;
-    border-top: 1.5pt solid #aaa;
-    padding-top: 6pt;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-}
+/* Rodape removido a pedido (tela e impressao). Elementos mantidos no HTML mas
+   ocultos, pra preview == impressao. */
+.footer-screen { display: none !important; }
 .footer-text { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; text-align: center; line-height: 1.4; flex: 1; }
 .footer-page { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; white-space: nowrap; padding-left: 12pt; }
 /* Testemunhas (analfabeto) */
@@ -535,7 +510,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .termo-content { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between; min-height: 0; }
 .termo-blk { flex: 0 0 auto; }
 /* Itens do box "Requerimento" do Anexo X (checkbox + rótulo/seleção). */
-.anexo-req-item { display: flex; align-items: flex-start; gap: 8pt; margin: 6pt 0; font-size: 10.5pt; text-align: justify; line-height: 1.4; }
+.anexo-req-item { display: flex; align-items: flex-start; gap: 8pt; margin: 4pt 0; font-size: 10.5pt; text-align: justify; line-height: 1.32; }
 .anexo-req-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #622423; margin-top: 3px; flex: 0 0 auto; }
 .anexo-req-item > span { flex: 1; }
 .anexo-req-sel { flex: 1; }
@@ -563,7 +538,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .tb-link { user-select: none; -webkit-user-select: none; transition: color .15s, text-shadow .15s; }
 .tb-link.egg-charging { text-shadow: 0 0 8px rgba(255,255,255,0.6); cursor: progress; }
 .tb-link.egg-done { color: #7ed957 !important; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
-.termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.5; margin: 0 0 7pt; }
+.termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.42; margin: 0 0 6pt; }
 .termo-p:last-child { margin-bottom: 0; }
 /* Itens numerados (I, II, a, b) tem input largo no meio — justify esticaria a
    linha com espacos gigantes. Left-align evita isso. */
@@ -574,7 +549,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
    boxes de Beneficiario/Qualidade. Pra ele encher a folha igual (sem gaps
    grandes), damos mais leading e respiro SO nele (mesmo tamanho de fonte,
    entao as duas paginas continuam visualmente consistentes). */
-#page-termocomp .termo-p { line-height: 1.6; margin-bottom: 8pt; }
+#page-termocomp .termo-p { line-height: 1.5; margin-bottom: 6pt; }
 .termo-box {
     border: 0.8pt solid #622423; border-radius: 3px; padding: 7pt 14pt 9pt;
 }
@@ -593,7 +568,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .termo-check { display: flex; align-items: center; gap: 7pt; font-size: 11pt; }
 .termo-check input { width: 14px; height: 14px; accent-color: #622423; }
 /* Local/Data + Assinatura no padrao da procuracao: centralizados. */
-.termo-localdata { text-align: center; font-size: 12pt; font-weight: bold; margin-bottom: 20pt; }
+.termo-localdata { text-align: center; font-size: 12pt; font-weight: bold; margin-bottom: 12pt; }
 .termo-sign-block { text-align: center; }
 /* Espaco de assinatura ACIMA da linha (onde a pessoa assina). So existe
    quando o bloco de assinatura simples esta visivel (analfabeto OFF) — ai
@@ -607,7 +582,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     padding: 5pt 9pt; background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
 }
 .termo-analf-toggle input { width: 14px; height: 14px; accent-color: #622423; flex: 0 0 auto; }
-.termo-analf-block { display: none; margin-top: 10pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 8pt; }
+.termo-analf-block { display: none; margin-top: 7pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 6pt; }
 .termo-analf-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; }
 /* Evita assinatura duplicada: quando o bloco de rogo+testemunhas aparece, a
    linha simples de "Assinatura" some — via JS (applyHasFallbacks), nao
@@ -697,9 +672,12 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <input type="password" id="iaKey" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
         </label>
         <label class="ia-field">Modelo com visão
-            <input type="text" id="iaModel" placeholder="google/gemini-2.5-flash-lite" autocomplete="off" spellcheck="false">
+            <input type="text" id="iaModel" placeholder="google/gemini-3.1-flash-lite" autocomplete="off" spellcheck="false">
         </label>
-        <p class="ia-note">A chave fica salva <b>só neste navegador</b> (localStorage) — não vai para lugar nenhum além do OpenRouter nas suas chamadas. A imagem do documento é enviada ao modelo escolhido para extrair nome, CPF e RG. Use uma chave sua. Sugestão de modelo barato com visão: <code>google/gemini-2.5-flash-lite</code>.</p>
+        <p class="ia-note">A chave fica salva <b>só neste navegador</b> (localStorage) — só vai ao OpenRouter nas suas chamadas. A imagem do documento é enviada ao modelo para extrair nome, CPF e RG. Use uma chave sua.<br>
+        Padrão (bom e barato): <code>google/gemini-3.1-flash-lite</code>.<br>
+        Mais baratos: <code>deepseek/deepseek-v4-flash</code> · <code>nex-agi/nex-n2-mini</code>.<br>
+        Grátis (qualidade menor p/ documento): <code>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free</code>.</p>
         <div class="ia-modal-actions">
             <button type="button" onclick="preencherStub(); fecharIASettings();">🧪 Dados de teste</button>
             <button type="button" onclick="salvarIAConfig()">Salvar</button>
@@ -864,7 +842,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
 <!-- PODERES -->
 <div class="secao espaco-antes">PODERES:</div>
-<p>O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia</em> e <em>extra</em> dando enfim, <strong>amplos e irrestrito poderes</strong> para o foro em geral, inclusive no âmbito da administração pública, direta e indireta, em seus órgãos competentes, podendo, para tanto, praticar todos os atos necessários ao fiel desempenho da presente ação judicial ou administrativa, e qualquer procedimento que seja necessária a intervenção de advogado, representando-o, conjunta ou separadamente, <strong>perante o INSS</strong> ou qualquer juízo, comarca, instância ou Tribunal, para quem concedem os mais amplos e irrestritos poderes, sendo que estes podem, observados os poderes do advogado estabelecido em Lei, são conferidos para intentar ou acompanhar qualquer feito em nome do outorgante, como autor, réu, assistentes, opoente, ou terceiro interveniente, podendo, ainda, celebrar ajustes amigáveis, <strong>receber valores em seu nome</strong>, renunciar valores excedentes ao teto dos Juizados Especiais Federais, <strong>assinar declaração de hipossuficiência</strong>, requerer isenção de imposto de renda, <strong>requerer gratuidade da justiça</strong>, dar e receber quitação de crédito, negociar débito, suscitar incidente de falsidade, arguir exceções de impedimento ou de suspeição, transigir, firmar compromissos e receber citação e intimações, desistir, e <strong>substabelecer</strong>, se necessário, com ou sem reserva os poderes ora conferidos, bem como <strong>retirar alvarás e senhas do "MEU INSS"/GOV.BR</strong>.</p>
+<p>O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia</em> e <em>extra</em> dando enfim, <strong>amplos e irrestrito poderes</strong> para o foro em geral, inclusive no âmbito da administração pública, direta e indireta, em seus órgãos competentes, podendo, para tanto, praticar todos os atos necessários ao fiel desempenho da presente ação judicial ou administrativa, e qualquer procedimento que seja necessária a intervenção de advogado, representando-o, conjunta ou separadamente, <strong>perante o INSS</strong> ou qualquer juízo, comarca, instância ou Tribunal, para quem concedem os mais amplos e irrestritos poderes, sendo que estes podem, observados os poderes do advogado estabelecido em Lei, são conferidos para intentar ou acompanhar qualquer feito em nome do outorgante, como autor, réu, assistentes, opoente, ou terceiro interveniente, podendo, ainda, celebrar ajustes amigáveis, <strong>receber valores em seu nome</strong>, renunciar valores excedentes ao teto dos Juizados Especiais Federais, <strong>assinar declaração de hipossuficiência</strong>, requerer isenção de imposto de renda, <strong>requerer gratuidade da justiça</strong>, dar e receber quitação de crédito, negociar débito, suscitar incidente de falsidade, arguir exceções de impedimento ou de suspeição, <strong>transigir</strong>, <strong>aceitar proposta de acordo</strong>, firmar compromissos e receber citação e intimações, desistir, e <strong>substabelecer</strong>, se necessário, com ou sem reserva os poderes ora conferidos, bem como <strong>levantar e sacar Requisições de Pequeno Valor (RPV), precatórios, alvarás e senhas do "MEU INSS"/GOV.BR</strong>.</p>
 
 <!-- ====== ASSINATURA: NORMAL ====== -->
 <div id="sec-assinatura-normal" class="tipo-section active">
@@ -2655,7 +2633,13 @@ function preencherStub() {
 // preenche o campo do titular ou do representante/assistente.
 var IA_LS_KEY = 'proc_openrouter_key';
 var IA_LS_MODEL = 'proc_openrouter_model';
-var IA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+var IA_DEFAULT_MODEL = 'google/gemini-3.1-flash-lite';
+// Migra modelos antigos/descontinuados ja salvos no navegador para o atual.
+var IA_MODELOS_OBSOLETOS = { 'google/gemini-2.5-flash-lite': 1, 'google/gemini-2.0-flash-exp:free': 1, 'google/gemini-flash-1.5-8b': 1 };
+(function migraModeloIA() {
+    var m = localStorage.getItem(IA_LS_MODEL);
+    if (m && IA_MODELOS_OBSOLETOS[m]) localStorage.setItem(IA_LS_MODEL, IA_DEFAULT_MODEL);
+})();
 var IA_ALVOS = {
     titular: { nome: 'nome', cpf: 'cpf', rg: 'rg', label: 'outorgante' },
     rep:     { nome: 'rep_nome', cpf: 'rep_cpf', rg: 'rep_rg', label: 'representante' },
