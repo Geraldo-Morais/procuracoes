@@ -261,14 +261,13 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
     outline: 3px solid #2e9e4f; outline-offset: 4px; background: #f1fbf3;
     border-radius: 4px; box-shadow: 0 0 0 4px rgba(46,158,79,0.18);
 }
-/* "Processando" enquanto a IA le o documento. */
-.dados-grid.ia-busy { position: relative; }
-.dados-grid.ia-busy::after {
-    content: "🤖 Lendo documento…"; position: absolute; inset: 0; z-index: 60;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(98,36,35,0.92); color: #fff; font: bold 11pt Arial, sans-serif;
-    border-radius: 4px; letter-spacing: .3px;
+/* "Processando" enquanto a IA le o documento: sem modal/emoji centralizado —
+   so a moldura pulsando de leve (a mensagem vem no toast do rodape da tela). */
+.dados-grid.ia-busy {
+    outline: 2px solid #2e9e4f; outline-offset: 4px; border-radius: 4px;
+    animation: iaPulse 1s ease-in-out infinite;
 }
+@keyframes iaPulse { 0%, 100% { outline-color: rgba(46,158,79,0.35); } 50% { outline-color: rgba(46,158,79,1); } }
 /* Opcoes do chooser "quem e quem". */
 .ia-choose-opt {
     display: block; width: 100%; text-align: left; margin: 0 0 8px; padding: 10px 14px;
@@ -553,7 +552,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .termo-box {
     border: 0.8pt solid #622423; border-radius: 3px; padding: 7pt 14pt 9pt;
 }
-.termo-box + .termo-box { margin-top: 10pt; }
+.termo-box + .termo-box { margin-top: 14pt; } /* respiro entre os boxes de titulo (nao colados) */
 .termo-box .termo-box-title {
     background: #622423; color: #fff; text-align: center; font-weight: bold;
     margin: -7pt -14pt 8pt; padding: 4pt 10pt; font-size: 11.5pt; text-transform: uppercase; letter-spacing: 0.4pt;
@@ -672,12 +671,12 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <input type="password" id="iaKey" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
         </label>
         <label class="ia-field">Modelo com visão
-            <input type="text" id="iaModel" placeholder="google/gemini-3.1-flash-lite" autocomplete="off" spellcheck="false">
+            <input type="text" id="iaModel" placeholder="google/gemini-2.5-flash-lite" autocomplete="off" spellcheck="false">
         </label>
-        <p class="ia-note">A chave fica salva <b>só neste navegador</b> (localStorage) — só vai ao OpenRouter nas suas chamadas. A imagem do documento é enviada ao modelo para extrair nome, CPF e RG. Use uma chave sua.<br>
-        Padrão (bom e barato): <code>google/gemini-3.1-flash-lite</code>.<br>
-        Mais baratos: <code>deepseek/deepseek-v4-flash</code> · <code>nex-agi/nex-n2-mini</code>.<br>
-        Grátis (qualidade menor p/ documento): <code>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free</code>.</p>
+        <p class="ia-note">A chave fica salva <b>só neste navegador</b> (localStorage) — só vai ao OpenRouter nas suas chamadas. A imagem do documento é enviada ao modelo para extrair os dados. Use uma chave sua.<br>
+        Padrão (bom p/ documento): <code>google/gemini-2.5-flash-lite</code>.<br>
+        Mais baratos c/ visão: <code>qwen/qwen3.6-27b</code> (Qwen) · <code>nex-agi/nex-n2-mini</code>.<br>
+        Grátis (qualidade menor): <code>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free</code>.</p>
         <div class="ia-modal-actions">
             <button type="button" onclick="preencherStub(); fecharIASettings();">🧪 Dados de teste</button>
             <button type="button" onclick="salvarIAConfig()">Salvar</button>
@@ -725,7 +724,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
             </td>
             <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
-                Menezes Advocacia e Consultoria Jurídica
+                Menezes Advocacia &amp; Consultoria Jurídica
             </td>
         </tr>
     </table>
@@ -1023,7 +1022,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e Consultoria Jurídica
+                    Menezes Advocacia &amp; Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1186,7 +1185,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e Consultoria Jurídica
+                    Menezes Advocacia &amp; Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -1327,7 +1326,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
-                    Menezes Advocacia e Consultoria Jurídica
+                    Menezes Advocacia &amp; Consultoria Jurídica
                 </td>
             </tr>
         </table>
@@ -2563,6 +2562,12 @@ function runPdfValidation() {
     var errors = validateForm();
     if (errors.length) {
         alert('Corrija antes de gerar PDF:\\n\\n- ' + errors.join('\\n- '));
+        // Leva a pessoa ate o 1o campo com erro (ex.: tipo de beneficio do Anexo X).
+        var primeiro = document.querySelector('.input-error');
+        if (primeiro) {
+            try { primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { primeiro.scrollIntoView(); }
+            setTimeout(function() { try { primeiro.focus({ preventScroll: true }); } catch (e) {} }, 350);
+        }
         return false;
     }
     return true;
@@ -2633,17 +2638,19 @@ function preencherStub() {
 // preenche o campo do titular ou do representante/assistente.
 var IA_LS_KEY = 'proc_openrouter_key';
 var IA_LS_MODEL = 'proc_openrouter_model';
-var IA_DEFAULT_MODEL = 'google/gemini-3.1-flash-lite';
-// Migra modelos antigos/descontinuados ja salvos no navegador para o atual.
-var IA_MODELOS_OBSOLETOS = { 'google/gemini-2.5-flash-lite': 1, 'google/gemini-2.0-flash-exp:free': 1, 'google/gemini-flash-1.5-8b': 1 };
+var IA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+// Migra de volta quem recebeu o 3.1 (mais caro) no deploy anterior.
+var IA_MODELOS_OBSOLETOS = { 'google/gemini-3.1-flash-lite': 1, 'google/gemini-3.1-flash-lite-image': 1 };
 (function migraModeloIA() {
     var m = localStorage.getItem(IA_LS_MODEL);
     if (m && IA_MODELOS_OBSOLETOS[m]) localStorage.setItem(IA_LS_MODEL, IA_DEFAULT_MODEL);
 })();
+// Campos que a IA tenta extrair do documento e onde caem na procuracao. O
+// titular (outorgante) tem endereco; rep/assistente so nome/CPF/RG.
 var IA_ALVOS = {
-    titular: { nome: 'nome', cpf: 'cpf', rg: 'rg', label: 'outorgante' },
-    rep:     { nome: 'rep_nome', cpf: 'rep_cpf', rg: 'rep_rg', label: 'representante' },
-    assist:  { nome: 'assist_nome', cpf: 'assist_cpf', rg: 'assist_rg', label: 'assistente' }
+    titular: { label: 'outorgante', campos: { nome: 'nome', cpf: 'cpf', rg: 'rg', endereco: 'endereco', numero: 'numero', bairro: 'bairro', cidade: 'cidade', uf: 'estado' } },
+    rep:     { label: 'representante', campos: { nome: 'rep_nome', cpf: 'rep_cpf', rg: 'rep_rg' } },
+    assist:  { label: 'assistente', campos: { nome: 'assist_nome', cpf: 'assist_cpf', rg: 'assist_rg' } }
 };
 function getIAConfig() {
     return {
@@ -2747,11 +2754,12 @@ function iaSetTipo(tipo) {
     var sel = document.getElementById('tipoSelect'); if (sel) sel.value = tipo;
     mudarTipo(tipo);
 }
+var IA_CAMPO_LABEL = { nome: 'nome', cpf: 'CPF', rg: 'RG', endereco: 'endereço', numero: 'nº', bairro: 'bairro', cidade: 'cidade', uf: 'UF' };
 function iaPreenchePessoa(alvo, p) {
     var got = [];
-    if (p.nome) { iaPreencheCampo(alvo.nome, p.nome); got.push('nome'); }
-    if (p.cpf) { iaPreencheCampo(alvo.cpf, p.cpf); got.push('CPF'); }
-    if (p.rg) { iaPreencheCampo(alvo.rg, p.rg); got.push('RG'); }
+    Object.keys(alvo.campos).forEach(function(k) {
+        if (p[k]) { iaPreencheCampo(alvo.campos[k], p[k]); got.push(IA_CAMPO_LABEL[k] || k); }
+    });
     return got;
 }
 // 2 pessoas -> outorgante + representante/assistente, com o tipo pela idade.
@@ -2789,13 +2797,14 @@ function extrairIdentidade(file, alvoKey, grid) {
         return;
     }
     if (grid) grid.classList.add('ia-busy');
-    var prompt = 'As imagens são de documento(s) de identidade brasileiro(s) (RG, CNH e/ou CPF). ' +
+    var prompt = 'As imagens são de documento(s) brasileiro(s) (RG, CNH, CPF ou comprovante). ' +
         'Identifique CADA pessoa distinta (frente e verso do mesmo documento = MESMA pessoa). ' +
-        'Para cada pessoa extraia: nome completo, CPF, RG com órgão emissor e data de nascimento. ' +
+        'Para cada pessoa extraia TODOS os campos que estiverem VISÍVEIS na imagem: nome completo, CPF, ' +
+        'RG com órgão emissor, data de nascimento e, se aparecerem, endereço (logradouro), número, bairro, cidade e UF. ' +
         'Responda SOMENTE um JSON, sem texto ao redor, no formato exato ' +
-        '{"pessoas":[{"nome":"","cpf":"","rg":"","nascimento":"AAAA-MM-DD"}]}. ' +
-        'CPF como 000.000.000-00; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD. ' +
-        'Campo ilegível = string vazia. NÃO invente dados.';
+        '{"pessoas":[{"nome":"","cpf":"","rg":"","nascimento":"AAAA-MM-DD","endereco":"","numero":"","bairro":"","cidade":"","uf":""}]}. ' +
+        'CPF como 000.000.000-00; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD; UF com 2 letras. ' +
+        'Campo que não aparecer no documento = string vazia. NÃO invente dados.';
     iaArquivoParaImagens(file).then(function(imagens) {
         iaToast('Lendo documento com IA…', 'info');
         var content = [{ type: 'text', text: prompt }];
@@ -2820,13 +2829,19 @@ function extrairIdentidade(file, alvoKey, grid) {
         if (typeof txt !== 'string') txt = JSON.stringify(txt);
         var m = txt.match(/\{[\s\S]*\}/);
         if (!m) throw new Error('a IA não retornou JSON: ' + txt.slice(0, 140));
-        var pessoas = (JSON.parse(m[0]).pessoas || []).filter(function(p) { return p && (p.nome || p.cpf || p.rg); });
+        var pessoas = (JSON.parse(m[0]).pessoas || []).filter(function(p) { return p && (p.nome || p.cpf || p.rg || p.endereco || p.cidade); });
         pessoas.forEach(function(p) { p.idade = iaIdade(p.nascimento); });
         if (!pessoas.length) { iaToast('A IA não encontrou dados no documento.', 'err'); return; }
         if (pessoas.length > 2) { iaToast('O documento tem mais de 2 pessoas — anexe só o(s) documento(s) do outorgante e do representante.', 'err'); return; }
         if (pessoas.length === 1) {
             var got = iaPreenchePessoa(alvo, pessoas[0]);
-            iaToast(got.length ? ('Preenchido (' + alvo.label + '): ' + got.join(', ') + '. Confira e complemente endereço/profissão.') : 'A IA não encontrou dados no documento.', got.length ? 'ok' : 'err');
+            if (!got.length) { iaToast('A IA não encontrou dados no documento.', 'err'); return; }
+            var msg = 'Preenchido (' + alvo.label + '): ' + got.join(', ') + '. Confira e complemente o que faltar.';
+            var t2 = tipoAtual();
+            if (alvoKey === 'titular' && t2 !== 'normal') {
+                msg += ' Se quiser, arraste também o documento do ' + (t2 === 'relativo' ? 'assistente' : 'representante') + ' no retângulo dele.';
+            }
+            iaToast(msg, 'ok');
             return;
         }
         // 2 pessoas: menor manda. <16 = outorgante (incapaz); 16-17 = outorgante
@@ -2932,25 +2947,29 @@ var MM_TO_PX = (function() {
     document.body.removeChild(probe);
     return px || 3.7795; // fallback ~96dpi se a sonda falhar por algum motivo
 })();
-var PRINT_TARGET_PX = 297 * MM_TO_PX; // altura de uma folha A4 inteira
+var PRINT_TARGET_PX = 297 * MM_TO_PX;           // altura fisica da folha A4
 
 function updatePrintFitScaleForPage(pageEl) {
     var naturalH = pageEl.scrollHeight;
     if (!naturalH) return;
     // Desconta elementos que so existem na TELA (somem no @media print): os
-    // botoes "Preencher por foto (IA)" e os toggles "e analfabeto". Sem isso
-    // eles inflam a altura medida e a pagina encolhe a toa na impressao.
+    // toggles "e analfabeto" e botoes de IA. Sem isso inflam a altura medida.
     pageEl.querySelectorAll('.ia-attach, .pg-analf-toggle, .termo-analf-toggle').forEach(function(el) {
         var s = getComputedStyle(el);
         if (s.display === 'none') return;
         naturalH -= el.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
     });
-    if (naturalH < 1) naturalH = 1;
-    var scale = Math.min(1, PRINT_TARGET_PX / naturalH);
-    // Nunca deixa a escala cair tanto que fique ilegivel no papel — se o
-    // conteudo precisar de mais que isso, e sinal de bug de conteudo real,
-    // nao so overflow normal, e a pagina deve mesmo virar 2 folhas.
-    scale = Math.max(scale, 0.75);
+    // Padding vertical REAL do .page (lido do CSS, nao hardcoded — se as margens
+    // mudarem, o calculo acompanha). Na impressao o padding vira 0 e as margens
+    // fisicas vem do @page (iguais a esse padding), entao: conteudo puro =
+    // scrollHeight - padding; area util de impressao = folha A4 - padding.
+    var cs = getComputedStyle(pageEl);
+    var padV = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var conteudo = naturalH - padV;
+    if (conteudo < 1) conteudo = 1;
+    var areaUtil = PRINT_TARGET_PX - padV;
+    var scale = Math.min(1, areaUtil / conteudo);
+    scale = Math.max(scale, 0.7); // piso pra nao ficar ilegivel
     pageEl.style.setProperty('--print-fit-scale', scale.toFixed(4));
 }
 
