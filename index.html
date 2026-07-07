@@ -276,6 +276,9 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
 }
 .ia-choose-opt:hover { background: #fdf3f2; border-color: #622423; color: #622423; }
 .ia-choose-opt b { color: #622423; }
+/* Lista de erros no modal de validacao. */
+.val-list { margin: 2px 0 14px; padding-left: 20px; max-height: 46vh; overflow-y: auto; }
+.val-list li { font-size: 9.5pt; color: #444; line-height: 1.5; margin-bottom: 4px; }
 .ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
 .ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 12px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; }
 .ia-modal-title { font-size: 13pt; font-weight: bold; color: #622423; margin-bottom: 14px; }
@@ -698,13 +701,26 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
 </div>
 
+<!-- Modal proprio de validacao (substitui o alert() feio do navegador). -->
+<div class="ia-modal-overlay" id="valModal" style="display:none">
+    <div class="ia-modal">
+        <div class="ia-modal-title">Faltam campos obrigatórios</div>
+        <p class="ia-note">Preencha o que falta antes de gerar o PDF:</p>
+        <ul class="val-list" id="valList"></ul>
+        <div class="ia-modal-actions">
+            <button type="button" onclick="fecharValModal(false)">Fechar</button>
+            <button type="button" onclick="fecharValModal(true)">Ir ao 1º campo</button>
+        </div>
+    </div>
+</div>
+
 <span id="sizer"></span>
 
 <div id="docsArea">
 <div class="doc-tabs" id="docTabs">
     <span class="doc-tabs-label">Ir para:</span>
     <button type="button" class="doc-tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')">Procuração</button>
-    <button type="button" class="doc-tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')">Anexo X</button>
+    <button type="button" class="doc-tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')">Termo de Benefício</button>
     <button type="button" class="doc-tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')">Termo de Responsabilidade</button>
     <button type="button" class="doc-tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')">Termo de Compromisso</button>
 </div>
@@ -1166,7 +1182,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             Av. Ascendino Melo, nº 297, Shopping Itatiaia, Centro, Vitória da Conquista – BA<br>
             Telefone: 77 99927-1876 &nbsp;·&nbsp; E-mail: menezesadv49@gmail.com
         </div>
-        <div class="footer-page">Anexo X</div>
+        <div class="footer-page">Termo de Benefício</div>
     </div>
 </div><!-- .page-anexox -->
 </div><!-- .print-sheet-anexox -->
@@ -2549,25 +2565,33 @@ function validateForm() {
     setError('anexo_beneficio_outro', false);
     var benef = fieldValue('anexo_beneficio');
     if (!benef) {
-        errors.push('Tipo de benefício (ANEXO X) é obrigatório para emitir a procuração.');
+        errors.push('Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.');
         setError('anexo_beneficio', true);
     } else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) {
-        errors.push('Especifique o benefício no campo "Outro" do ANEXO X.');
+        errors.push('Especifique o benefício no campo "Outro" do Termo de Benefício.');
         setError('anexo_beneficio_outro', true);
     }
 
     return errors;
 }
-function runPdfValidation() {
-    var errors = validateForm();
-    if (errors.length) {
-        alert('Corrija antes de gerar PDF:\\n\\n- ' + errors.join('\\n- '));
-        // Leva a pessoa ate o 1o campo com erro (ex.: tipo de beneficio do Anexo X).
+// Modal proprio de validacao (nada de alert() do navegador).
+function fecharValModal(irCampo) {
+    document.getElementById('valModal').style.display = 'none';
+    if (irCampo) {
         var primeiro = document.querySelector('.input-error');
         if (primeiro) {
             try { primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { primeiro.scrollIntoView(); }
             setTimeout(function() { try { primeiro.focus({ preventScroll: true }); } catch (e) {} }, 350);
         }
+    }
+}
+function runPdfValidation() {
+    var errors = validateForm();
+    if (errors.length) {
+        var ul = document.getElementById('valList');
+        ul.innerHTML = '';
+        errors.forEach(function(e) { var li = document.createElement('li'); li.textContent = e; ul.appendChild(li); });
+        document.getElementById('valModal').style.display = 'flex';
         return false;
     }
     return true;
@@ -2889,11 +2913,11 @@ function extrairIdentidade(file, alvoKey, grid) {
         iaAplicarDupla(out, rep, 'incapaz'); // adulto representando adulto = curatela (incapaz)
     });
     // Fecha os modais ao clicar fora ou Esc.
-    ['iaSettings', 'iaChooser'].forEach(function(id) {
+    ['iaSettings', 'iaChooser', 'valModal'].forEach(function(id) {
         var ov = document.getElementById(id);
         if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) ov.style.display = 'none'; });
     });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); } });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); fecharValModal(false); } });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
