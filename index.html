@@ -2829,7 +2829,7 @@ function extrairIdentidade(file, alvoKey, grid) {
         if (typeof txt !== 'string') txt = JSON.stringify(txt);
         var m = txt.match(/\{[\s\S]*\}/);
         if (!m) throw new Error('a IA não retornou JSON: ' + txt.slice(0, 140));
-        var pessoas = (JSON.parse(m[0]).pessoas || []).filter(function(p) { return p && (p.nome || p.cpf || p.rg); });
+        var pessoas = (JSON.parse(m[0]).pessoas || []).filter(function(p) { return p && (p.nome || p.cpf || p.rg || p.endereco || p.cidade); });
         pessoas.forEach(function(p) { p.idade = iaIdade(p.nascimento); });
         if (!pessoas.length) { iaToast('A IA não encontrou dados no documento.', 'err'); return; }
         if (pessoas.length > 2) { iaToast('O documento tem mais de 2 pessoas — anexe só o(s) documento(s) do outorgante e do representante.', 'err'); return; }
@@ -2948,8 +2948,6 @@ var MM_TO_PX = (function() {
     return px || 3.7795; // fallback ~96dpi se a sonda falhar por algum motivo
 })();
 var PRINT_TARGET_PX = 297 * MM_TO_PX;           // altura fisica da folha A4
-var PAGE_PAD_V_PX = 25 * MM_TO_PX;              // padding vertical do .page (1cm topo + 1,5cm base) = margens @page
-var PRINT_CONTENT_PX = PRINT_TARGET_PX - PAGE_PAD_V_PX; // area UTIL de impressao (272mm)
 
 function updatePrintFitScaleForPage(pageEl) {
     var naturalH = pageEl.scrollHeight;
@@ -2961,12 +2959,16 @@ function updatePrintFitScaleForPage(pageEl) {
         if (s.display === 'none') return;
         naturalH -= el.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
     });
-    // Desconta o padding vertical do .page (na impressao ele e 0; as margens
-    // fisicas vem do @page). Compara o CONTEUDO puro com a AREA UTIL real de
-    // impressao -> escala exata, sem cortar 1-2mm da biometria no rodape.
-    var conteudo = naturalH - PAGE_PAD_V_PX;
+    // Padding vertical REAL do .page (lido do CSS, nao hardcoded — se as margens
+    // mudarem, o calculo acompanha). Na impressao o padding vira 0 e as margens
+    // fisicas vem do @page (iguais a esse padding), entao: conteudo puro =
+    // scrollHeight - padding; area util de impressao = folha A4 - padding.
+    var cs = getComputedStyle(pageEl);
+    var padV = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var conteudo = naturalH - padV;
     if (conteudo < 1) conteudo = 1;
-    var scale = Math.min(1, PRINT_CONTENT_PX / conteudo);
+    var areaUtil = PRINT_TARGET_PX - padV;
+    var scale = Math.min(1, areaUtil / conteudo);
     scale = Math.max(scale, 0.7); // piso pra nao ficar ilegivel
     pageEl.style.setProperty('--print-fit-scale', scale.toFixed(4));
 }
