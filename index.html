@@ -1073,7 +1073,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
 
     <div class="termo-blk termo-box tbl" id="anexo-rep-box" style="display:none;">
-        <div class="termo-box-title"><span class="js-papel-anexo">Representante Legal</span></div>
+        <div class="termo-box-title"><span class="js-papel-anexo">Representante Legal</span><span class="js-qualidade-sufixo"></span></div>
         <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
             <div class="grid-row">
                 <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="anexo_rep_nome" maxlength="50"></div>
@@ -1219,7 +1219,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
     <div class="termo-content">
     <div class="termo-blk termo-box tbl">
-        <div class="termo-box-title"><span class="js-papel">Representante Legal</span></div>
+        <div class="termo-box-title"><span class="js-papel">Representante Legal</span><span class="js-qualidade-sufixo"></span></div>
         <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
             <div class="grid-row" style="border-bottom-color:#622423;">
                 <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termoresp_nome" maxlength="50"></div>
@@ -1263,17 +1263,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
     </div>
 
-    <div class="termo-blk termo-box">
-        <div class="termo-box-title">Qualidade da Representação</div>
-        <div class="termo-check-grid" id="termoresp-qualidade-grid">
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="TutorNato" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Tutor Nato</label>
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="TutorLegal" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Tutor Legal</label>
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="Curador" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Curador</label>
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="ResponsavelTermoGuarda" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Responsável Termo de Guarda</label>
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="AdministradorProvisorio" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Administrador Provisório</label>
-            <label class="termo-check"><input type="checkbox" name="termoresp_qualidade" value="Procurador" onchange="document.getElementById('termoresp-qualidade-grid').dataset.userTouched='1';"> Procurador</label>
-        </div>
-    </div>
 
     <div class="termo-blk">
         <div class="termo-localdata">
@@ -1360,7 +1349,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
     <div class="termo-content">
     <div class="termo-blk termo-box tbl">
-        <div class="termo-box-title"><span class="js-papel">Representante Legal</span></div>
+        <div class="termo-box-title"><span class="js-papel">Representante Legal</span><span class="js-qualidade-sufixo"></span></div>
         <div class="dados-grid" style="margin-bottom:0; border:1pt solid #622423;">
             <div class="grid-row" style="border-bottom-color:#622423;">
                 <div class="grid-cell" style="flex:0 0 78%; border-right-color:#622423;"><span class="label">Nome:</span><input type="text" id="termocomp_nome" maxlength="50"></div>
@@ -1386,17 +1375,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
     </div>
 
-    <div class="termo-blk termo-box tbl">
-        <div class="termo-box-title">Qualidade da Representação</div>
-        <div class="termo-check-grid" id="termocomp-qualidade-grid">
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="TutorNato" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Tutor Nato (pai/mãe)</label>
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="TutorLegal" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Tutor Legal</label>
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="Curador" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Curador</label>
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="ResponsavelTermoGuarda" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Responsável Termo de Guarda</label>
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="AdministradorProvisorio" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Administrador Provisório</label>
-            <label class="termo-check"><input type="checkbox" name="termocomp_qualidade" value="Procurador" onchange="document.getElementById('termocomp-qualidade-grid').dataset.userTouched='1'; atualizarCompromissoII();"> Procurador</label>
-        </div>
-    </div>
 
     <div class="termo-blk">
         <p class="termo-p recuo">
@@ -1625,8 +1603,6 @@ function mudarTipo(tipo) {
     if (fAnexo) { propagateFieldChange(fAnexo.nome); propagateFieldChange(fAnexo.cpf); }
 
     // Reseta overrides manuais do Termo ao trocar de tipo e resincroniza
-    var qGrid = document.getElementById('termoresp-qualidade-grid'); if (qGrid) delete qGrid.dataset.userTouched;
-    var qGrid2 = document.getElementById('termocomp-qualidade-grid'); if (qGrid2) delete qGrid2.dataset.userTouched;
     var incluirChk = document.getElementById('termoIncluirCheck'); if (incluirChk) delete incluirChk.dataset.userTouched;
     syncTermo();
 }
@@ -1829,28 +1805,36 @@ function wireBidirectionalSync() {
         });
     });
 }
+// Rotulo curto de cada categoria de qualidade (mapeada da procuracao).
+var QUALIDADE_LABEL = {
+    TutorNato: 'TUTOR NATO', TutorLegal: 'TUTOR LEGAL', Curador: 'CURADOR',
+    ResponsavelTermoGuarda: 'GUARDIÃO', AdministradorProvisorio: 'ADMINISTRADOR PROVISÓRIO', Procurador: 'PROCURADOR'
+};
+// Categoria de qualidade do responsavel ativo (mapeada da procuracao).
+function qualidadeAtualMapeada() {
+    var fonte = fonteResponsavel(tipoAtual());
+    return fonte ? qualidadeParaCheckbox(fieldValue(fonte.qualidade)) : null;
+}
+// A qualidade da procuracao aparece no TITULO do box do representante/assistente
+// de cada termo/anexo — ex.: "REPRESENTANTE LEGAL (TUTOR NATO)" — em vez de um
+// retangulo de checkboxes separado.
 function remapQualidade() {
     var fonte = fonteResponsavel(tipoAtual());
-    if (!fonte) return;
-    var mapped = qualidadeParaCheckbox(fieldValue(fonte.qualidade));
-    // A qualidade da procuracao alimenta os DOIS termos (Responsabilidade e
-    // Compromisso), cada um respeitando seu proprio override manual.
-    ['termoresp', 'termocomp'].forEach(function(prefix) {
-        var gridEl = document.getElementById(prefix + '-qualidade-grid');
-        if (!gridEl || gridEl.dataset.userTouched) return;
-        document.querySelectorAll('input[name="' + prefix + '_qualidade"]').forEach(function(cb) {
-            cb.checked = (cb.value === mapped);
-        });
-    });
-    atualizarCompromissoII();
+    if (!fonte) { document.querySelectorAll('.js-qualidade-sufixo').forEach(function(el) { el.textContent = ''; }); return; }
+    var raw = fieldValue(fonte.qualidade);
+    var mapped = qualidadeParaCheckbox(raw);
+    var label = mapped ? QUALIDADE_LABEL[mapped] : (raw ? raw.toUpperCase() : '');
+    var sufixo = label ? ' (' + label + ')' : '';
+    document.querySelectorAll('.js-qualidade-sufixo').forEach(function(el) { el.textContent = sufixo; });
+    atualizarCompromissoII(mapped);
 }
 // No Termo de Compromisso, o item II (prazo de 6 meses para apresentar a
 // representacao legal) so vale para quem AINDA nao a tem (adm. provisorio,
 // etc.). Pai/mae (Tutor Nato) ja e representante legal -> some o item II e o
 // conector "; e" do item I vira ".".
-function atualizarCompromissoII() {
-    var checked = document.querySelector('input[name="termocomp_qualidade"]:checked');
-    var isTutorNato = !!(checked && checked.value === 'TutorNato');
+function atualizarCompromissoII(mapped) {
+    if (mapped === undefined) mapped = qualidadeAtualMapeada();
+    var isTutorNato = (mapped === 'TutorNato');
     var bloco = document.getElementById('termocomp-item-ii');
     if (bloco) bloco.style.display = isTutorNato ? 'none' : '';
     var fim = document.getElementById('termocomp-i-fim');
