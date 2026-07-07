@@ -271,9 +271,29 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
     font-size: 8.5pt; font-family: Arial, sans-serif; color: #622423; background: #fdf3f2;
     border: 1px dashed #cc9a98; border-radius: 6px; cursor: pointer;
 }
-.ia-attach:hover { background: #f7e4e2; border-color: #622423; }
-.ia-attach.busy { opacity: 0.6; pointer-events: none; }
-.dados-grid.ia-drop { outline: 2px dashed #622423; outline-offset: 3px; background: #fff8f7; }
+/* Drop zone: arrastar um documento sobre o retangulo do outorgante/rep/assist.
+   Sem botao/dica — ao arrastar por cima, a moldura fica verdinha. */
+.dados-grid.ia-dropzone { transition: outline-color .12s, background .12s; }
+.dados-grid.ia-drop {
+    outline: 3px solid #2e9e4f; outline-offset: 4px; background: #f1fbf3;
+    border-radius: 4px; box-shadow: 0 0 0 4px rgba(46,158,79,0.18);
+}
+/* "Processando" enquanto a IA le o documento. */
+.dados-grid.ia-busy { position: relative; }
+.dados-grid.ia-busy::after {
+    content: "🤖 Lendo documento…"; position: absolute; inset: 0; z-index: 60;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(98,36,35,0.92); color: #fff; font: bold 11pt Arial, sans-serif;
+    border-radius: 4px; letter-spacing: .3px;
+}
+/* Opcoes do chooser "quem e quem". */
+.ia-choose-opt {
+    display: block; width: 100%; text-align: left; margin: 0 0 8px; padding: 10px 14px;
+    font-size: 10pt; font-family: Arial, sans-serif; color: #333; background: #fff;
+    border: 1px solid #ccc; border-radius: 8px; cursor: pointer;
+}
+.ia-choose-opt:hover { background: #fdf3f2; border-color: #622423; color: #622423; }
+.ia-choose-opt b { color: #622423; }
 .ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
 .ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 12px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; }
 .ia-modal-title { font-size: 13pt; font-weight: bold; color: #622423; margin-bottom: 14px; }
@@ -669,7 +689,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
 <!-- Preenchimento por IA: input de arquivo (compartilhado), painel de config
      (chave OpenRouter + modelo, salvos no navegador) e toast de status. -->
-<input type="file" id="iaFileInput" accept="image/*" style="display:none">
+<input type="file" id="iaFileInput" accept="image/*,application/pdf" style="display:none">
 <div class="ia-modal-overlay" id="iaSettings" style="display:none">
     <div class="ia-modal">
         <div class="ia-modal-title">⚙️ Preenchimento por IA</div>
@@ -688,6 +708,18 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
 </div>
 <div class="ia-toast" id="iaToast" style="display:none"></div>
+
+<!-- Chooser "quem e quem" quando o documento tem 2 pessoas maiores de idade. -->
+<div class="ia-modal-overlay" id="iaChooser" style="display:none">
+    <div class="ia-modal">
+        <div class="ia-modal-title">Quem é o outorgante?</div>
+        <p class="ia-note" id="iaChooserMsg">O documento tem 2 pessoas. Selecione quem é o <b>outorgante</b> (a pessoa representada). A outra entra como representante legal.</p>
+        <div id="iaChooserOpts"></div>
+        <div class="ia-modal-actions">
+            <button type="button" onclick="fecharIAChooser()">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <span id="sizer"></span>
 
@@ -727,7 +759,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== OUTORGANTE: NORMAL / RELATIVO / ANALFABETO ====== -->
 <div id="sec-outorgante-full" class="tipo-section active">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;" id="lbl-outorgante">OUTORGANTE:</div>
-<button type="button" class="ia-attach" data-alvo="titular" title="Anexe ou arraste uma foto do RG/CNH/CPF do outorgante para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid" id="grid-outorgante">
     <div class="grid-row" id="row-nome">
         <div class="grid-cell" id="cell-nome" style="flex: 1 1 100%"><span class="label">Nome Completo:</span><input type="text" id="nome" value="" maxlength="50"></div>
@@ -799,7 +830,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
 <div id="sec-representante" class="tipo-section">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">REPRESENTANTE LEGAL:</div>
-<button type="button" class="ia-attach" data-alvo="rep" title="Anexe ou arraste uma foto do RG/CNH/CPF do representante para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="rep_nome" value="" maxlength="50"></div>
@@ -816,7 +846,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- ====== ASSISTENTE LEGAL (relativamente incapaz) ====== -->
 <div id="sec-assistente" class="tipo-section">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">ASSISTENTE LEGAL:</div>
-<button type="button" class="ia-attach" data-alvo="assist" title="Anexe ou arraste uma foto do RG/CNH/CPF do assistente para preencher nome, CPF e RG por IA">📎 Preencher por foto do documento (IA)</button>
 <div class="dados-grid">
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 80%"><span class="label">Nome Completo:</span><input type="text" id="assist_nome" value="" maxlength="50"></div>
@@ -2677,24 +2706,116 @@ function iaPreencheCampo(id, val) {
     e.dispatchEvent(new Event('change', {bubbles:true}));
     e.dispatchEvent(new Event('blur', {bubbles:true}));
 }
-function extrairIdentidade(file, alvoKey, btn) {
+// --- PDF.js (lazy): conta paginas (rejeita bundle) e rasteriza pra imagem. ---
+var _pdfjsPromise = null;
+function carregarPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (_pdfjsPromise) return _pdfjsPromise;
+    _pdfjsPromise = new Promise(function(res, rej) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+        s.onload = function() {
+            try { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; } catch (e) {}
+            res(window.pdfjsLib);
+        };
+        s.onerror = function() { rej(new Error('não consegui carregar o leitor de PDF (precisa de internet)')); };
+        document.head.appendChild(s);
+    });
+    return _pdfjsPromise;
+}
+var IA_MAX_PAGINAS = 2; // 1 pessoa = 1-2 paginas (frente/verso). Mais = bundle/processo.
+function iaArquivoParaImagens(file) {
+    var isPdf = (file.type === 'application/pdf') || /\.pdf$/i.test(file.name || '');
+    if (!isPdf) {
+        if (!file.type || file.type.indexOf('image/') !== 0) return Promise.reject(new Error('anexe uma imagem ou PDF do documento'));
+        return iaFileToDataURL(file).then(function(u) { return [u]; });
+    }
+    return carregarPdfJs().then(function(lib) {
+        return file.arrayBuffer().then(function(buf) { return lib.getDocument({ data: buf }).promise; }).then(function(pdf) {
+            if (pdf.numPages > IA_MAX_PAGINAS) {
+                throw new Error('o PDF tem ' + pdf.numPages + ' páginas — anexe só o documento da pessoa (1–2 páginas), não o processo inteiro');
+            }
+            var jobs = [];
+            for (var i = 1; i <= pdf.numPages; i++) {
+                jobs.push(pdf.getPage(i).then(function(page) {
+                    var vp = page.getViewport({ scale: 2 });
+                    var canvas = document.createElement('canvas');
+                    canvas.width = vp.width; canvas.height = vp.height;
+                    return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise
+                        .then(function() { return canvas.toDataURL('image/jpeg', 0.85); });
+                }));
+            }
+            return Promise.all(jobs);
+        });
+    });
+}
+function iaIdade(nasc) {
+    if (!nasc) return null;
+    var y, mo, d, m1 = String(nasc).match(/^(\d{4})-(\d{2})-(\d{2})/), m2 = String(nasc).match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (m1) { y = +m1[1]; mo = +m1[2]; d = +m1[3]; }
+    else if (m2) { d = +m2[1]; mo = +m2[2]; y = +m2[3]; }
+    else return null;
+    var hoje = new Date(), idade = hoje.getFullYear() - y;
+    if (hoje.getMonth() + 1 < mo || (hoje.getMonth() + 1 === mo && hoje.getDate() < d)) idade--;
+    return (idade >= 0 && idade < 130) ? idade : null;
+}
+function iaSetTipo(tipo) {
+    var sel = document.getElementById('tipoSelect'); if (sel) sel.value = tipo;
+    mudarTipo(tipo);
+}
+function iaPreenchePessoa(alvo, p) {
+    var got = [];
+    if (p.nome) { iaPreencheCampo(alvo.nome, p.nome); got.push('nome'); }
+    if (p.cpf) { iaPreencheCampo(alvo.cpf, p.cpf); got.push('CPF'); }
+    if (p.rg) { iaPreencheCampo(alvo.rg, p.rg); got.push('RG'); }
+    return got;
+}
+// 2 pessoas -> outorgante + representante/assistente, com o tipo pela idade.
+function iaAplicarDupla(outorgante, rep, tipo) {
+    iaSetTipo(tipo);
+    setTimeout(function() {
+        iaPreenchePessoa(IA_ALVOS.titular, outorgante);
+        iaPreenchePessoa(IA_ALVOS[tipo === 'relativo' ? 'assist' : 'rep'], rep);
+        var papel = tipo === 'relativo' ? 'assistente' : 'representante';
+        iaToast('Preenchido: ' + (outorgante.nome || 'outorgante') + ' (outorgante) e ' + (rep.nome || papel) + ' (' + papel + '). Tipo definido pela idade — confira a qualidade.', 'ok');
+    }, 60);
+}
+// Chooser (2 adultos): usuario escolhe quem e o outorgante; o outro vira rep.
+var _iaChooserPessoas = null;
+function iaAbrirChooser(pessoas) {
+    _iaChooserPessoas = pessoas;
+    var box = document.getElementById('iaChooserOpts'); box.innerHTML = '';
+    pessoas.forEach(function(p, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'ia-choose-opt';
+        b.innerHTML = '<b>' + (p.nome || ('Pessoa ' + (i + 1))) + '</b>' + (p.idade != null ? ' — ' + p.idade + ' anos' : '') + (p.cpf ? '<br><small>CPF ' + p.cpf + '</small>' : '');
+        b.setAttribute('data-i', i);
+        box.appendChild(b);
+    });
+    document.getElementById('iaChooser').style.display = 'flex';
+}
+function fecharIAChooser() { document.getElementById('iaChooser').style.display = 'none'; }
+
+function extrairIdentidade(file, alvoKey, grid) {
     var cfg = getIAConfig();
-    var alvo = IA_ALVOS[alvoKey];
-    if (!alvo) return;
-    if (!file.type || file.type.indexOf('image/') !== 0) { iaToast('Anexe uma imagem (foto/print) do documento.', 'err'); return; }
+    var alvo = IA_ALVOS[alvoKey] || IA_ALVOS.titular;
     if (!cfg.key) {
         iaToast('Configure sua chave OpenRouter primeiro (segure "Revogar procuração").', 'err');
         abrirIASettings();
         return;
     }
-    if (btn) btn.classList.add('busy');
-    iaToast('Lendo documento do ' + alvo.label + ' com IA…', 'info');
-    var prompt = 'Você recebe a imagem de um documento de identidade brasileiro (RG, CNH ou CPF). ' +
-        'Extraia apenas: nome completo do titular, número do CPF e número do RG com órgão emissor. ' +
-        'Responda SOMENTE um JSON, sem texto ao redor, no formato exato {"nome":"","cpf":"","rg":""}. ' +
-        'CPF formatado como 000.000.000-00. RG com órgão/UF se visível (ex.: "1234567 SSP/BA"). ' +
-        'Se algum campo não estiver legível, use string vazia.';
-    iaFileToDataURL(file).then(function(dataURL) {
+    if (grid) grid.classList.add('ia-busy');
+    var prompt = 'As imagens são de documento(s) de identidade brasileiro(s) (RG, CNH e/ou CPF). ' +
+        'Identifique CADA pessoa distinta (frente e verso do mesmo documento = MESMA pessoa). ' +
+        'Para cada pessoa extraia: nome completo, CPF, RG com órgão emissor e data de nascimento. ' +
+        'Responda SOMENTE um JSON, sem texto ao redor, no formato exato ' +
+        '{"pessoas":[{"nome":"","cpf":"","rg":"","nascimento":"AAAA-MM-DD"}]}. ' +
+        'CPF como 000.000.000-00; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD. ' +
+        'Campo ilegível = string vazia. NÃO invente dados.';
+    iaArquivoParaImagens(file).then(function(imagens) {
+        iaToast('Lendo documento com IA…', 'info');
+        var content = [{ type: 'text', text: prompt }];
+        imagens.forEach(function(u) { content.push({ type: 'image_url', image_url: { url: u } }); });
         return fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -2703,14 +2824,7 @@ function extrairIdentidade(file, alvoKey, btn) {
                 'HTTP-Referer': location.origin,
                 'X-Title': 'Procuracoes Menezes'
             },
-            body: JSON.stringify({
-                model: cfg.model,
-                temperature: 0,
-                messages: [{ role: 'user', content: [
-                    { type: 'text', text: prompt },
-                    { type: 'image_url', image_url: { url: dataURL } }
-                ]}]
-            })
+            body: JSON.stringify({ model: cfg.model, temperature: 0, messages: [{ role: 'user', content: content }] })
         });
     }).then(function(resp) {
         return resp.text().then(function(body) {
@@ -2722,48 +2836,65 @@ function extrairIdentidade(file, alvoKey, btn) {
         if (typeof txt !== 'string') txt = JSON.stringify(txt);
         var m = txt.match(/\{[\s\S]*\}/);
         if (!m) throw new Error('a IA não retornou JSON: ' + txt.slice(0, 140));
-        var obj = JSON.parse(m[0]);
-        var got = [];
-        if (obj.nome) { iaPreencheCampo(alvo.nome, obj.nome); got.push('nome'); }
-        if (obj.cpf) { iaPreencheCampo(alvo.cpf, obj.cpf); got.push('CPF'); }
-        if (obj.rg) { iaPreencheCampo(alvo.rg, obj.rg); got.push('RG'); }
-        if (got.length) iaToast('Preenchido (' + alvo.label + '): ' + got.join(', ') + '. Confira e complemente endereço/profissão.', 'ok');
-        else iaToast('A IA não encontrou dados no documento do ' + alvo.label + '.', 'err');
+        var pessoas = (JSON.parse(m[0]).pessoas || []).filter(function(p) { return p && (p.nome || p.cpf || p.rg); });
+        pessoas.forEach(function(p) { p.idade = iaIdade(p.nascimento); });
+        if (!pessoas.length) { iaToast('A IA não encontrou dados no documento.', 'err'); return; }
+        if (pessoas.length > 2) { iaToast('O documento tem mais de 2 pessoas — anexe só o(s) documento(s) do outorgante e do representante.', 'err'); return; }
+        if (pessoas.length === 1) {
+            var got = iaPreenchePessoa(alvo, pessoas[0]);
+            iaToast(got.length ? ('Preenchido (' + alvo.label + '): ' + got.join(', ') + '. Confira e complemente endereço/profissão.') : 'A IA não encontrou dados no documento.', got.length ? 'ok' : 'err');
+            return;
+        }
+        // 2 pessoas: menor manda. <16 = outorgante (incapaz); 16-17 = outorgante
+        // (relativo/assistido); 2 adultos = pergunta quem e quem (curatela etc.).
+        var ord = pessoas.slice().sort(function(a, b) { return (a.idade == null ? 999 : a.idade) - (b.idade == null ? 999 : b.idade); });
+        var jovem = ord[0], velho = ord[1];
+        if (jovem.idade != null && jovem.idade < 16) iaAplicarDupla(jovem, velho, 'incapaz');
+        else if (jovem.idade != null && jovem.idade < 18) iaAplicarDupla(jovem, velho, 'relativo');
+        else iaAbrirChooser(pessoas);
     }).catch(function(e) {
         iaToast('Falha ao ler documento: ' + (e.message || e), 'err');
     }).then(function() {
-        if (btn) btn.classList.remove('busy');
+        if (grid) grid.classList.remove('ia-busy');
     });
 }
 (function wireIA() {
-    var fileInput = document.getElementById('iaFileInput');
-    if (!fileInput) return;
-    var pendingAlvo = null, pendingBtn = null;
-    document.querySelectorAll('.ia-attach').forEach(function(btn) {
-        var alvo = btn.dataset.alvo;
-        btn.addEventListener('click', function() {
-            pendingAlvo = alvo; pendingBtn = btn;
-            fileInput.value = ''; fileInput.click();
+    // Drop zones = os retangulos (dados-grid) do outorgante, representante e
+    // assistente. Sem botao/dica: arrastar por cima acende a moldura verde.
+    function temArquivo(e) {
+        var t = e.dataTransfer; if (!t || !t.types) return false;
+        for (var i = 0; i < t.types.length; i++) if (t.types[i] === 'Files') return true;
+        return false;
+    }
+    [{ sel: '#grid-outorgante', alvo: 'titular' },
+     { sel: '#sec-representante .dados-grid', alvo: 'rep' },
+     { sel: '#sec-assistente .dados-grid', alvo: 'assist' }].forEach(function(z) {
+        var grid = document.querySelector(z.sel); if (!grid) return;
+        grid.classList.add('ia-dropzone');
+        var depth = 0;
+        grid.addEventListener('dragenter', function(e) { if (temArquivo(e)) { e.preventDefault(); depth++; grid.classList.add('ia-drop'); } });
+        grid.addEventListener('dragover', function(e) { if (temArquivo(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
+        grid.addEventListener('dragleave', function() { if (--depth <= 0) { depth = 0; grid.classList.remove('ia-drop'); } });
+        grid.addEventListener('drop', function(e) {
+            e.preventDefault(); depth = 0; grid.classList.remove('ia-drop');
+            var f = e.dataTransfer && e.dataTransfer.files[0];
+            if (f) extrairIdentidade(f, z.alvo, grid);
         });
-        var grid = btn.parentElement.querySelector('.dados-grid');
-        if (grid) {
-            grid.addEventListener('dragover', function(e) { e.preventDefault(); grid.classList.add('ia-drop'); });
-            grid.addEventListener('dragleave', function(e) { if (e.target === grid) grid.classList.remove('ia-drop'); });
-            grid.addEventListener('drop', function(e) {
-                e.preventDefault(); grid.classList.remove('ia-drop');
-                var f = e.dataTransfer && e.dataTransfer.files[0];
-                if (f) extrairIdentidade(f, alvo, btn);
-            });
-        }
     });
-    fileInput.addEventListener('change', function() {
-        var f = fileInput.files[0];
-        if (f && pendingAlvo) extrairIdentidade(f, pendingAlvo, pendingBtn);
+    // Chooser: clique numa pessoa a define como outorgante (a outra vira rep).
+    var chooserBox = document.getElementById('iaChooserOpts');
+    if (chooserBox) chooserBox.addEventListener('click', function(e) {
+        var b = e.target.closest('.ia-choose-opt'); if (!b || !_iaChooserPessoas) return;
+        var i = +b.getAttribute('data-i'), out = _iaChooserPessoas[i], rep = _iaChooserPessoas[i === 0 ? 1 : 0];
+        fecharIAChooser();
+        iaAplicarDupla(out, rep, 'incapaz'); // adulto representando adulto = curatela (incapaz)
     });
-    // Fecha o modal ao clicar fora ou Esc.
-    var overlay = document.getElementById('iaSettings');
-    if (overlay) overlay.addEventListener('mousedown', function(e) { if (e.target === overlay) fecharIASettings(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') fecharIASettings(); });
+    // Fecha os modais ao clicar fora ou Esc.
+    ['iaSettings', 'iaChooser'].forEach(function(id) {
+        var ov = document.getElementById(id);
+        if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) ov.style.display = 'none'; });
+    });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); } });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
