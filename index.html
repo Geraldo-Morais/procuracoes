@@ -589,7 +589,10 @@ body.sidebar-collapsed #docsArea { left: 0; }
     padding: 5pt 9pt; background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
 }
 .termo-analf-toggle input { width: 14px; height: 14px; accent-color: #622423; flex: 0 0 auto; }
-.termo-analf-block { display: none; margin-top: 7pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 6pt; }
+/* Sem barra/linha em cima do bloco a rogo: no analfabeto a assinatura e a rogo
+   (esquerda), entao a barra de assinatura simples nao se aplica e so confunde.
+   A assinatura simples (com sua linha) continua no caso normal, via sign-block. */
+.termo-analf-block { display: none; margin-top: 10pt; font-size: 10pt; padding-top: 2pt; }
 .termo-analf-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; }
 /* Evita assinatura duplicada: quando o bloco de rogo+testemunhas aparece, a
    linha simples de "Assinatura" some — via JS (applyHasFallbacks), nao
@@ -2115,6 +2118,13 @@ function autoSize(el) {
     if (el && el.closest && el.closest('.grid-cell')) {
         el.style.width = '';        // mantem width:100% do CSS
         autoFitGridFont(el);
+        return;
+    }
+    // Inputs de testemunha/rogo (CPF/RG) tem largura fixa (width:100% da coluna).
+    // NAO alargar/encolher com o conteudo — senao viram ~17px e cortam o valor
+    // (igual a procuracao, onde ficam full). Deixa o CSS mandar.
+    if (el && el.closest && el.closest('.testemunha-campo')) {
+        el.style.width = '';
         return;
     }
     sizer.textContent = el.value || el.placeholder || 'M';
