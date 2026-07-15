@@ -39,17 +39,18 @@ body {
     padding: 1cm 2cm 1.5cm 2.5cm; /* == @page margin (preview idêntico à impressão) */
     background: #fff;
     box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-    /* top CENTER (nao top left): quando a pagina e escalada pra caber na altura
-       (--print-fit-scale < 1), encolhe simetrico e fica CENTRADA — sem a
-       "margemzona" a direita que jogava o conteudo dos termos pra esquerda. */
     transform-origin: top center;
 }
-.header { margin-bottom: 6pt; margin-top: 0; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; overflow: visible; }
-.header table { width: 100%; border-collapse: collapse; border-bottom: none; }
+.header { position: relative; margin-bottom: 6pt; margin-top: 0; border-bottom: 2.5pt solid #622423; padding-bottom: 4pt; overflow: visible; }
+.header table { width: 100%; height: 58px; border-collapse: collapse; border-bottom: none; }
 .header td { border: none; padding: 0; vertical-align: middle; }
+.header img {
+    position: absolute; left: 50%; bottom: 3px;
+    transform: translateX(-50%); margin: 0 !important;
+}
 /* Nome do escritorio (celula direita) — UMA linha so (sem quebra). A celula
-   ganha mais largura e a fonte encolhe o suficiente pra "Menezes Advocacia e
-   Consultoria Juridica" caber inteiro numa linha. */
+   ganha mais largura, mas a logo agora e posicionada nos 50% reais do cabecalho,
+   independentemente da largura reservada ao nome. */
 .header table td:first-child { width: 24% !important; }
 .header table td:nth-child(2) { width: 34% !important; }
 .header table td:last-child { width: 42% !important; font-size: 9pt !important; line-height: 1.2; white-space: nowrap; }
@@ -498,12 +499,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .page.compact .pg-analf-block .testemunha-campo input { font-size: 8.5pt; }
 @media print { .pg-analf-toggle, .termo-analf-toggle { display: none !important; } }
 /* Moldura de impressao: cada documento (procuracao / termo) fica dentro de um
-   "sheet" com altura FIXA de 297mm + overflow:hidden. Na tela, display:contents
-   faz esse wrapper desaparecer (o .page participa do flex de #docs-wrap
-   normalmente). Na impressao, o .page filho e escalado (--print-fit-scale,
-   calculado em recalcLayout/updatePrintFitScaleForPage) para caber dentro dos
-   297mm fixos do sheet — em vez de deixar o navegador criar uma folha extra
-   quase em branco quando sobra so um resto de conteudo. */
+   "sheet" com altura fixa e overflow:hidden. Quando um documento precisa de
+   escala, sua caixa logica cresce na proporcao inversa antes do transform. Assim
+   a pintura final ocupa toda a largura e altura uteis da A4, sem ficar afinada. */
 .print-sheet { display: contents; }
 @media print {
     body { background: #fff; padding-left: 0 !important; overflow: visible !important; }
@@ -521,10 +519,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
            porque #docsViewport tem height:auto em impressao). */
         height: 100vh; overflow: hidden;
         page-break-after: always; break-after: page;
-        /* Quando a pagina e escalada pra baixo (--print-fit-scale < 1), o
-           transform encolhe so o .page, sobrando uma faixa do sheet que sem
-           isso mostraria o cinza de fundo herdado de #docsArea — acusado
-           pelo Codex na revisao. Sheet branco por baixo resolve. */
+        /* Fundo branco protege qualquer residuo subpixel ao redor da folha. */
         background: #fff;
     }
     /* :last-of-type nao serve aqui: ele conta por posicao no DOM, nao por
@@ -541,8 +536,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
        (updateLastVisibleSheet), nao por :has(). */
     .print-sheet.print-sheet-hidden { display: none !important; }
     .page {
-        width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none;
+        width: var(--print-layout-width, 100%); min-height: auto; margin: 0; padding: 0; box-shadow: none;
         zoom: 1 !important;
+        transform-origin: top left;
         transform: scale(var(--print-fit-scale, 1));
     }
     /* Forca visivel mesmo se o modo Foco escondeu esta pagina na tela
@@ -554,7 +550,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     /* .termo-content so consegue empurrar o ultimo bloco para o fundo se a
        .page tiver altura real — min-height:auto (de cima) tira essa altura,
        entao devolve ela igual a moldura fixa do .print-sheet. */
-    .page-termo, .page-anexo { height: 100%; }
+    .page-termo, .page-anexo { height: var(--print-layout-height, 100vh); }
     .dados-table input[type="text"], .date-input, .testemunha-campo input, .inline-input, .dados-grid .grid-cell input[type="text"] { background: transparent !important; -webkit-appearance: none; }
     .footer-screen { display: none !important; }
     #docsArea { position: static !important; left: 0 !important; display: block !important; }
@@ -861,7 +857,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div class="grid-row" id="row-identidade">
         <div class="grid-cell" id="cell-cpf"><span class="label">CPF:</span><input type="text" id="cpf" value="" maxlength="14"></div>
-        <div class="grid-cell" id="cell-rg"><span class="label">RG / Órgão:</span><input type="text" id="rg" value="" maxlength="25"></div>
+        <div class="grid-cell" id="cell-rg"><span class="label">RG:</span><input type="text" id="rg" value="" maxlength="14"></div>
         <div class="grid-cell" id="cell-profissao"><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></div>
         <div class="grid-cell" id="cell-estado-civil"><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
         <div class="grid-cell" id="cell-telefone"><span class="label">Telefone celular:</span><input type="text" id="telefone" value="" maxlength="16"></div>
@@ -933,7 +929,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 40%"><span class="label">Estado Civil:</span><input type="text" id="rep_estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
-        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG / Órgão:</span><input type="text" id="rep_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG:</span><input type="text" id="rep_rg" value="" maxlength="14"></div>
         <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Qualidade:</span><input type="text" id="rep_qualidade" value="" maxlength="25" list="qualidade-rep-list" placeholder="Pai, Mãe, Tutor..."></div>
     </div>
 </div>
@@ -949,7 +945,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div class="grid-row">
         <div class="grid-cell" style="flex: 0 0 40%"><span class="label">Estado Civil:</span><input type="text" id="assist_estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
-        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG / Órgão:</span><input type="text" id="assist_rg" value="" maxlength="25"></div>
+        <div class="grid-cell" style="flex: 0 0 30%"><span class="label">RG:</span><input type="text" id="assist_rg" value="" maxlength="14"></div>
         <div class="grid-cell" style="flex: 0 0 30%"><span class="label">Qualidade:</span><input type="text" id="assist_qualidade" value="" maxlength="25" list="qualidade-assist-list" placeholder="Genitor, Curador..."></div>
     </div>
 </div>
@@ -1155,7 +1151,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <div class="grid-row" style="border-bottom-color:#622423;">
                 <div class="grid-cell" style="flex:0 0 56%; border-right-color:#622423;"><span class="label">Nome completo:</span><input type="text" id="anexo_nome" maxlength="50"></div>
                 <div class="grid-cell" style="flex:0 0 24%; border-right-color:#622423;"><span class="label">CPF:</span><input type="text" id="anexo_cpf" maxlength="14"></div>
-                <div class="grid-cell" style="flex:0 0 20%;"><span class="label">RG / Órgão:</span><input type="text" id="anexo_rg" maxlength="25"></div>
+                <div class="grid-cell" style="flex:0 0 20%;"><span class="label">RG:</span><input type="text" id="anexo_rg" maxlength="14"></div>
             </div>
             <div class="grid-row">
                 <div class="grid-cell" style="flex:0 0 40%; border-right-color:#622423;"><span class="label">Endereço:</span><input type="text" id="anexo_endereco" maxlength="60"></div>
@@ -2098,14 +2094,12 @@ function formatCPF(v) {
 }
 function formatRG(v) {
     if (!v) return v;
-    if (v === '--') return v;
-    // Se tem espaço (ex: "12345678 SSP/BA"), só faz uppercase sem mexer na pontuação
-    if (/\s/.test(v)) return v.toUpperCase();
-    var raw = v.toUpperCase().replace(/[^0-9A-Z]/g, '').substring(0, 10);
-    if (raw.length <= 2) return raw;
-    if (raw.length <= 5) return raw.substring(0, 2) + '.' + raw.substring(2);
-    if (raw.length <= 8) return raw.substring(0, 2) + '.' + raw.substring(2, 5) + '.' + raw.substring(5);
-    return raw.substring(0, 2) + '.' + raw.substring(2, 5) + '.' + raw.substring(5, 8) + '-' + raw.substring(8);
+    var value = String(v).trim().toUpperCase();
+    if (value === '--') return value;
+    // O documento usa somente o numero do RG. Se vier junto com orgao/UF ou
+    // pontuacao, preserva apenas numero e eventual digito verificador X.
+    var match = value.match(/\d[\d.\-]*[0-9X]?/);
+    return match ? match[0].replace(/[^0-9X]/g, '').substring(0, 14) : '';
 }
 function formatTelefone(v) {
     var d = onlyDigits(v).substring(0, 11);
@@ -2954,7 +2948,7 @@ function preencherStub() {
     var tipo = tipoAtual();
     s('nome', 'Maria Aparecida de Souza');
     s('cpf', '529.982.247-25');
-    s('rg', '1234567 SSP/BA');
+    s('rg', '1234567');
     s('profissao', 'Lavradora');
     s('estado_civil', 'Solteira');
     s('telefone', '(77) 9 9927-1876');
@@ -3166,10 +3160,10 @@ function extrairIdentidade(file, alvoKey, grid) {
     var prompt = 'As imagens são de documento(s) brasileiro(s) (RG, CNH, CPF ou comprovante). ' +
         'Identifique CADA pessoa distinta (frente e verso do mesmo documento = MESMA pessoa). ' +
         'Para cada pessoa extraia TODOS os campos que estiverem VISÍVEIS na imagem: nome completo, CPF, ' +
-        'RG com órgão emissor, data de nascimento e, se aparecerem, endereço (logradouro), número, bairro, cidade e UF. ' +
+        'somente o número do RG (sem órgão emissor ou UF), data de nascimento e, se aparecerem, endereço (logradouro), número, bairro, cidade e UF. ' +
         'Responda SOMENTE um JSON, sem texto ao redor, no formato exato ' +
         '{"pessoas":[{"nome":"","cpf":"","rg":"","nascimento":"AAAA-MM-DD","endereco":"","numero":"","bairro":"","cidade":"","uf":""}]}. ' +
-        'CPF no padrão NNN.NNN.NNN-NN; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD; UF com 2 letras. ' +
+        'CPF no padrão NNN.NNN.NNN-NN; RG somente com o número (ex.: "1234567"); nascimento AAAA-MM-DD; UF com 2 letras. ' +
         'Campo que não aparecer no documento = string vazia. NÃO invente dados.';
     iaArquivoParaImagens(file).then(function(imagens) {
         iaToast('Lendo documento com IA…', 'info');
@@ -3393,6 +3387,11 @@ function updatePrintFitScaleForPage(pageEl) {
     var scale = Math.min(1, areaUtil / conteudo);
     scale = Math.max(scale, 0.7); // piso pra nao ficar ilegivel
     pageEl.style.setProperty('--print-fit-scale', scale.toFixed(4));
+    // O transform reduz a pintura. Expandir antes a caixa logica na proporcao
+    // inversa faz o resultado final continuar usando 100% da area util da A4.
+    var inverse = (100 / scale).toFixed(4);
+    pageEl.style.setProperty('--print-layout-width', inverse + '%');
+    pageEl.style.setProperty('--print-layout-height', inverse + 'vh');
 }
 
 // Marca qual .print-sheet e o ultimo REALMENTE aplicavel (procuracao sempre
