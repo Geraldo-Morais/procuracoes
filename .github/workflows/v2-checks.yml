@@ -1,0 +1,32 @@
+name: Procurações v2
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Localizar Chrome
+        shell: bash
+        run: echo "CHROME_PATH=$(command -v google-chrome || command -v chromium || command -v chromium-browser)" >> "$GITHUB_ENV"
+      - run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: procuracoes-v2-evidencias
+          path: output/playwright/
+          if-no-files-found: ignore
+          retention-days: 7

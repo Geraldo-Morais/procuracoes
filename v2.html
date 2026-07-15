@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>Procurações | Menezes Advocacia</title>
+  <link rel="icon" href="logo.png">
+  <link rel="stylesheet" href="assets/v2.css">
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <aside class="side-panel" id="sidePanel" aria-label="Preenchimento da procuração">
+      <header class="panel-header">
+        <div class="office-mark">
+          <img src="logo.png" alt="Menezes Advocacia">
+          <div>
+            <strong>Procurações</strong>
+            <span>Menezes Advocacia</span>
+          </div>
+        </div>
+        <button class="icon-button panel-toggle" id="panelToggle" type="button" title="Recolher painel" aria-label="Recolher painel" aria-expanded="true">
+          <i data-lucide="panel-left-close"></i>
+        </button>
+      </header>
+
+      <nav class="step-nav" aria-label="Etapas">
+        <button type="button" class="step-link is-active" data-step-target="benefit">
+          <span class="step-icon"><i data-lucide="landmark"></i></span>
+          <span class="step-copy"><b>Benefício</b><small id="stepBenefitStatus">Pendente</small></span>
+          <i class="step-check" data-lucide="circle"></i>
+        </button>
+        <button type="button" class="step-link" data-step-target="representation">
+          <span class="step-icon"><i data-lucide="users"></i></span>
+          <span class="step-copy"><b>Quem assina</b><small id="stepRepresentationStatus">Pendente</small></span>
+          <i class="step-check" data-lucide="circle"></i>
+        </button>
+        <button type="button" class="step-link" data-step-target="data">
+          <span class="step-icon"><i data-lucide="contact"></i></span>
+          <span class="step-copy"><b>Dados</b><small id="stepDataStatus">Pendente</small></span>
+          <i class="step-check" data-lucide="circle"></i>
+        </button>
+        <button type="button" class="step-link" data-step-target="documents">
+          <span class="step-icon"><i data-lucide="list-checks"></i></span>
+          <span class="step-copy"><b>Documentos</b><small id="stepDocumentsStatus">Checklist</small></span>
+          <i class="step-check" data-lucide="circle"></i>
+        </button>
+        <button type="button" class="step-link" data-step-target="review">
+          <span class="step-icon"><i data-lucide="badge-check"></i></span>
+          <span class="step-copy"><b>Revisão</b><small id="stepReviewStatus">Pendente</small></span>
+          <i class="step-check" data-lucide="circle"></i>
+        </button>
+      </nav>
+
+      <div class="panel-body" id="panelBody">
+        <section class="step-section is-active" data-step="benefit" aria-labelledby="benefitHeading">
+          <div class="section-heading">
+            <span class="eyebrow">Etapa 1 de 5</span>
+            <h1 id="benefitHeading">Qual benefício será pedido?</h1>
+          </div>
+
+          <div class="field-block" data-field-wrap="benefitId">
+            <label for="benefitId">Tipo de benefício <span aria-hidden="true">*</span></label>
+            <select id="benefitId" data-bind="benefitId" required>
+              <option value="">Selecione o benefício</option>
+            </select>
+            <p class="field-error" data-error-for="benefitId"></p>
+          </div>
+
+          <button type="button" class="secondary-button full-button" id="openTriage">
+            <i data-lucide="route"></i><span>Não sabe qual benefício?</span>
+          </button>
+
+          <div class="benefit-summary" id="benefitSummary" hidden>
+            <div class="summary-title">
+              <span class="status-dot"></span>
+              <strong id="benefitSummaryName"></strong>
+            </div>
+            <p id="benefitSummaryText"></p>
+            <button type="button" class="text-button" data-go-step="documents">Ver critérios e documentos <i data-lucide="arrow-right"></i></button>
+          </div>
+
+          <div class="conditional-fields" id="pensionContext" hidden>
+            <div class="subsection-title">Situação do dependente</div>
+            <div class="field-block">
+              <label for="dependentType">Vínculo com o falecido</label>
+              <select id="dependentType" data-bind="dependentType">
+                <option value="spouse_married">Cônjuge casado</option>
+                <option value="stable_union">Companheiro em união estável</option>
+                <option value="child_under21">Filho menor de 21 anos</option>
+                <option value="child_disabled">Filho maior inválido ou com deficiência</option>
+                <option value="other">Outro dependente</option>
+              </select>
+            </div>
+            <label class="switch-row">
+              <span><b>O falecido já recebia benefício?</b><small>Altera a prova da qualidade de segurado.</small></span>
+              <input type="checkbox" id="deceasedWasBeneficiary" data-bind="deceasedWasBeneficiary">
+              <span class="switch" aria-hidden="true"></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="step-section" data-step="representation" aria-labelledby="representationHeading">
+          <div class="section-heading">
+            <span class="eyebrow">Etapa 2 de 5</span>
+            <h1 id="representationHeading">Quem assina pelo titular?</h1>
+          </div>
+
+          <div class="choice-list" role="radiogroup" aria-label="Forma de assinatura">
+            <label class="choice-row">
+              <input type="radio" name="representationMode" value="self" checked>
+              <span class="choice-icon"><i data-lucide="user"></i></span>
+              <span><b>O próprio titular</b><small>Pessoa capaz que assina sozinha.</small></span>
+              <i data-lucide="circle-check"></i>
+            </label>
+            <label class="choice-row">
+              <input type="radio" name="representationMode" value="represented">
+              <span class="choice-icon"><i data-lucide="user-round-check"></i></span>
+              <span><b>Representante assina</b><small>Menor de 16 anos ou pessoa representada.</small></span>
+              <i data-lucide="circle-check"></i>
+            </label>
+            <label class="choice-row">
+              <input type="radio" name="representationMode" value="assisted">
+              <span class="choice-icon"><i data-lucide="users-round"></i></span>
+              <span><b>Titular assina assistido</b><small>Pessoa de 16 ou 17 anos ou assistência definida judicialmente.</small></span>
+              <i data-lucide="circle-check"></i>
+            </label>
+          </div>
+
+          <div class="conditional-fields" id="representationRoleWrap" hidden>
+            <div class="field-block" data-field-wrap="representationRole">
+              <label for="representationRole">Qualidade da representação <span aria-hidden="true">*</span></label>
+              <select id="representationRole" data-bind="representationRole">
+                <option value="">Selecione a qualidade</option>
+              </select>
+              <p class="field-hint" id="roleHint"></p>
+              <p class="field-error" data-error-for="representationRole"></p>
+            </div>
+            <div class="document-rule" id="documentRule"></div>
+          </div>
+
+          <label class="switch-row signature-switch">
+            <span><b>Signatário não sabe assinar</b><small>Inclui assinatura a rogo, duas testemunhas e impressão digital.</small></span>
+            <input type="checkbox" id="illiterate" data-bind="illiterate">
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section class="step-section" data-step="data" aria-labelledby="dataHeading">
+          <div class="section-heading">
+            <span class="eyebrow">Etapa 3 de 5</span>
+            <h1 id="dataHeading">Dados do titular</h1>
+          </div>
+
+          <div class="form-grid">
+            <div class="field-block span-2" data-field-wrap="holderName">
+              <label for="holderName">Nome completo <span aria-hidden="true">*</span></label>
+              <input id="holderName" data-bind="holderName" autocomplete="name" maxlength="60">
+              <p class="field-error" data-error-for="holderName"></p>
+            </div>
+            <div class="field-block" data-field-wrap="holderCpf">
+              <label for="holderCpf">CPF <span aria-hidden="true">*</span></label>
+              <input id="holderCpf" data-bind="holderCpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
+              <p class="field-error" data-error-for="holderCpf"></p>
+            </div>
+            <div class="field-block">
+              <label for="holderRg">RG</label>
+              <input id="holderRg" data-bind="holderRg" inputmode="numeric" maxlength="14" placeholder="Somente números">
+            </div>
+            <div class="field-block" data-field-wrap="holderPhone">
+              <label for="holderPhone">Telefone celular <span aria-hidden="true">*</span></label>
+              <input id="holderPhone" data-bind="holderPhone" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="(77) 99999-9999">
+              <p class="field-error" data-error-for="holderPhone"></p>
+            </div>
+            <div class="field-block">
+              <label for="holderCivilStatus">Estado civil</label>
+              <select id="holderCivilStatus" data-bind="holderCivilStatus">
+                <option value="">Selecione</option>
+                <option>Solteiro</option><option>Casado</option><option>Divorciado</option><option>Viúvo</option><option>Separado judicialmente</option><option>União estável</option>
+              </select>
+            </div>
+            <div class="field-block span-2">
+              <label for="holderProfession">Profissão</label>
+              <input id="holderProfession" data-bind="holderProfession" maxlength="40">
+            </div>
+            <div class="field-block span-2" data-field-wrap="address">
+              <label for="address">Endereço <span aria-hidden="true">*</span></label>
+              <input id="address" data-bind="address" autocomplete="street-address" maxlength="70">
+              <p class="field-error" data-error-for="address"></p>
+            </div>
+            <div class="field-block" data-field-wrap="addressNumber">
+              <label for="addressNumber">Número <span aria-hidden="true">*</span></label>
+              <input id="addressNumber" data-bind="addressNumber" maxlength="10">
+              <p class="field-error" data-error-for="addressNumber"></p>
+            </div>
+            <div class="field-block" data-field-wrap="neighborhood">
+              <label for="neighborhood">Bairro <span aria-hidden="true">*</span></label>
+              <input id="neighborhood" data-bind="neighborhood" maxlength="40">
+              <p class="field-error" data-error-for="neighborhood"></p>
+            </div>
+            <div class="field-block" data-field-wrap="city">
+              <label for="city">Cidade <span aria-hidden="true">*</span></label>
+              <input id="city" data-bind="city" maxlength="40">
+              <p class="field-error" data-error-for="city"></p>
+            </div>
+            <div class="field-block" data-field-wrap="stateUf">
+              <label for="stateUf">UF <span aria-hidden="true">*</span></label>
+              <select id="stateUf" data-bind="stateUf">
+                <option value="">UF</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
+              </select>
+              <p class="field-error" data-error-for="stateUf"></p>
+            </div>
+          </div>
+
+          <div class="person-subsection" id="representativeFields" hidden>
+            <div class="subsection-title" id="representativeHeading">Dados do representante</div>
+            <div class="form-grid">
+              <div class="field-block span-2" data-field-wrap="representativeName">
+                <label for="representativeName">Nome completo <span aria-hidden="true">*</span></label>
+                <input id="representativeName" data-bind="representativeName" maxlength="60">
+                <p class="field-error" data-error-for="representativeName"></p>
+              </div>
+              <div class="field-block" data-field-wrap="representativeCpf">
+                <label for="representativeCpf">CPF <span aria-hidden="true">*</span></label>
+                <input id="representativeCpf" data-bind="representativeCpf" inputmode="numeric" maxlength="14">
+                <p class="field-error" data-error-for="representativeCpf"></p>
+              </div>
+              <div class="field-block">
+                <label for="representativeRg">RG</label>
+                <input id="representativeRg" data-bind="representativeRg" inputmode="numeric" maxlength="14" placeholder="Somente números">
+              </div>
+            </div>
+          </div>
+
+          <div class="person-subsection" id="witnessFields" hidden>
+            <div class="subsection-title">Assinatura a rogo e testemunhas</div>
+            <div class="form-grid">
+              <div class="field-block span-2"><label for="rogoName">Nome de quem assina a rogo</label><input id="rogoName" data-bind="rogoName" maxlength="60"></div>
+              <div class="field-block" data-field-wrap="rogoCpf"><label for="rogoCpf">CPF de quem assina a rogo</label><input id="rogoCpf" data-bind="rogoCpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="rogoCpf"></p></div>
+              <div class="field-block"><label for="rogoRg">RG</label><input id="rogoRg" data-bind="rogoRg" inputmode="numeric" maxlength="14"></div>
+              <div class="field-block span-2"><label for="witness1Name">1ª testemunha</label><input id="witness1Name" data-bind="witness1Name" maxlength="60"></div>
+              <div class="field-block" data-field-wrap="witness1Cpf"><label for="witness1Cpf">CPF da 1ª testemunha</label><input id="witness1Cpf" data-bind="witness1Cpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="witness1Cpf"></p></div>
+              <div class="field-block"><label for="witness1Rg">RG</label><input id="witness1Rg" data-bind="witness1Rg" inputmode="numeric" maxlength="14"></div>
+              <div class="field-block span-2"><label for="witness2Name">2ª testemunha</label><input id="witness2Name" data-bind="witness2Name" maxlength="60"></div>
+              <div class="field-block" data-field-wrap="witness2Cpf"><label for="witness2Cpf">CPF da 2ª testemunha</label><input id="witness2Cpf" data-bind="witness2Cpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="witness2Cpf"></p></div>
+              <div class="field-block"><label for="witness2Rg">RG</label><input id="witness2Rg" data-bind="witness2Rg" inputmode="numeric" maxlength="14"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-section" data-step="documents" aria-labelledby="documentsHeading">
+          <div class="section-heading">
+            <span class="eyebrow">Etapa 4 de 5</span>
+            <h1 id="documentsHeading">Documentos do benefício</h1>
+          </div>
+          <div class="guide-tabs" role="tablist">
+            <button type="button" role="tab" aria-selected="true" data-guide-tab="checklist">Checklist</button>
+            <button type="button" role="tab" aria-selected="false" data-guide-tab="criteria">Critérios</button>
+            <button type="button" role="tab" aria-selected="false" data-guide-tab="attention">Atenção</button>
+          </div>
+          <div class="guide-panel is-active" data-guide-panel="checklist">
+            <div class="checklist-toolbar">
+              <span id="checklistProgress">0 de 0 separados</span>
+              <div>
+                <button type="button" class="icon-button" id="copyChecklist" title="Copiar para WhatsApp" aria-label="Copiar checklist"><i data-lucide="copy"></i></button>
+                <button type="button" class="icon-button" id="printChecklist" title="Imprimir checklist" aria-label="Imprimir checklist"><i data-lucide="printer"></i></button>
+              </div>
+            </div>
+            <div class="checklist" id="checklist"></div>
+          </div>
+          <div class="guide-panel" data-guide-panel="criteria">
+            <div class="criteria-block"><span>Indicado para</span><p id="benefitFit"></p></div>
+            <div class="criteria-block"><span>Perguntas para conferir</span><ul class="question-list" id="benefitQuestions"></ul></div>
+            <div class="source-list" id="benefitSources"></div>
+            <p class="review-date">Conteúdo revisado em <span id="reviewDate"></span>.</p>
+          </div>
+          <div class="guide-panel" data-guide-panel="attention">
+            <ul class="alert-list" id="benefitAlerts"></ul>
+          </div>
+        </section>
+
+        <section class="step-section" data-step="review" aria-labelledby="reviewHeading">
+          <div class="section-heading">
+            <span class="eyebrow">Etapa 5 de 5</span>
+            <h1 id="reviewHeading">Revisão final</h1>
+          </div>
+          <div class="review-status" id="reviewStatus" aria-live="polite"></div>
+          <div class="review-list" id="reviewList"></div>
+          <div class="document-set">
+            <span>PDF jurídico</span>
+            <ol id="documentSet"></ol>
+          </div>
+          <a href="revogacao-v2.html" class="secondary-button full-button"><i data-lucide="file-x-2"></i><span>Revogar procuração</span></a>
+        </section>
+      </div>
+
+      <footer class="panel-footer">
+        <div class="completion-row"><span>Preenchimento</span><strong id="completionLabel">0%</strong></div>
+        <div class="progress-track"><span id="completionBar"></span></div>
+        <div class="footer-actions">
+          <button type="button" class="icon-button" id="previousStep" title="Etapa anterior" aria-label="Etapa anterior"><i data-lucide="arrow-left"></i></button>
+          <button type="button" class="primary-button" id="nextStep"><span>Continuar</span><i data-lucide="arrow-right"></i></button>
+          <button type="button" class="primary-button generate-button" id="generatePdf" hidden><i data-lucide="file-down"></i><span>Gerar PDF</span><span class="hold-progress" aria-hidden="true"></span></button>
+        </div>
+      </footer>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-bar">
+        <button class="icon-button mobile-panel-button" id="mobilePanelButton" type="button" aria-label="Abrir preenchimento"><i data-lucide="panel-left-open"></i></button>
+        <div class="view-switcher" role="tablist" aria-label="Visualização">
+          <button type="button" role="tab" aria-selected="false" data-mobile-view="form"><i data-lucide="square-pen"></i><span>Preencher</span></button>
+          <button type="button" role="tab" aria-selected="true" data-mobile-view="preview"><i data-lucide="files"></i><span>Prévia</span></button>
+          <button type="button" role="tab" aria-selected="false" data-mobile-view="checklist"><i data-lucide="list-checks"></i><span>Checklist</span></button>
+        </div>
+        <div class="workspace-meta">
+          <span id="documentCount">2 documentos</span>
+          <button type="button" class="icon-button" id="clearData" title="Limpar dados" aria-label="Limpar dados"><i data-lucide="trash-2"></i></button>
+        </div>
+      </header>
+      <div class="document-tabs" id="documentTabs" role="tablist" aria-label="Documentos do PDF"></div>
+      <div class="paper-stage" id="paperStage">
+        <div class="document-stack" id="documentStack"></div>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="app-dialog" id="triageDialog">
+    <form method="dialog" class="dialog-shell" id="triageForm">
+      <header><div><span class="eyebrow">Triagem inicial</span><h2>Qual é a situação principal?</h2></div><button type="submit" class="icon-button" value="cancel" aria-label="Fechar"><i data-lucide="x"></i></button></header>
+      <div class="triage-options">
+        <label><input type="checkbox" name="death"><span><i data-lucide="heart-handshake"></i>Falecimento</span></label>
+        <label><input type="checkbox" name="temporaryIncapacity"><span><i data-lucide="stethoscope"></i>Incapacidade temporária</span></label>
+        <label><input type="checkbox" name="permanentIncapacity"><span><i data-lucide="accessibility"></i>Incapacidade permanente</span></label>
+        <label><input type="checkbox" name="workAccident"><span><i data-lucide="hard-hat"></i>Acidente ou doença do trabalho</span></label>
+        <label><input type="checkbox" name="sequela"><span><i data-lucide="activity"></i>Sequela permanente</span></label>
+        <label><input type="checkbox" name="maternity"><span><i data-lucide="baby"></i>Parto ou adoção</span></label>
+        <label><input type="checkbox" name="prison"><span><i data-lucide="shield"></i>Segurado preso</span></label>
+        <label><input type="checkbox" name="lowIncomeDisability"><span><i data-lucide="hand-heart"></i>Deficiência e baixa renda</span></label>
+        <label><input type="checkbox" name="age65LowIncome"><span><i data-lucide="person-standing"></i>65 anos e baixa renda</span></label>
+        <label><input type="checkbox" name="retirement"><span><i data-lucide="calendar-clock"></i>Aposentadoria</span></label>
+        <label><input type="checkbox" name="priorBenefit"><span><i data-lucide="file-search"></i>Benefício já concedido</span></label>
+        <label><input type="checkbox" name="rural"><span><i data-lucide="sprout"></i>Trabalho rural</span></label>
+        <label><input type="checkbox" name="mixedWork"><span><i data-lucide="shuffle"></i>Trabalho rural e urbano</span></label>
+      </div>
+      <div class="triage-results" id="triageResults" aria-live="polite"></div>
+      <footer><button type="button" class="secondary-button" id="runTriage"><i data-lucide="route"></i>Ver caminhos</button><button type="submit" class="text-button" value="cancel">Cancelar</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog compact-dialog" id="internalPrintDialog">
+    <form method="dialog" class="dialog-shell">
+      <header><div><span class="eyebrow">Uso interno</span><h2>Imprimir com campos vazios?</h2></div><button type="submit" class="icon-button" value="cancel" aria-label="Fechar"><i data-lucide="x"></i></button></header>
+      <p>Campos vazios serão liberados. CPF, telefone ou dados parcialmente preenchidos e inválidos continuarão bloqueados.</p>
+      <footer><button type="submit" class="secondary-button" value="cancel">Cancelar</button><button type="button" class="primary-button" id="confirmInternalPrint"><i data-lucide="printer"></i>Imprimir incompleto</button></footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="print-checklist" id="printChecklistSheet"></div>
+
+  <script src="assets/lucide.min.js"></script>
+  <script type="module" src="assets/v2.js"></script>
+</body>
+</html>

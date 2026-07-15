@@ -12,3 +12,5 @@ cliente-*.pdf
 Thumbs.db
 *.tmp
 *.swp
+node_modules/
+output/
