@@ -15,6 +15,12 @@
     margin-left: 2.5cm;
     margin-right: 2cm;
 }
+:root {
+    --sidebar-width: 232px;
+    --brand: #622423;
+    --brand-dark: #451714;
+    --surface: #f7f4f2;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: 'Times New Roman', Times, serif;
@@ -133,10 +139,10 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .toolbar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
-    width: 202px;
+    width: var(--sidebar-width);
     background: linear-gradient(165deg, #6f2b27 0%, #5a201d 55%, #4c1a17 100%);
     color: #fff;
-    padding: 20px 16px;
+    padding: 18px 16px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -144,13 +150,15 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     font-family: Arial, sans-serif;
     font-size: 10pt;
     box-shadow: 2px 0 10px rgba(0,0,0,0.35);
-    gap: 16px;
+    gap: 14px;
     overflow-y: auto;
     overflow-x: hidden;
-    transition: width 0.18s ease, padding 0.18s ease, opacity 0.15s ease;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.32) transparent;
+    transition: width 0.22s ease, padding 0.22s ease, opacity 0.18s ease, box-shadow 0.22s ease;
 }
 .toolbar.collapsed { width: 0; padding: 20px 0; opacity: 0; pointer-events: none; box-shadow: none; }
-.toolbar .tb-group { display: flex; flex-direction: column; gap: 7px; }
+.toolbar .tb-group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .toolbar .tb-label { font-weight: bold; font-size: 9pt; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.6pt; }
 .toolbar .tb-row { display: flex; align-items: center; gap: 6px; }
 .toolbar .tb-spacer { flex: 1 1 auto; }
@@ -176,6 +184,14 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 }
 .toolbar button:hover { background: #f7e7e5; }
 .toolbar button:active { transform: scale(0.97); }
+.toolbar button:focus-visible,
+.toolbar a:focus-visible,
+.doc-tab:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #d8a6a2;
+    outline-offset: 2px;
+}
 .toolbar .tb-link {
     display: block; text-align: center; width: 100%; margin-top: 8px;
     color: rgba(255,255,255,0.85); text-decoration: underline; font-size: 9pt;
@@ -193,25 +209,62 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .sidebar-collapse-btn:hover { background: rgba(255,255,255,0.2); }
 .sidebar-reopen {
     position: fixed; top: 14px; left: 12px; z-index: 1001;
-    width: 36px; height: 36px; border-radius: 9px; border: none;
+    width: 42px; height: 38px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18);
     background: linear-gradient(165deg, #6f2b27, #4c1a17); color: #fff; font-size: 15px; cursor: pointer;
-    display: none; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    opacity: 0; transform: translateX(-12px); pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.22s ease, filter 0.12s ease;
 }
 .sidebar-reopen:hover { filter: brightness(1.12); }
-body.sidebar-collapsed .sidebar-reopen { display: flex; }
+body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); pointer-events: auto; }
 .brand-tag {
-    margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.14);
+    margin-top: 2px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.14);
     font-size: 7.5pt; letter-spacing: 0.5pt; text-transform: uppercase; text-align: center;
     opacity: 0.55; line-height: 1.5;
 }
+.tb-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.tb-toggle {
+    display: grid !important;
+    grid-template-columns: 16px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    font-size: 8.8pt;
+    line-height: 1.42;
+    cursor: pointer;
+}
+.tb-toggle input { width: 14px; height: 14px; margin-top: 2px; accent-color: #fff; }
+.tb-toggle span { min-width: 0; text-align: left; text-wrap: balance; hyphens: none; }
+.toolbar .primary-action {
+    position: relative;
+    overflow: hidden;
+    min-height: 42px;
+    border: 1px solid rgba(255,255,255,0.62);
+    box-shadow: 0 4px 14px rgba(25,5,5,0.2);
+    transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.toolbar .primary-action:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(25,5,5,0.28); }
+.toolbar .primary-action::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: #2e7d32;
+    transform: scaleX(0);
+    transform-origin: left;
+}
+.toolbar .primary-action.internal-hold-charging::after {
+    transform: scaleX(1);
+    transition: transform 1.15s linear;
+}
+.toolbar .primary-action.internal-hold-fired { background: #eef8ef; color: #235e28; }
 
 /* Dropdown customizado (substitui o <select> nativo do navegador) */
 .csel { position: relative; width: 100%; font-family: Arial, sans-serif; }
 .csel-btn {
     width: 100%; display: flex; align-items: center; justify-content: space-between;
     background: #fff; color: #622423; border: 1px solid rgba(0,0,0,0.06); border-radius: 7px;
-    padding: 8px 12px; font-size: 9.5pt; font-weight: bold; cursor: pointer;
+    min-height: 42px; padding: 8px 12px; font-size: 9.5pt; font-weight: bold; cursor: pointer;
     text-align: left; gap: 6px;
 }
 .csel-btn:hover { background: #fdf3f2; }
@@ -287,7 +340,10 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
 .val-item::before { content: "→"; position: absolute; left: 10px; color: #b3261e; font-weight: bold; }
 .val-item:hover { background: #fdf3f2; border-color: #622423; color: #622423; }
 .ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
-.ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 12px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; }
+.ia-modal-overlay { animation: overlayIn 0.14s ease-out; }
+.ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 10px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; animation: modalIn 0.16s ease-out; }
+@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .ia-modal-title { font-size: 13pt; font-weight: bold; color: #622423; margin-bottom: 14px; }
 .ia-field { display: block; font-size: 9.5pt; color: #444; margin-bottom: 12px; }
 .ia-field input { width: 100%; margin-top: 4px; padding: 8px 10px; font-size: 10pt; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
@@ -311,9 +367,10 @@ body.sidebar-collapsed .sidebar-reopen { display: flex; }
    "pular para o documento" (a exibicao e em pilha vertical com rolagem). */
 .doc-tabs {
     flex: 0 0 auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-    padding: 10px 24px; background: #ece7e4; border-bottom: 1px solid #d6cdc9;
+    padding: 10px 24px; background: #f5f2f0; border-bottom: 1px solid #d6cdc9;
     font-family: Arial, sans-serif;
-    transition: padding-left 0.18s ease;
+    box-shadow: 0 2px 8px rgba(62,35,31,0.08);
+    transition: padding-left 0.22s ease;
 }
 .doc-tabs-label { font-size: 8.5pt; font-weight: bold; color: #8a6e6c; text-transform: uppercase; letter-spacing: 0.4pt; margin-right: 2px; }
 /* Com a sidebar recolhida, o botão flutuante de reabrir (▸▸) fica no canto
@@ -325,14 +382,15 @@ body.sidebar-collapsed .doc-tabs { padding-left: 60px; }
     cursor: pointer; transition: background 0.12s ease, color 0.12s ease;
 }
 .doc-tab:hover { background: #622423; color: #fff; border-color: #622423; }
+.doc-tab.active { background: #622423; color: #fff; border-color: #622423; box-shadow: 0 2px 6px rgba(98,36,35,0.2); }
 .doc-tab[hidden] { display: none; }
 
 /* Area dos documentos: fixa a direita da sidebar, sem scroll de pagina */
 #docsArea {
-    position: fixed; top: 0; right: 0; bottom: 0; left: 202px;
+    position: fixed; top: 0; right: 0; bottom: 0; left: var(--sidebar-width);
     display: flex; flex-direction: column;
     background: #d8d3d0;
-    transition: left 0.18s ease;
+    transition: left 0.22s ease;
 }
 body.sidebar-collapsed #docsArea { left: 0; }
 #docsViewport {
@@ -361,22 +419,25 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .testemunha-campo .label { font-size: 7pt; }
 .testemunha-campo input { font-family: 'Times New Roman', serif; font-weight: bold; font-size: 9pt; border: none; outline: none; background: #fff8dc; width: 100%; padding: 0; }
 .testemunha-campo input:focus { background: #fff3a0; }
-/* Tooltip de ajuda */
-.help-btn {
+/* Ajuda do seletor de tipo: painel fora da sidebar para nunca ser recortado. */
+.toolbar .help-btn {
     display: inline-flex; align-items: center; justify-content: center;
     width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.2);
     color: #fff; font-weight: bold; font-size: 12pt; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.5);
-    position: relative; margin-left: 6px;
+    padding: 0; margin-left: 4px; flex: 0 0 22px;
 }
-.help-btn:hover { background: rgba(255,255,255,0.4); }
+.toolbar .help-btn:hover { background: rgba(255,255,255,0.38); color: #fff; }
 .help-popup {
-    display: none; position: absolute; top: 0; left: 100%; margin-left: 8px;
-    background: #fff; color: #333; padding: 12px 14px; border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3); font-size: 9pt; line-height: 1.5;
-    width: 320px; z-index: 2000; font-weight: normal; text-align: left;
+    display: none; position: fixed; z-index: 5000;
+    width: min(360px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto;
+    background: #fff; color: #333; padding: 15px 16px; border: 1px solid #dccbc8; border-radius: 8px;
+    box-shadow: 0 16px 44px rgba(38,18,16,0.3); font: normal 9pt/1.48 Arial, sans-serif; text-align: left;
 }
-.help-btn:hover .help-popup { display: block; }
+.help-popup.open { display: block; animation: helpIn 0.14s ease-out; }
+.help-popup p { margin: 0 0 10px; text-align: left; line-height: 1.48; }
+.help-popup p:last-child { margin-bottom: 0; }
 .help-popup b { color: #622423; }
+@keyframes helpIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 /* Sections hidden by default */
 .tipo-section { display: none; }
 .tipo-section.active { display: block; }
@@ -526,7 +587,15 @@ body.sidebar-collapsed #docsArea { left: 0; }
 }
 .anexo-req-sel select:focus { background: #fff3a0; border-color: #622423; }
 .anexo-req-sel select.input-error { background: #ffe9e9; box-shadow: inset 0 0 0 1px #b30000; }
+.anexo-beneficio-outro {
+    width: 100%; margin-top: 5pt; padding: 3pt 4pt;
+    font-family: 'Times New Roman', Times, serif; font-size: 10pt; font-weight: bold;
+    color: #000; background: #fff8dc; border: 1pt solid #999; border-radius: 3px; outline: none;
+}
+.anexo-beneficio-outro:focus { background: #fff3a0; border-color: #622423; }
+.anexo-beneficio-outro.input-error { background: #ffe9e9 !important; box-shadow: inset 0 0 0 1px #b30000; }
 @media print { .anexo-req-sel select { background: transparent !important; border: none !important; border-bottom: 1px solid #555 !important; border-radius: 0 !important; -webkit-appearance: none; appearance: none; } }
+@media print { .anexo-beneficio-outro { background: transparent !important; border: none !important; border-bottom: 1px solid #555 !important; border-radius: 0 !important; } }
 .termo-header {
     text-align: center; font-size: 10.5pt; line-height: 1.35; color: #622423; font-weight: 600;
     border-bottom: 1.5pt solid #622423; padding-bottom: 6pt;
@@ -544,7 +613,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .tb-link { user-select: none; -webkit-user-select: none; transition: color .15s, text-shadow .15s; }
 .tb-link.egg-charging { text-shadow: 0 0 8px rgba(255,255,255,0.6); cursor: progress; }
 .tb-link.egg-done { color: #7ed957 !important; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
-.termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.42; margin: 0 0 6pt; }
+.termo-p { text-align: justify; font-size: 11.5pt; line-height: 1.42; margin: 0 0 6pt; overflow-wrap: break-word; }
 .termo-p:last-child { margin-bottom: 0; }
 /* Itens numerados (I, II, a, b) tem input largo no meio — justify esticaria a
    linha com espacos gigantes. Left-align evita isso. */
@@ -610,13 +679,23 @@ body.sidebar-collapsed #docsArea { left: 0; }
     padding: 40px 26px 60px;
     min-width: min-content;
 }
+@media screen and (max-width: 1100px) {
+    :root { --sidebar-width: 216px; }
+    .toolbar { padding-left: 12px; padding-right: 12px; }
+    #docs-wrap { padding: 32px 7px 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .toolbar, #docsArea, .sidebar-reopen, .csel-arrow, .toolbar .primary-action,
+    .help-popup.open, .ia-modal-overlay, .ia-modal { transition: none !important; animation: none !important; }
+}
 @media print {
     .page-termo:not(.show) { display: none !important; }
+    .help-popup { display: none !important; }
 }
-#print-benefit-blocker { display: none; }
+#print-validation-blocker { display: none; }
 @media print {
-    body.print-benefit-blocked > *:not(#print-benefit-blocker) { display: none !important; }
-    body.print-benefit-blocked > #print-benefit-blocker {
+    body.print-validation-blocked > *:not(#print-validation-blocker) { display: none !important; }
+    body.print-validation-blocked > #print-validation-blocker {
         display: block !important;
         font-family: Arial, sans-serif;
         font-size: 16pt;
@@ -631,25 +710,18 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </head>
 <body>
 
-<div id="print-benefit-blocker">
-    Impressão bloqueada. Selecione o tipo de benefício no Termo de Benefício antes de gerar o PDF.
+<div id="print-validation-blocker">
+    Impressão bloqueada. Preencha e corrija os campos obrigatórios antes de gerar o PDF.
 </div>
 
 <div class="toolbar" id="toolbarEl">
-    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores">
+    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores" aria-expanded="true" aria-controls="toolbarEl">
         <span class="sc-icon">◂◂</span> Recolher barra
     </button>
     <div class="tb-group">
         <div class="tb-row">
             <span class="tb-label">Tipo</span>
-            <span class="help-btn">?
-                <div class="help-popup">
-                    <b>Normal:</b> Pessoa maior de 18 anos, capaz, que assina o documento.<br><br>
-                    <b>Absolutamente Incapaz:</b> Menor de 16 anos ou curatelado. O representante legal (pai, mãe, tutor ou curador) assina pela pessoa.<br><br>
-                    <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
-                    Em qualquer um dos 3 tipos, marque a caixa <b>"é analfabeto(a)"</b> logo abaixo da assinatura se quem assina (outorgante, representante ou assistente, conforme o tipo) não sabe assinar — isso abre o bloco de assinatura a rogo + 2 testemunhas + impressão digital, na própria página, sem precisar trocar de tipo.
-                </div>
-            </span>
+            <button type="button" class="help-btn" id="typeHelpBtn" aria-label="Explicar os tipos de procuração" aria-controls="typeHelpPanel" aria-expanded="false">?</button>
         </div>
         <select id="tipoSelect" onchange="mudarTipo(this.value)" style="display:none;">
             <option value="normal">Normal</option>
@@ -671,24 +743,28 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
     <hr>
 
-    <label id="termo-toggle-wrap" class="tb-group" style="display:none; font-size:9pt; line-height:1.3; cursor:pointer;">
-        <span class="tb-row" style="align-items:flex-start;">
-            <input type="checkbox" id="termoIncluirCheck" onchange="this.dataset.userTouched='1'; syncTermo();" style="accent-color:#fff; margin-top:2px;">
-            <span>Incluir Termo de Responsabilidade e Compromisso</span>
-        </span>
+    <label id="termo-toggle-wrap" class="tb-toggle" style="display:none;">
+        <input type="checkbox" id="termoIncluirCheck" onchange="this.dataset.userTouched='1'; syncTermo();">
+        <span>Incluir Termo de Responsabilidade e Compromisso</span>
     </label>
 
-    <div class="tb-spacer"></div>
-
-    <button onclick="gerarPDF()">Gerar PDF</button>
-    <!-- Easter egg: segurar ~1s este link preenche tudo com dados de TESTE;
-         clique normal (rapido) revoga a procuracao como sempre. -->
-    <a href="revogacao.html" class="tb-link" id="revogarLink">Revogar procuração →</a>
-
-    <div class="brand-tag">Menezes Advocacia<br>Procurações</div>
+    <div class="tb-actions">
+        <button type="button" class="primary-action" id="gerarPdfBtn">Gerar PDF</button>
+        <!-- Easter egg: segurar ~1s este link abre a configuração interna;
+             clique normal (rapido) revoga a procuracao como sempre. -->
+        <a href="revogacao.html" class="tb-link" id="revogarLink">Revogar procuração →</a>
+        <div class="brand-tag">Menezes Advocacia<br>Procurações</div>
+    </div>
 </div>
 
-<button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral de novo">▸▸</button>
+<div class="help-popup" id="typeHelpPanel" role="dialog" aria-label="Tipos de procuração" aria-hidden="true">
+    <p><b>Normal:</b> pessoa maior de 18 anos, capaz, que assina o documento.</p>
+    <p><b>Absolutamente incapaz:</b> menor de 16 anos ou curatelado. O representante legal assina pela pessoa.</p>
+    <p><b>Relativamente incapaz:</b> pessoa de 16 ou 17 anos, ou maior assistido. Assina com o assistente legal.</p>
+    <p>Quando o signatário não souber assinar, marque <b>“Signatário(a) analfabeto(a)”</b> no documento.</p>
+</div>
+
+<button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral" aria-label="Mostrar a barra lateral">▸▸</button>
 
 <!-- Preenchimento por IA: input de arquivo (compartilhado), painel de config
      (chave OpenRouter + modelo, salvos no navegador) e toast de status. -->
@@ -730,8 +806,8 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <!-- Modal proprio de validacao (substitui o alert() feio do navegador). -->
 <div class="ia-modal-overlay" id="valModal" style="display:none">
     <div class="ia-modal">
-        <div class="ia-modal-title">Faltam campos obrigatórios</div>
-        <p class="ia-note">Preencha o que falta antes de gerar o PDF:</p>
+        <div class="ia-modal-title">Revise os campos</div>
+        <p class="ia-note">Corrija os itens abaixo antes de gerar o PDF:</p>
         <ul class="val-list" id="valList"></ul>
         <p class="ia-note" style="margin:-6px 0 12px;">Clique num item para ir direto ao campo.</p>
         <div class="ia-modal-actions">
@@ -788,7 +864,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
         <div class="grid-cell" id="cell-rg"><span class="label">RG / Órgão:</span><input type="text" id="rg" value="" maxlength="25"></div>
         <div class="grid-cell" id="cell-profissao"><span class="label">Profissão:</span><input type="text" id="profissao" value="" maxlength="30"></div>
         <div class="grid-cell" id="cell-estado-civil"><span class="label">Estado Civil:</span><input type="text" id="estado_civil" value="" maxlength="25" list="estado-civil-list"></div>
-        <div class="grid-cell" id="cell-telefone"><span class="label">Telefone:</span><input type="text" id="telefone" value="" maxlength="16"></div>
+        <div class="grid-cell" id="cell-telefone"><span class="label">Telefone celular:</span><input type="text" id="telefone" value="" maxlength="16"></div>
     </div>
     <div class="grid-row" id="row-endereco">
         <div class="grid-cell" id="cell-endereco"><span class="label">Endereço:</span><input type="text" id="endereco" value="" maxlength="45"></div>
@@ -1132,7 +1208,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     <option>Revisão de Benefício</option>
                     <option>Outro (especificar):</option>
                 </select>
-                <input type="text" id="anexo_beneficio_outro" placeholder="(especifique se marcou 'outro')" maxlength="60" style="display:none; width:100%; margin-top:5pt;">
+                <input type="text" id="anexo_beneficio_outro" class="anexo-beneficio-outro" placeholder="(especifique se marcou 'outro')" maxlength="60" style="display:none;">
             </div>
         </div>
         <label class="anexo-req-item"><input type="checkbox" id="anexo_opt2" checked><span>Atualizações para manutenção do benefício e outros serviços relacionados, na modalidade de atendimento à distância, bem como a preparação e instrução de requerimentos para posterior análise pelo INSS.</span></label>
@@ -1901,6 +1977,7 @@ function onAnexoBeneficioChange() {
     var isOutro = /outro/i.test(sel.value);
     outro.style.display = isOutro ? '' : 'none';
     if (!isOutro) outro.value = '';
+    else requestAnimationFrame(function() { autoFitGridFont(outro); });
     recalcLayout();
 }
 function updateFooterPagina() {
@@ -2037,10 +2114,15 @@ function formatTelefone(v) {
     if (d.length <= 7) return '(' + d.substring(0, 2) + ') ' + d.substring(2, 3) + ' ' + d.substring(3);
     return '(' + d.substring(0, 2) + ') ' + d.substring(2, 3) + ' ' + d.substring(3, 7) + '-' + d.substring(7);
 }
+function isObviousCPFPlaceholder(d) {
+    var base = d.substring(0, 9);
+    return base === '012345678' || base === '123456789' || base === '987654321' || /^(\d)\1{8}$/.test(base);
+}
 function isValidCPF(v) {
     var d = onlyDigits(v);
     if (d.length !== 11) return false;
     if (/^(\d)\1{10}$/.test(d)) return false;
+    if (isObviousCPFPlaceholder(d)) return false;
     var sum = 0, i;
     for (i = 0; i < 9; i++) sum += parseInt(d.charAt(i), 10) * (10 - i);
     var dv1 = 11 - (sum % 11); if (dv1 >= 10) dv1 = 0;
@@ -2050,7 +2132,20 @@ function isValidCPF(v) {
     var dv2 = 11 - (sum % 11); if (dv2 >= 10) dv2 = 0;
     return dv2 === parseInt(d.charAt(10), 10);
 }
+var VALID_DDDS = {};
+('11 12 13 14 15 16 17 18 19 21 22 24 27 28 31 32 33 34 35 37 38 ' +
+ '41 42 43 44 45 46 47 48 49 51 53 54 55 61 62 63 64 65 66 67 68 69 ' +
+ '71 73 74 75 77 79 81 82 83 84 85 86 87 88 89 91 92 93 94 95 96 97 98 99')
+    .split(' ').forEach(function(ddd) { VALID_DDDS[ddd] = true; });
 function isTelefoneCompleto(v) { return /^\(\d{2}\)\s\d\s\d{4}-\d{4}$/.test((v || '').trim()); }
+function isValidTelefone(v) {
+    var d = onlyDigits(v);
+    if (d.length !== 11 || !VALID_DDDS[d.substring(0, 2)] || d.charAt(2) !== '9') return false;
+    var numero = d.substring(2);
+    if (/^9(\d)\1{7}$/.test(numero)) return false;
+    if (numero === '912345678' || numero === '987654321') return false;
+    return isTelefoneCompleto(formatTelefone(d));
+}
 function filterInput(v, allow) {
     if (allow === 'text') return v.replace(/[0-9]/g, '');
     if (allow === 'num')  return v.replace(/[^0-9]/g, '');
@@ -2170,25 +2265,32 @@ ALL_DATE_IDS.forEach(function(id) {
 // Bind table fields
 function validateCPFLive(el) {
     var d = onlyDigits(el.value);
-    if (d.length === 0) { el.classList.remove('input-error'); return; }
-    if (d.length < 11) { el.classList.remove('input-error'); return; } // ainda digitando
-    if (isValidCPF(el.value)) el.classList.remove('input-error');
-    else el.classList.add('input-error');
+    if (d.length === 0 || d.length < 11) { setError(el.id, false); return; }
+    setError(el.id, !isValidCPF(el.value));
+}
+function validateTelefoneLive(el, finalCheck) {
+    var d = onlyDigits(el.value);
+    if (!d.length || (!finalCheck && d.length < 11)) { setError(el.id, false); return; }
+    setError(el.id, !isValidTelefone(el.value));
 }
 Object.keys(FIELDS).forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     var cfg = FIELDS[id];
+    if (cfg.fmt === 'cpf') { el.inputMode = 'numeric'; el.autocomplete = 'off'; }
+    if (cfg.fmt === 'fone') { el.inputMode = 'tel'; el.autocomplete = 'tel'; }
     el.addEventListener('input', function() {
         var pos = el.selectionStart, before = el.value;
         if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
         if (REALTIME[cfg.fmt]) el.value = normalize(id, el.value);
         el.setSelectionRange(Math.max(0, pos - (before.length - el.value.length)), Math.max(0, pos - (before.length - el.value.length)));
         if (cfg.fmt === 'cpf') validateCPFLive(el);
+        if (cfg.fmt === 'fone') validateTelefoneLive(el, false);
     });
     if (cfg.fmt) el.addEventListener('blur', function() {
         if (cfg.allow) el.value = filterInput(el.value, cfg.allow);
         el.value = normalize(id, el.value);
         if (cfg.fmt === 'cpf') validateCPFLive(el);
+        if (cfg.fmt === 'fone') validateTelefoneLive(el, true);
     });
 });
 
@@ -2250,6 +2352,71 @@ document.addEventListener('click', function(ev) {
 document.addEventListener('keydown', function(ev) {
     if (ev.key === 'Escape') toggleTipoMenu(true);
 });
+
+// Painel de ajuda fica no <body>, fora do overflow da sidebar. Hover abre para
+// consulta rápida; clique fixa o painel até novo clique, Esc ou clique externo.
+var TYPE_HELP_PINNED = false;
+var TYPE_HELP_CLOSE_TIMER = null;
+function positionTypeHelpPanel() {
+    var button = document.getElementById('typeHelpBtn');
+    var panel = document.getElementById('typeHelpPanel');
+    var toolbar = document.getElementById('toolbarEl');
+    if (!button || !panel || !toolbar || !panel.classList.contains('open')) return;
+    var br = button.getBoundingClientRect();
+    var tr = toolbar.getBoundingClientRect();
+    var maxLeft = window.innerWidth - panel.offsetWidth - 12;
+    var left = Math.max(12, Math.min(tr.right + 12, maxLeft));
+    var maxTop = window.innerHeight - panel.offsetHeight - 12;
+    var top = Math.max(12, Math.min(br.top - 4, maxTop));
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+}
+function setTypeHelpPanelOpen(open) {
+    var button = document.getElementById('typeHelpBtn');
+    var panel = document.getElementById('typeHelpPanel');
+    if (!button || !panel) return;
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    button.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) requestAnimationFrame(positionTypeHelpPanel);
+}
+function closeTypeHelpPanel() {
+    TYPE_HELP_PINNED = false;
+    clearTimeout(TYPE_HELP_CLOSE_TIMER);
+    setTypeHelpPanelOpen(false);
+}
+(function wireTypeHelp() {
+    var button = document.getElementById('typeHelpBtn');
+    var panel = document.getElementById('typeHelpPanel');
+    if (!button || !panel) return;
+    function openTransient() { clearTimeout(TYPE_HELP_CLOSE_TIMER); setTypeHelpPanelOpen(true); }
+    function scheduleClose() {
+        clearTimeout(TYPE_HELP_CLOSE_TIMER);
+        TYPE_HELP_CLOSE_TIMER = setTimeout(function() {
+            if (!TYPE_HELP_PINNED) setTypeHelpPanelOpen(false);
+        }, 130);
+    }
+    button.addEventListener('mouseenter', openTransient);
+    button.addEventListener('mouseleave', scheduleClose);
+    button.addEventListener('focus', openTransient);
+    button.addEventListener('blur', scheduleClose);
+    panel.addEventListener('mouseenter', function() { clearTimeout(TYPE_HELP_CLOSE_TIMER); });
+    panel.addEventListener('mouseleave', scheduleClose);
+    button.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        TYPE_HELP_PINNED = !TYPE_HELP_PINNED;
+        setTypeHelpPanelOpen(TYPE_HELP_PINNED || !panel.classList.contains('open'));
+    });
+    document.addEventListener('click', function(event) {
+        if (!panel.classList.contains('open')) return;
+        if (!panel.contains(event.target) && event.target !== button) closeTypeHelpPanel();
+    });
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeTypeHelpPanel();
+    });
+    window.addEventListener('resize', positionTypeHelpPanel);
+})();
 
 // === COMBOBOX custom (troca o <datalist> nativo por popup estilizado) ========
 // Aplica a TODO input[list]: qualidade (pai/mae/tutor...), estado civil, estado
@@ -2344,9 +2511,17 @@ wireBidirectionalSync();
 
 function setError(id, hasError) {
     var el = document.getElementById(id); if (!el) return;
-    if (hasError) el.classList.add('input-error');
-    else el.classList.remove('input-error');
+    if (hasError) {
+        el.classList.add('input-error');
+        el.setAttribute('aria-invalid', 'true');
+    } else {
+        el.classList.remove('input-error');
+        el.removeAttribute('aria-invalid');
+    }
 }
+['cpf','telefone','rep_cpf','assist_cpf'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.setAttribute('aria-required', 'true');
+});
 function applyRGFallback(id) {
     var el = document.getElementById(id); if (!el) return;
     if (!el.value || !el.value.trim()) el.value = '--';
@@ -2519,6 +2694,11 @@ document.querySelectorAll('.dados-grid .grid-cell input[type="text"]').forEach(f
     el.addEventListener('blur', function() { autoFitGridFont(el); });
     autoFitGridFont(el);
 });
+var beneficioOutroEl = document.getElementById('anexo_beneficio_outro');
+if (beneficioOutroEl) {
+    beneficioOutroEl.addEventListener('input', function() { autoFitGridFont(beneficioOutroEl); });
+    beneficioOutroEl.addEventListener('blur', function() { autoFitGridFont(beneficioOutroEl); });
+}
 
 // Initial field normalization
 Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id); if (el && FIELDS[id].fmt) el.value = normalize(id, el.value); });
@@ -2533,33 +2713,51 @@ function fieldValue(id) {
     var el = document.getElementById(id);
     return el ? (el.value || '').trim() : '';
 }
-function hasAnyMeaningfulInput() {
-    var inputs = document.querySelectorAll('input[type="text"]');
-    for (var i = 0; i < inputs.length; i++) {
-        var el = inputs[i];
-        if (!el || !el.id) continue;
-        if (el.classList.contains('date-input')) continue;
-        var v = (el.value || '').trim();
-        if (!v) continue;
-        if (v === '--' && (el.id === 'rg' || el.id === 'rep_rg' || el.id === 'assist_rg' || el.id === 'test1_rg' || el.id === 'test2_rg' || el.id === 'rogo_rg')) continue;
-        return true;
-    }
-    return false;
-}
 function markRequiredEmpty(id, det, label) {
     var v = fieldValue(id);
     if (!v || v === '--') {
-        det.push({ id: id, msg: label + ' é obrigatório.' });
+        det.push({ id: id, msg: 'Preencha: ' + label + '.' });
         setError(id, true);
     }
+}
+function validateRequiredCPF(id, label, det) {
+    var value = fieldValue(id);
+    if (!value) {
+        det.push({ id: id, msg: label + ' é obrigatório.' });
+        setError(id, true);
+        return false;
+    }
+    if (!isValidCPF(value)) {
+        det.push({ id: id, msg: label + ' inválido. Não use CPF repetido, sequencial ou de teste.' });
+        setError(id, true);
+        return false;
+    }
+    return true;
+}
+function validateDistinctCPFs(entries, det) {
+    var seen = {};
+    entries.forEach(function(entry) {
+        var value = fieldValue(entry.id);
+        if (!isValidCPF(value)) return;
+        var digits = onlyDigits(value);
+        if (!seen[digits]) { seen[digits] = entry; return; }
+        var first = seen[digits];
+        det.push({ id: entry.id, msg: 'O ' + entry.label + ' não pode repetir o ' + first.label + '.' });
+        setError(first.id, true);
+        setError(entry.id, true);
+    });
 }
 // Guarda o ultimo resultado detalhado ({id,msg}) pro modal de validacao clicavel.
 var VAL_ERRORS = [];
 function validateForm() {
     var det = [];
     ['nome','profissao','estado_civil','telefone','endereco','numero','estado','cidade','bairro',
-     'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade']
+     'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade',
+     'anexo_t1_nome','anexo_t2_nome']
         .forEach(function(id) { setError(id, false); });
+    Object.keys(FIELDS).forEach(function(id) {
+        if (FIELDS[id].fmt === 'cpf') setError(id, false);
+    });
 
     // O benefício é obrigatório independentemente dos demais campos.
     setError('anexo_beneficio', false);
@@ -2568,16 +2766,13 @@ function validateForm() {
     if (!benef) { det.push({ id: 'anexo_beneficio', msg: 'Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.' }); setError('anexo_beneficio', true); }
     else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) { det.push({ id: 'anexo_beneficio_outro', msg: 'Especifique o benefício no campo "Outro" do Termo de Benefício.' }); setError('anexo_beneficio_outro', true); }
 
-    if (!hasAnyMeaningfulInput()) {
-        VAL_ERRORS = det;
-        return det.map(function(e) { return e.msg; });
-    }
-
     var tipo = tipoAtual();
     var titularIncapaz = (tipo === 'incapaz');
     var isCompact = (titularIncapaz || tipo === 'relativo');
+    var cpfEntries = [{ id: 'cpf', label: 'CPF do outorgante' }];
 
-    // Se começou a preencher, exige conjunto base completo (telefone é OPCIONAL).
+    // Clique normal sempre exige o conjunto completo. Modelo vazio e uso
+    // excepcional ficam restritos ao long press interno do botão Gerar PDF.
     markRequiredEmpty('nome', det, 'Nome completo do outorgante');
     if (!isCompact) {
         markRequiredEmpty('profissao', det, 'Profissão');
@@ -2588,28 +2783,44 @@ function validateForm() {
     markRequiredEmpty('estado', det, 'Estado');
     markRequiredEmpty('cidade', det, 'Cidade');
     markRequiredEmpty('bairro', det, 'Bairro');
+    validateRequiredCPF('cpf', 'CPF do outorgante', det);
 
-    var cpfOutorgante = fieldValue('cpf');
-    if (cpfOutorgante && !isValidCPF(cpfOutorgante)) { det.push({ id: 'cpf', msg: 'CPF do outorgante inválido.' }); setError('cpf', true); }
+    var telefone = fieldValue('telefone');
+    if (!telefone) {
+        det.push({ id: 'telefone', msg: 'Telefone celular do outorgante é obrigatório.' });
+        setError('telefone', true);
+    } else if (!isValidTelefone(telefone)) {
+        det.push({ id: 'telefone', msg: 'Telefone celular inválido. Informe um número plausível, com DDD, sem sequências ou dígitos repetidos.' });
+        setError('telefone', true);
+    }
 
     if (titularIncapaz) {
         markRequiredEmpty('rep_nome', det, 'Nome do representante legal');
         markRequiredEmpty('rep_qualidade', det, 'Qualidade do representante legal');
-        var repCpf = fieldValue('rep_cpf');
-        if (!repCpf || !isValidCPF(repCpf)) { det.push({ id: 'rep_cpf', msg: 'CPF do representante legal é obrigatório e deve ser válido.' }); setError('rep_cpf', true); }
+        validateRequiredCPF('rep_cpf', 'CPF do representante legal', det);
+        cpfEntries.push({ id: 'rep_cpf', label: 'CPF do representante legal' });
     }
     if (tipo === 'relativo') {
         markRequiredEmpty('assist_nome', det, 'Nome do assistente legal');
         markRequiredEmpty('assist_qualidade', det, 'Qualidade do assistente legal');
-        var assistCpf = fieldValue('assist_cpf');
-        if (!assistCpf || !isValidCPF(assistCpf)) { det.push({ id: 'assist_cpf', msg: 'CPF do assistente legal é obrigatório e deve ser válido.' }); setError('assist_cpf', true); }
+        validateRequiredCPF('assist_cpf', 'CPF do assistente legal', det);
+        cpfEntries.push({ id: 'assist_cpf', label: 'CPF do assistente legal' });
     }
 
-    // Telefone nao e obrigatorio; se preenchido, so avisa o formato.
-    if (!isCompact) {
-        var telefone = fieldValue('telefone');
-        if (telefone && !isTelefoneCompleto(telefone)) { det.push({ id: 'telefone', msg: 'Telefone no formato (XX) X XXXX-XXXX.' }); setError('telefone', true); }
+    if (analfabetoAtivo()) {
+        var rogo = fonteRogo(tipo);
+        var analfCPFs = [
+            { id: rogo.cpf, label: 'CPF de quem assina a rogo' },
+            { id: rogo.t1cpf, label: 'CPF da 1ª testemunha' },
+            { id: rogo.t2cpf, label: 'CPF da 2ª testemunha' }
+        ];
+        analfCPFs.forEach(function(entry) { validateRequiredCPF(entry.id, entry.label, det); });
+        cpfEntries = cpfEntries.concat(analfCPFs);
+        markRequiredEmpty('anexo_t1_nome', det, 'Nome da 1ª testemunha');
+        markRequiredEmpty('anexo_t2_nome', det, 'Nome da 2ª testemunha');
     }
+
+    validateDistinctCPFs(cpfEntries, det);
 
     VAL_ERRORS = det;
     return det.map(function(e) { return e.msg; });
@@ -2617,9 +2828,18 @@ function validateForm() {
 // Modal proprio de validacao (nada de alert() do navegador). Cada item e
 // CLICAVEL (leva ao campo) e o botao "Ir ao proximo" percorre os pendentes.
 var _valIdx = -1;
-function fecharValModal() { document.getElementById('valModal').style.display = 'none'; }
+function fecharValModal(restoreFocus) {
+    var modal = document.getElementById('valModal');
+    if (!modal) return;
+    var wasOpen = getComputedStyle(modal).display !== 'none';
+    modal.style.display = 'none';
+    if (!wasOpen) return;
+    if (restoreFocus === false) return;
+    var trigger = document.getElementById('gerarPdfBtn');
+    if (trigger) setTimeout(function() { trigger.focus(); }, 0);
+}
 function iaVaiParaCampo(id) {
-    fecharValModal();
+    fecharValModal(false);
     var el = document.getElementById(id); if (!el) return;
     try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { el.scrollIntoView(); }
     setTimeout(function() { try { el.focus({ preventScroll: true }); } catch (e) {} }, 350);
@@ -2644,34 +2864,82 @@ function runPdfValidation() {
         ul.appendChild(li);
     });
     document.getElementById('valModal').style.display = 'flex';
+    setTimeout(function() {
+        var first = document.querySelector('#valList .val-item');
+        if (first) first.focus();
+    }, 0);
     return false;
 }
+var INTERNAL_PRINT_BYPASS = false;
 function gerarPDF() {
-    document.body.classList.remove('print-benefit-blocked');
+    INTERNAL_PRINT_BYPASS = false;
+    document.body.classList.remove('print-validation-blocked');
     if (!runPdfValidation()) return;
     window.print();
 }
-function beneficioProntoParaImpressao() {
-    var benef = fieldValue('anexo_beneficio');
-    return !!benef && (!/outro/i.test(benef) || !!fieldValue('anexo_beneficio_outro'));
+function imprimirModeloInterno() {
+    INTERNAL_PRINT_BYPASS = true;
+    document.body.classList.remove('print-validation-blocked');
+    fecharValModal(false);
+    iaToast('Impressão interna sem validação.', 'info');
+    window.print();
+    // Fallback para testes/headless que substituem window.print e não disparam
+    // afterprint. Na impressão real, afterprint encerra o bypass antes disso.
+    setTimeout(function() { INTERNAL_PRINT_BYPASS = false; }, 1500);
 }
 // O atalho pode ser cancelado. O menu nativo nao pode, entao o beforeprint
-// substitui o documento por um aviso e impede que a procuracao incompleta saia.
+// substitui o documento por um aviso quando qualquer gate estiver vermelho.
 document.addEventListener('keydown', function(event) {
     var isPrintShortcut = (event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'p';
-    if (!isPrintShortcut || beneficioProntoParaImpressao()) return;
+    if (!isPrintShortcut || INTERNAL_PRINT_BYPASS) return;
+    if (runPdfValidation()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    runPdfValidation();
 }, true);
 window.addEventListener('beforeprint', function() {
-    var blocked = !beneficioProntoParaImpressao();
-    document.body.classList.toggle('print-benefit-blocked', blocked);
-    if (blocked) runPdfValidation();
+    if (INTERNAL_PRINT_BYPASS) {
+        document.body.classList.remove('print-validation-blocked');
+        return;
+    }
+    var valid = runPdfValidation();
+    document.body.classList.toggle('print-validation-blocked', !valid);
 });
 window.addEventListener('afterprint', function() {
-    document.body.classList.remove('print-benefit-blocked');
+    INTERNAL_PRINT_BYPASS = false;
+    document.body.classList.remove('print-validation-blocked');
 });
+
+// Clique normal valida tudo. Segurar o botão por ~1,15s libera, de forma
+// discreta, a impressão interna de um modelo vazio.
+(function wireGenerateHold() {
+    var button = document.getElementById('gerarPdfBtn'); if (!button) return;
+    var HOLD = 1150, timer = null, fired = false;
+    function clearHold() {
+        if (timer) { clearTimeout(timer); timer = null; }
+        button.classList.remove('internal-hold-charging');
+    }
+    button.addEventListener('pointerdown', function(event) {
+        if (event.button !== 0) return;
+        fired = false;
+        clearHold();
+        button.classList.add('internal-hold-charging');
+        timer = setTimeout(function() {
+            timer = null;
+            fired = true;
+            button.classList.remove('internal-hold-charging');
+            button.classList.add('internal-hold-fired');
+            imprimirModeloInterno();
+            setTimeout(function() { button.classList.remove('internal-hold-fired'); }, 700);
+        }, HOLD);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(function(eventName) {
+        button.addEventListener(eventName, clearHold);
+    });
+    button.addEventListener('click', function(event) {
+        if (fired) { event.preventDefault(); fired = false; return; }
+        gerarPDF();
+    });
+})();
 
 // === PREENCHER TESTE (dados stub) — segurar o botao ~1s para acionar ==========
 // CPFs abaixo sao validos para passar no isValidCPF (nao pertencem a ninguem).
@@ -2856,6 +3124,12 @@ function iaPreenchePessoa(alvo, p) {
 }
 // 2 pessoas -> outorgante + representante/assistente, com o tipo pela idade.
 function iaAplicarDupla(outorgante, rep, tipo) {
+    var cpfOutorgante = onlyDigits(outorgante.cpf || '');
+    var cpfRepresentante = onlyDigits(rep.cpf || '');
+    if (cpfOutorgante && cpfRepresentante && cpfOutorgante === cpfRepresentante) {
+        iaToast('A IA identificou o mesmo CPF para as duas pessoas. Confira os documentos antes de preencher.', 'err');
+        return;
+    }
     iaSetTipo(tipo);
     setTimeout(function() {
         iaPreenchePessoa(IA_ALVOS.titular, outorgante);
@@ -2895,7 +3169,7 @@ function extrairIdentidade(file, alvoKey, grid) {
         'RG com órgão emissor, data de nascimento e, se aparecerem, endereço (logradouro), número, bairro, cidade e UF. ' +
         'Responda SOMENTE um JSON, sem texto ao redor, no formato exato ' +
         '{"pessoas":[{"nome":"","cpf":"","rg":"","nascimento":"AAAA-MM-DD","endereco":"","numero":"","bairro":"","cidade":"","uf":""}]}. ' +
-        'CPF como 000.000.000-00; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD; UF com 2 letras. ' +
+        'CPF no padrão NNN.NNN.NNN-NN; RG com órgão/UF (ex.: "1234567 SSP/BA"); nascimento AAAA-MM-DD; UF com 2 letras. ' +
         'Campo que não aparecer no documento = string vazia. NÃO invente dados.';
     iaArquivoParaImagens(file).then(function(imagens) {
         iaToast('Lendo documento com IA…', 'info');
@@ -2989,9 +3263,18 @@ function extrairIdentidade(file, alvoKey, grid) {
     // Fecha os modais ao clicar fora ou Esc.
     ['iaSettings', 'iaChooser', 'valModal'].forEach(function(id) {
         var ov = document.getElementById(id);
-        if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) ov.style.display = 'none'; });
+        if (ov) ov.addEventListener('mousedown', function(e) {
+            if (e.target !== ov) return;
+            if (id === 'valModal') fecharValModal();
+            else ov.style.display = 'none';
+        });
     });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharIASettings(); fecharIAChooser(); fecharValModal(); } });
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        fecharIASettings();
+        fecharIAChooser();
+        fecharValModal();
+    });
 })();
 
 // === EXIBICAO: sidebar recolhivel (docs em pilha vertical, tamanho real) ===
@@ -2999,9 +3282,12 @@ var LS_SIDEBAR = 'procuracao_sidebar_collapsed';
 
 function toggleSidebar(forceCollapsed) {
     var collapsed = typeof forceCollapsed === 'boolean' ? forceCollapsed : !document.body.classList.contains('sidebar-collapsed');
+    closeTypeHelpPanel();
     document.body.classList.toggle('sidebar-collapsed', collapsed);
     var toolbarEl = document.getElementById('toolbarEl');
     if (toolbarEl) toolbarEl.classList.toggle('collapsed', collapsed);
+    var collapseButton = document.getElementById('sidebarCollapseBtn');
+    if (collapseButton) collapseButton.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     try { localStorage.setItem(LS_SIDEBAR, collapsed ? '1' : '0'); } catch (e) {}
     requestAnimationFrame(recalcLayout);
 }
@@ -3021,7 +3307,33 @@ function getActiveDocEls() {
 // ficam empilhados em tamanho real e rola-se pra vê-los.
 function focusDoc(id) {
     var el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) {
+        setActiveDocTab(id);
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function setActiveDocTab(id) {
+    document.querySelectorAll('.doc-tab').forEach(function(tab) {
+        var active = !tab.hidden && tab.getAttribute('data-doc') === id;
+        tab.classList.toggle('active', active);
+        if (active) tab.setAttribute('aria-current', 'page');
+        else tab.removeAttribute('aria-current');
+    });
+}
+
+function updateActiveDocTabFromScroll() {
+    var viewport = document.getElementById('docsViewport');
+    var active = getActiveDocEls();
+    if (!viewport || !active.length) return;
+    var anchor = viewport.getBoundingClientRect().top + 24;
+    var best = active[0], bestDistance = Infinity;
+    active.forEach(function(page) {
+        var rect = page.getBoundingClientRect();
+        var distance = (rect.top <= anchor && rect.bottom > anchor) ? 0 : Math.abs(rect.top - anchor);
+        if (distance < bestDistance) { best = page; bestDistance = distance; }
+    });
+    setActiveDocTab(best.id);
 }
 
 function updateDocTabsUI(active) {
@@ -3032,7 +3344,19 @@ function updateDocTabsUI(active) {
     if (tabComp) tabComp.hidden = activeIds.indexOf('page-termocomp') === -1;
     var tabAnexo = document.getElementById('tabAnexo');
     if (tabAnexo) tabAnexo.hidden = activeIds.indexOf('page-anexox') === -1;
+    updateActiveDocTabFromScroll();
 }
+
+var _docTabScrollScheduled = false;
+var _docsViewport = document.getElementById('docsViewport');
+if (_docsViewport) _docsViewport.addEventListener('scroll', function() {
+    if (_docTabScrollScheduled) return;
+    _docTabScrollScheduled = true;
+    requestAnimationFrame(function() {
+        _docTabScrollScheduled = false;
+        updateActiveDocTabFromScroll();
+    });
+});
 
 // Conversao mm->px exata deste navegador/DPI, medida uma vez com uma sonda
 // invisivel (nao depende de nenhuma classe/estado de .page, entao funciona
@@ -3150,6 +3474,8 @@ window.addEventListener('resize', function() {
     document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
     var toolbarEl = document.getElementById('toolbarEl');
     if (toolbarEl) toolbarEl.classList.toggle('collapsed', sidebarCollapsed);
+    var collapseButton = document.getElementById('sidebarCollapseBtn');
+    if (collapseButton) collapseButton.setAttribute('aria-expanded', sidebarCollapsed ? 'false' : 'true');
 })();
 
 mudarTipo((document.getElementById('tipoSelect') || {}).value || 'normal');
