@@ -15,10 +15,13 @@ A v2 permanece paralela até aprovação explícita. A promoção não deve subs
 
 ## Procurações v2
 
-O fluxo possui cinco etapas: benefício, pessoa que assina, dados, documentos e revisão. A seleção da representação gera automaticamente:
+O preenchimento usa um painel contínuo e compacto: benefício, forma de assinatura, dados e conjunto documental aparecem na mesma coluna, enquanto a prévia A4 permanece dominante. O conjunto completo é o padrão; a opção **Somente procuração** gera uma única página e dispensa a escolha do benefício.
+
+A seleção da representação gera automaticamente:
 
 | Situação | Páginas |
 |---|---:|
+| Somente procuração | 1 |
 | Titular assina sozinho | 2 |
 | Representação ou assistência | 3 |
 | Administrador provisório | 4 |
@@ -29,13 +32,13 @@ O Guia Previdenciário está em [`assets/benefits.js`](assets/benefits.js). Ele 
 
 ## Validação e impressão
 
-- Benefício, nome, CPF, telefone e endereço são obrigatórios no uso normal.
+- No conjunto completo, benefício, nome, CPF, telefone e endereço são obrigatórios. Em **Somente procuração**, o benefício deixa de ser exigido.
 - CPF inválido, repetitivo, sequencial, placeholder ou repetido entre pessoas é bloqueado.
 - Telefone com DDD inválido, quantidade incorreta, sequência ou repetição é bloqueado.
 - RG recebe somente o número.
 - Um clique em **Gerar PDF** exige o formulário válido.
 - Segurar **Gerar PDF** por 1,2 segundo abre o modo interno para imprimir campos vazios; valores parcialmente preenchidos e inválidos continuam bloqueados.
-- Cada documento é uma folha fixa de `210mm x 297mm`; o checklist é impresso separadamente e nunca integra o PDF jurídico.
+- Cada documento é uma folha fixa de `210mm x 297mm`; a procuração preserva a composição da versão de produção e usa toda a área útil da folha. O checklist é impresso separadamente e nunca integra o PDF jurídico.
 
 Use escala `100%`, papel A4 e margens `Nenhuma` na caixa de impressão do navegador. Cabeçalhos e rodapés do navegador devem permanecer desativados.
 

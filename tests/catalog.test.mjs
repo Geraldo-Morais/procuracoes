@@ -39,11 +39,12 @@ test('enum de representação usa somente as seis opções masculinas', () => {
   assert.ok(REPRESENTATION_ROLES.every(({ label }) => !/procuradora|curadora|genitora|tutora/i.test(label)));
 });
 
-test('matriz documental gera duas, três ou quatro páginas', () => {
+test('matriz documental gera conjunto completo ou somente procuração', () => {
   assert.deepEqual(resolveDocumentSet({ representationMode: 'self', representationRole: '' }), ['procuracao', 'anexo']);
   assert.deepEqual(resolveDocumentSet({ representationMode: 'represented', representationRole: 'tutor_nato' }), ['procuracao', 'anexo', 'responsabilidade']);
   assert.deepEqual(resolveDocumentSet({ representationMode: 'assisted', representationRole: 'tutor_nato' }), ['procuracao', 'anexo', 'responsabilidade']);
   assert.deepEqual(resolveDocumentSet({ representationMode: 'represented', representationRole: 'administrador_provisorio' }), ['procuracao', 'anexo', 'responsabilidade', 'compromisso']);
+  assert.deepEqual(resolveDocumentSet({ documentMode: 'procuracao', representationMode: 'represented', representationRole: 'administrador_provisorio' }), ['procuracao']);
 
   for (const role of REPRESENTATION_ROLES.filter(({ id }) => id !== 'administrador_provisorio')) {
     assert.ok(!resolveDocumentSet({ representationMode: 'represented', representationRole: role.id }).includes('compromisso'));

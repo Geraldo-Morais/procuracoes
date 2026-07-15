@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/v2.css">
 </head>
 <body>
-  <div class="app-shell" id="appShell">
+  <div class="app-shell procurement-app" id="appShell">
     <aside class="side-panel" id="sidePanel" aria-label="Preenchimento da procuração">
       <header class="panel-header">
         <div class="office-mark">
@@ -25,50 +25,22 @@
         </button>
       </header>
 
-      <nav class="step-nav" aria-label="Etapas">
-        <button type="button" class="step-link is-active" data-step-target="benefit">
-          <span class="step-icon"><i data-lucide="landmark"></i></span>
-          <span class="step-copy"><b>Benefício</b><small id="stepBenefitStatus">Pendente</small></span>
-          <i class="step-check" data-lucide="circle"></i>
-        </button>
-        <button type="button" class="step-link" data-step-target="representation">
-          <span class="step-icon"><i data-lucide="users"></i></span>
-          <span class="step-copy"><b>Quem assina</b><small id="stepRepresentationStatus">Pendente</small></span>
-          <i class="step-check" data-lucide="circle"></i>
-        </button>
-        <button type="button" class="step-link" data-step-target="data">
-          <span class="step-icon"><i data-lucide="contact"></i></span>
-          <span class="step-copy"><b>Dados</b><small id="stepDataStatus">Pendente</small></span>
-          <i class="step-check" data-lucide="circle"></i>
-        </button>
-        <button type="button" class="step-link" data-step-target="documents">
-          <span class="step-icon"><i data-lucide="list-checks"></i></span>
-          <span class="step-copy"><b>Documentos</b><small id="stepDocumentsStatus">Checklist</small></span>
-          <i class="step-check" data-lucide="circle"></i>
-        </button>
-        <button type="button" class="step-link" data-step-target="review">
-          <span class="step-icon"><i data-lucide="badge-check"></i></span>
-          <span class="step-copy"><b>Revisão</b><small id="stepReviewStatus">Pendente</small></span>
-          <i class="step-check" data-lucide="circle"></i>
-        </button>
-      </nav>
-
       <div class="panel-body" id="panelBody">
         <section class="step-section is-active" data-step="benefit" aria-labelledby="benefitHeading">
           <div class="section-heading">
-            <span class="eyebrow">Etapa 1 de 5</span>
-            <h1 id="benefitHeading">Qual benefício será pedido?</h1>
+            <i data-lucide="landmark"></i>
+            <h1 id="benefitHeading">Benefício</h1>
           </div>
 
           <div class="field-block" data-field-wrap="benefitId">
-            <label for="benefitId">Tipo de benefício <span aria-hidden="true">*</span></label>
+            <label for="benefitId">Tipo de benefício <span class="conditional-required" aria-hidden="true">*</span></label>
             <select id="benefitId" data-bind="benefitId" required>
               <option value="">Selecione o benefício</option>
             </select>
             <p class="field-error" data-error-for="benefitId"></p>
           </div>
 
-          <button type="button" class="secondary-button full-button" id="openTriage">
+          <button type="button" class="text-button compact-link" id="openTriage">
             <i data-lucide="route"></i><span>Não sabe qual benefício?</span>
           </button>
 
@@ -78,7 +50,7 @@
               <strong id="benefitSummaryName"></strong>
             </div>
             <p id="benefitSummaryText"></p>
-            <button type="button" class="text-button" data-go-step="documents">Ver critérios e documentos <i data-lucide="arrow-right"></i></button>
+            <button type="button" class="text-button" data-go-step="documents">Ver documentos exigidos <i data-lucide="arrow-right"></i></button>
           </div>
 
           <div class="conditional-fields" id="pensionContext" hidden>
@@ -103,29 +75,18 @@
 
         <section class="step-section" data-step="representation" aria-labelledby="representationHeading">
           <div class="section-heading">
-            <span class="eyebrow">Etapa 2 de 5</span>
-            <h1 id="representationHeading">Quem assina pelo titular?</h1>
+            <i data-lucide="users"></i>
+            <h1 id="representationHeading">Quem assina</h1>
           </div>
 
-          <div class="choice-list" role="radiogroup" aria-label="Forma de assinatura">
-            <label class="choice-row">
-              <input type="radio" name="representationMode" value="self" checked>
-              <span class="choice-icon"><i data-lucide="user"></i></span>
-              <span><b>O próprio titular</b><small>Pessoa capaz que assina sozinha.</small></span>
-              <i data-lucide="circle-check"></i>
-            </label>
-            <label class="choice-row">
-              <input type="radio" name="representationMode" value="represented">
-              <span class="choice-icon"><i data-lucide="user-round-check"></i></span>
-              <span><b>Representante assina</b><small>Menor de 16 anos ou pessoa representada.</small></span>
-              <i data-lucide="circle-check"></i>
-            </label>
-            <label class="choice-row">
-              <input type="radio" name="representationMode" value="assisted">
-              <span class="choice-icon"><i data-lucide="users-round"></i></span>
-              <span><b>Titular assina assistido</b><small>Pessoa de 16 ou 17 anos ou assistência definida judicialmente.</small></span>
-              <i data-lucide="circle-check"></i>
-            </label>
+          <div class="field-block">
+            <label for="representationMode">Forma de assinatura</label>
+            <select id="representationMode">
+              <option value="self">O próprio titular assina</option>
+              <option value="represented">Representante assina pelo titular</option>
+              <option value="assisted">Titular assina com assistente</option>
+            </select>
+            <p class="field-hint" id="representationModeHint">Use quando a pessoa capaz assina sozinha.</p>
           </div>
 
           <div class="conditional-fields" id="representationRoleWrap" hidden>
@@ -149,7 +110,7 @@
 
         <section class="step-section" data-step="data" aria-labelledby="dataHeading">
           <div class="section-heading">
-            <span class="eyebrow">Etapa 3 de 5</span>
+            <i data-lucide="contact"></i>
             <h1 id="dataHeading">Dados do titular</h1>
           </div>
 
@@ -252,9 +213,12 @@
 
         <section class="step-section" data-step="documents" aria-labelledby="documentsHeading">
           <div class="section-heading">
-            <span class="eyebrow">Etapa 4 de 5</span>
-            <h1 id="documentsHeading">Documentos do benefício</h1>
+            <i data-lucide="list-checks"></i>
+            <h1 id="documentsHeading">Guia do benefício</h1>
           </div>
+          <details class="benefit-guide" id="benefitGuideDetails">
+            <summary><span>Documentos exigidos, critérios e alertas</span><i data-lucide="chevron-down"></i></summary>
+            <div class="benefit-guide-content">
           <div class="guide-tabs" role="tablist">
             <button type="button" role="tab" aria-selected="true" data-guide-tab="checklist">Checklist</button>
             <button type="button" role="tab" aria-selected="false" data-guide-tab="criteria">Critérios</button>
@@ -279,15 +243,32 @@
           <div class="guide-panel" data-guide-panel="attention">
             <ul class="alert-list" id="benefitAlerts"></ul>
           </div>
+            </div>
+          </details>
         </section>
 
         <section class="step-section" data-step="review" aria-labelledby="reviewHeading">
           <div class="section-heading">
-            <span class="eyebrow">Etapa 5 de 5</span>
-            <h1 id="reviewHeading">Revisão final</h1>
+            <i data-lucide="files"></i>
+            <h1 id="reviewHeading">Documentos a gerar</h1>
+          </div>
+          <div class="pdf-choice" role="radiogroup" aria-label="Documentos que entrarão no PDF">
+            <label>
+              <input type="radio" name="documentMode" value="complete" checked>
+              <span><b>Conjunto completo</b><small>Procuração, Termo de Benefício e termos exigidos pela representação.</small></span>
+              <i data-lucide="circle-check"></i>
+            </label>
+            <label>
+              <input type="radio" name="documentMode" value="procuracao">
+              <span><b>Somente procuração</b><small>Gera uma única página e não exige escolher benefício.</small></span>
+              <i data-lucide="circle-check"></i>
+            </label>
           </div>
           <div class="review-status" id="reviewStatus" aria-live="polite"></div>
-          <div class="review-list" id="reviewList"></div>
+          <details class="pending-details" id="pendingDetails">
+            <summary id="pendingSummary">Ver pendências</summary>
+            <div class="review-list" id="reviewList"></div>
+          </details>
           <div class="document-set">
             <span>PDF jurídico</span>
             <ol id="documentSet"></ol>
@@ -297,30 +278,23 @@
       </div>
 
       <footer class="panel-footer">
-        <div class="completion-row"><span>Preenchimento</span><strong id="completionLabel">0%</strong></div>
-        <div class="progress-track"><span id="completionBar"></span></div>
+        <div class="completion-row"><span>Dados preenchidos</span><strong id="completionLabel">0%</strong></div>
         <div class="footer-actions">
-          <button type="button" class="icon-button" id="previousStep" title="Etapa anterior" aria-label="Etapa anterior"><i data-lucide="arrow-left"></i></button>
-          <button type="button" class="primary-button" id="nextStep"><span>Continuar</span><i data-lucide="arrow-right"></i></button>
-          <button type="button" class="primary-button generate-button" id="generatePdf" hidden><i data-lucide="file-down"></i><span>Gerar PDF</span><span class="hold-progress" aria-hidden="true"></span></button>
+          <button type="button" class="primary-button generate-button" id="generatePdf"><i data-lucide="file-down"></i><span>Gerar PDF</span><span class="hold-progress" aria-hidden="true"></span></button>
         </div>
+        <div class="panel-office-footer">MENEZES ADVOCACIA<span>PROCURAÇÕES</span></div>
       </footer>
     </aside>
 
     <main class="workspace">
       <header class="workspace-bar">
         <button class="icon-button mobile-panel-button" id="mobilePanelButton" type="button" aria-label="Abrir preenchimento"><i data-lucide="panel-left-open"></i></button>
-        <div class="view-switcher" role="tablist" aria-label="Visualização">
-          <button type="button" role="tab" aria-selected="false" data-mobile-view="form"><i data-lucide="square-pen"></i><span>Preencher</span></button>
-          <button type="button" role="tab" aria-selected="true" data-mobile-view="preview"><i data-lucide="files"></i><span>Prévia</span></button>
-          <button type="button" role="tab" aria-selected="false" data-mobile-view="checklist"><i data-lucide="list-checks"></i><span>Checklist</span></button>
-        </div>
+        <div class="document-tabs" id="documentTabs" role="tablist" aria-label="Documentos do PDF"></div>
         <div class="workspace-meta">
           <span id="documentCount">2 documentos</span>
           <button type="button" class="icon-button" id="clearData" title="Limpar dados" aria-label="Limpar dados"><i data-lucide="trash-2"></i></button>
         </div>
       </header>
-      <div class="document-tabs" id="documentTabs" role="tablist" aria-label="Documentos do PDF"></div>
       <div class="paper-stage" id="paperStage">
         <div class="document-stack" id="documentStack"></div>
       </div>

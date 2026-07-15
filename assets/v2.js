@@ -48,6 +48,7 @@ const FIELD_LABELS = Object.freeze({
 
 const EMPTY_STATE = Object.freeze({
   activeStep: 'benefit',
+  documentMode: 'complete',
   benefitId: '',
   dependentType: 'spouse_married',
   deceasedWasBeneficiary: false,
@@ -215,7 +216,8 @@ function contextForChecklist() {
 }
 
 function getRequiredFields() {
-  const fields = ['benefitId', 'holderName', 'holderCpf', 'holderPhone', 'address', 'addressNumber', 'neighborhood', 'city', 'stateUf'];
+  const fields = ['holderName', 'holderCpf', 'holderPhone', 'address', 'addressNumber', 'neighborhood', 'city', 'stateUf'];
+  if (state.documentMode !== 'procuracao') fields.unshift('benefitId');
   if (state.representationMode !== 'self') fields.push('representationRole', 'representativeName', 'representativeCpf');
   if (state.illiterate) fields.push('rogoName', 'rogoCpf', 'witness1Name', 'witness1Cpf', 'witness2Name', 'witness2Cpf');
   return fields;
@@ -269,7 +271,8 @@ export function validateState(candidate, { allowEmpty = false } = {}) {
 }
 
 function getRequiredFieldsFor(candidate) {
-  const fields = ['benefitId', 'holderName', 'holderCpf', 'holderPhone', 'address', 'addressNumber', 'neighborhood', 'city', 'stateUf'];
+  const fields = ['holderName', 'holderCpf', 'holderPhone', 'address', 'addressNumber', 'neighborhood', 'city', 'stateUf'];
+  if (candidate.documentMode !== 'procuracao') fields.unshift('benefitId');
   if (candidate.representationMode !== 'self') fields.push('representationRole', 'representativeName', 'representativeCpf');
   if (candidate.illiterate) fields.push('rogoName', 'rogoCpf', 'witness1Name', 'witness1Cpf', 'witness2Name', 'witness2Cpf');
   return fields;
@@ -310,21 +313,21 @@ function completionPercent() {
 }
 
 function stepIsComplete(step) {
-  if (step === 'benefit') return Boolean(state.benefitId);
+  if (step === 'benefit') return state.documentMode === 'procuracao' || Boolean(state.benefitId);
   if (step === 'representation') return state.representationMode === 'self' || Boolean(state.representationRole);
   if (step === 'data') {
     const dataFields = getRequiredFields().filter((field) => !['benefitId', 'representationRole'].includes(field));
     return dataFields.every((field) => String(state[field] ?? '').trim()) && validateState(state).filter((error) => dataFields.includes(error.field)).length === 0;
   }
-  if (step === 'documents') return Boolean(state.benefitId);
+  if (step === 'documents') return state.documentMode === 'procuracao' || Boolean(state.benefitId);
   if (step === 'review') return validateState(state).length === 0;
   return false;
 }
 
 function updateProgress() {
   const percent = completionPercent();
-  $('#completionLabel').textContent = `${percent}%`;
-  $('#completionBar').style.width = `${percent}%`;
+  if ($('#completionLabel')) $('#completionLabel').textContent = `${percent}%`;
+  if ($('#completionBar')) $('#completionBar').style.width = `${percent}%`;
   const statusLabels = {
     benefit: state.benefitId ? getBenefit(state.benefitId).name : 'Pendente',
     representation: state.representationMode === 'self' ? 'Titular' : (getRepresentationRole(state.representationRole)?.label || 'Pendente'),
@@ -334,7 +337,7 @@ function updateProgress() {
   };
   STEP_ORDER.forEach((step) => {
     const link = $(`[data-step-target="${step}"]`);
-    link.classList.toggle('is-complete', stepIsComplete(step));
+    if (link) link.classList.toggle('is-complete', stepIsComplete(step));
     const output = $(`#step${step[0].toUpperCase()}${step.slice(1)}Status`);
     if (output) output.textContent = statusLabels[step];
   });
@@ -343,18 +346,14 @@ function updateProgress() {
 function setStep(step, { focus = true } = {}) {
   if (!STEP_ORDER.includes(step)) return;
   state.activeStep = step;
-  $$('.step-section').forEach((section) => section.classList.toggle('is-active', section.dataset.step === step));
-  $$('.step-link').forEach((link) => link.classList.toggle('is-active', link.dataset.stepTarget === step));
-  const index = STEP_ORDER.indexOf(step);
-  $('#previousStep').disabled = index === 0;
-  $('#nextStep').hidden = step === 'review';
-  $('#generatePdf').hidden = step !== 'review';
+  $$('.step-section').forEach((section) => section.classList.toggle('is-current', section.dataset.step === step));
+  if (step === 'documents') $('#benefitGuideDetails').open = true;
   if (focus) {
     const heading = $(`[data-step="${step}"] h1`);
     heading?.setAttribute('tabindex', '-1');
     heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  if (window.innerWidth < 1200) closeMobilePanel();
   updateProgress();
   if (step === 'review') renderErrors(currentErrors);
 }
@@ -365,7 +364,11 @@ function updateConditionalUi() {
   $('#representativeFields').hidden = !represented;
   $('#witnessFields').hidden = !state.illiterate;
   $('#representativeHeading').textContent = state.representationMode === 'assisted' ? 'Dados do assistente legal' : 'Dados do representante legal';
+  $('#representationModeHint').textContent = state.representationMode === 'self'
+    ? 'Use quando a pessoa capaz assina sozinha.'
+    : (state.representationMode === 'assisted' ? 'O titular também assina; o assistente completa o ato.' : 'O representante assina no lugar do titular.');
   $('#pensionContext').hidden = !state.benefitId.startsWith('pensao-');
+  $$('.conditional-required').forEach((marker) => { marker.hidden = state.documentMode === 'procuracao'; });
 
   const role = getRepresentationRole(state.representationRole);
   const roleHint = $('#roleHint');
@@ -497,22 +500,53 @@ function rogoBlock(label) {
   </div>`;
 }
 
+function classicCell(label, value, width, fallback = '--') {
+  return `<div class="classic-cell c${width}"><small>${escapeHtml(label)}</small><b>${display(value, fallback)}</b></div>`;
+}
+
+function classicHolderGrid(title = 'Outorgante') {
+  return `<div class="classic-party-label">${escapeHtml(title)}:</div>
+  <div class="classic-data-grid">
+    <div class="classic-row">${classicCell('Nome completo', upper(state.holderName), 9, 'NÃO INFORMADO')}${classicCell('CPF', state.holderCpf, 3, '---.---.---.--')}</div>
+    <div class="classic-row">${classicCell('Estado civil', upper(state.holderCivilStatus), 3)}${classicCell('Profissão', upper(state.holderProfession), 3)}${classicCell('Telefone celular', state.holderPhone, 4)}${classicCell('RG', state.holderRg, 2)}</div>
+    <div class="classic-row">${classicCell('Endereço', upper(state.address), 9, 'NÃO INFORMADO')}${classicCell('Número', upper(state.addressNumber), 3)}</div>
+    <div class="classic-row">${classicCell('Estado', upper(state.stateUf), 2)}${classicCell('Cidade', upper(state.city), 6, 'NÃO INFORMADO')}${classicCell('Bairro', upper(state.neighborhood), 4, 'NÃO INFORMADO')}</div>
+  </div>`;
+}
+
+function classicRepresentativeGrid() {
+  const role = getRepresentationRole(state.representationRole);
+  const title = state.representationMode === 'assisted' ? 'Assistente legal' : 'Representante legal';
+  return `<div class="classic-party-label classic-representative-label">${title}:</div>
+  <div class="classic-data-grid classic-representative-grid">
+    <div class="classic-row">${classicCell('Nome completo', upper(state.representativeName), 7, 'NÃO INFORMADO')}${classicCell('CPF', state.representativeCpf, 3, '---.---.---.--')}${classicCell('RG', state.representativeRg, 2)}</div>
+    <div class="classic-row">${classicCell('Qualidade', upper(role?.official), 12)}</div>
+  </div>`;
+}
+
+function classicSignatureBlock(label) {
+  if (state.illiterate) return rogoBlock(label);
+  if (state.representationMode === 'assisted') {
+    return `<div class="classic-date">${signatureDate()}</div><div class="classic-signature-grid"><div><span></span><b>OUTORGANTE ASSISTIDO</b></div><div><span></span><b>ASSISTENTE LEGAL</b></div></div>`;
+  }
+  return `<div class="classic-date">${signatureDate()}</div><div class="classic-signature"><b>${escapeHtml(label.toLocaleUpperCase('pt-BR'))}:</b><span></span></div>`;
+}
+
 function buildProcuracao(page, total) {
   const represented = state.representationMode !== 'self';
-  const role = getRepresentationRole(state.representationRole);
-  const signingLabel = state.representationMode === 'self' ? 'Outorgante' : (state.representationMode === 'assisted' ? 'Outorgante e assistente legal' : `Representante legal${role ? ` - ${role.official}` : ''}`);
-  return `<section class="print-sheet" data-document="procuracao"><article class="paper">
+  const signingLabel = state.representationMode === 'self' ? 'Outorgante' : (state.representationMode === 'assisted' ? 'Outorgante e assistente legal' : 'Representante legal');
+  const paperClasses = ['paper', 'procuracao-paper', represented ? 'is-represented' : '', state.illiterate ? 'has-rogo' : ''].filter(Boolean).join(' ');
+  return `<section class="print-sheet" data-document="procuracao"><article class="${paperClasses}">
     ${docHeader()}
     <div class="doc-body">
       <h2 class="doc-title">Procuração <em>Ad Judicia et Extra</em></h2>
-      ${holderTable(represented ? 'Outorgante representado ou assistido' : 'Outorgante')}
-      ${represented ? representativeTable() : ''}
-      <p class="doc-paragraph compact"><b>OUTORGADO: CLAYTON GONÇALVES MENEZES</b>, advogado inscrito na OAB/BA sob o nº 49.167, com endereço profissional na Av. Ascendino Melo nº 297, Shopping Itatiaia, Menezes Advocacia, Centro, Vitória da Conquista - BA.</p>
-      <div class="doc-section-title">Poderes</div>
-      <p class="doc-paragraph compact">O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia et extra</em>, inclusive perante a administração pública direta e indireta, o INSS e qualquer juízo, comarca, instância ou Tribunal, para praticar os atos necessários ao acompanhamento de ações judiciais e procedimentos administrativos; receber valores em seu nome; renunciar ao excedente do teto dos Juizados Especiais Federais; assinar declaração de hipossuficiência; requerer isenção de imposto de renda e gratuidade da justiça; dar e receber quitação; negociar débitos; suscitar incidentes e exceções; transigir; aceitar proposta de acordo; firmar compromissos; receber citações e intimações; desistir; substabelecer com ou sem reserva; bem como levantar e sacar RPV, precatórios e alvarás e acessar informações necessárias do Meu INSS/GOV.BR, observados os limites legais e a finalidade deste mandato.</p>
-      ${signatureBlock(signingLabel)}
+      ${classicHolderGrid(represented ? 'Outorgante representado ou assistido' : 'Outorgante')}
+      ${represented ? classicRepresentativeGrid() : ''}
+      <p class="classic-paragraph classic-outorgado"><b>OUTORGADO: CLAYTON GONÇALVES MENEZES</b>, advogado inscrito na OAB/BA sob o nº 49.167, com endereço profissional na Av. Ascendino Melo nº 297, Shopping Itatiaia, Menezes Advocacia, Centro, Vitória da Conquista - BA.</p>
+      <div class="classic-section-title">PODERES:</div>
+      <p class="classic-paragraph">O Outorgante, por este instrumento de mandato, confere os poderes da cláusula <em>ad judicia et extra</em>, dando enfim, <b>amplos e irrestritos poderes</b> para o foro em geral, inclusive no âmbito da administração pública, direta e indireta, em seus órgãos competentes, podendo, para tanto, praticar todos os atos necessários ao fiel desempenho da presente ação judicial ou administrativa e qualquer procedimento em que seja necessária a intervenção de advogado, representando-o, conjunta ou separadamente, <b>perante o INSS</b> ou qualquer juízo, comarca, instância ou Tribunal, para quem são concedidos os mais amplos e irrestritos poderes, observados os poderes do advogado estabelecidos em Lei, podendo intentar ou acompanhar qualquer feito em nome do outorgante, como autor, réu, assistente, opoente ou terceiro interveniente; celebrar ajustes amigáveis; <b>receber valores em seu nome</b>; renunciar valores excedentes ao teto dos Juizados Especiais Federais; <b>assinar declaração de hipossuficiência</b>; requerer isenção de imposto de renda; <b>requerer gratuidade da justiça</b>; dar e receber quitação de crédito; negociar débito; suscitar incidente de falsidade; arguir exceções de impedimento ou suspeição; <b>transigir</b>; <b>aceitar proposta de acordo</b>; firmar compromissos; receber citações e intimações; desistir; <b>substabelecer</b>, com ou sem reserva, os poderes ora conferidos; bem como <b>levantar e sacar Requisições de Pequeno Valor (RPV), precatórios, alvarás e senhas do Meu INSS/GOV.BR</b>.</p>
+      ${classicSignatureBlock(signingLabel)}
     </div>
-    ${docFooter(page, total)}
   </article></section>`;
 }
 
@@ -537,7 +571,6 @@ function buildAnexo(page, total) {
       <p class="doc-paragraph compact">Este termo é válido por 60 (sessenta) dias, contados da assinatura, sem prejuízo da revogação anterior pelo outorgante.</p>
       ${signatureBlock(actor)}
     </div>
-    ${docFooter(page, total)}
   </article></section>`;
 }
 
@@ -558,7 +591,6 @@ function buildResponsabilidade(page, total) {
       <div class="term-warning">Os eventos a comunicar incluem o óbito do titular ou dependente do benefício e a cessação da representação legal. O descumprimento poderá acarretar devolução de valores recebidos indevidamente e responsabilização nos termos dos arts. 171 e 299 do Código Penal.</div>
       ${signatureBlock(label)}
     </div>
-    ${docFooter(page, total)}
   </article></section>`;
 }
 
@@ -576,7 +608,6 @@ function buildCompromisso(page, total) {
       <p class="doc-paragraph"><b>Concordo em assumir o compromisso deste termo.</b></p>
       ${signatureBlock('Administrador provisório')}
     </div>
-    ${docFooter(page, total)}
   </article></section>`;
 }
 
@@ -609,6 +640,8 @@ function renderReview() {
   status.innerHTML = ready
     ? '<i data-lucide="badge-check"></i><span><b>Documentos prontos para gerar.</b><br>Confira a prévia antes de abrir a impressão.</span>'
     : `<i data-lucide="circle-alert"></i><span><b>${currentErrors.length} ${currentErrors.length === 1 ? 'pendência' : 'pendências'}.</b><br>Corrija os campos indicados antes de gerar.</span>`;
+  $('#pendingDetails').hidden = ready;
+  $('#pendingSummary').textContent = `Ver ${currentErrors.length} ${currentErrors.length === 1 ? 'pendência' : 'pendências'}`;
   $('#reviewList').innerHTML = ready ? '' : currentErrors.map((error) => `<button type="button" class="review-item" data-review-field="${error.field}"><i data-lucide="circle-x"></i><span>${escapeHtml(error.message)}</span><i data-lucide="chevron-right"></i></button>`).join('');
   renderDocumentSet();
   refreshIcons($('#reviewStatus'));
@@ -703,14 +736,20 @@ function wireDataBindings() {
       renderErrors(currentErrors.filter((error) => touchedFields.has(error.field)));
     });
   });
-  $$('input[name="representationMode"]').forEach((radio) => {
+  $('#representationMode').addEventListener('change', (event) => {
+    state.representationMode = event.target.value;
+    if (state.representationMode === 'self') state.representationRole = '';
+    $('#representationRole').value = state.representationRole;
+    dirty = true;
+    renderAll();
+  });
+  $$('input[name="documentMode"]').forEach((radio) => {
     radio.addEventListener('change', () => {
       if (!radio.checked) return;
-      state.representationMode = radio.value;
-      if (radio.value === 'self') state.representationRole = '';
-      $('#representationRole').value = state.representationRole;
+      state.documentMode = radio.value;
       dirty = true;
       renderAll();
+      renderErrors(currentErrors.filter((error) => touchedFields.has(error.field)));
     });
   });
 }
@@ -754,6 +793,7 @@ function normalPrint() {
   internalPrintAllowed = false;
   if (!validateCurrent({ allowEmpty: false, reveal: true })) {
     setStep('review');
+    $('#pendingDetails').open = true;
     showToast('Corrija as pendências antes de gerar o PDF.', 'error');
     return;
   }
@@ -764,6 +804,7 @@ function internalPrint() {
   if (!validateCurrent({ allowEmpty: true, reveal: true })) {
     $('#internalPrintDialog').close();
     setStep('review');
+    $('#pendingDetails').open = true;
     showToast('Há dados preenchidos de forma inválida.', 'error');
     return;
   }
@@ -830,8 +871,6 @@ function wireEvents() {
   });
   $$('.step-link').forEach((button) => button.addEventListener('click', () => { setStep(button.dataset.stepTarget); openMobilePanel(); }));
   $$('[data-go-step]').forEach((button) => button.addEventListener('click', () => setStep(button.dataset.goStep)));
-  $('#previousStep').addEventListener('click', () => setStep(STEP_ORDER[Math.max(0, STEP_ORDER.indexOf(state.activeStep) - 1)]));
-  $('#nextStep').addEventListener('click', () => setStep(STEP_ORDER[Math.min(STEP_ORDER.length - 1, STEP_ORDER.indexOf(state.activeStep) + 1)]));
   $('#documentTabs').addEventListener('click', (event) => {
     const button = event.target.closest('[data-document-target]');
     if (button) focusDocument(button.dataset.documentTarget);
@@ -875,7 +914,8 @@ function wireEvents() {
       const key = control.dataset.bind;
       if (control.type === 'checkbox') control.checked = Boolean(state[key]); else control.value = state[key] ?? '';
     });
-    $$('input[name="representationMode"]').forEach((radio) => { radio.checked = radio.value === 'self'; });
+    $('#representationMode').value = 'self';
+    $$('input[name="documentMode"]').forEach((radio) => { radio.checked = radio.value === 'complete'; });
     setStep('benefit', { focus: false });
     renderErrors([]);
     renderAll({ resetChecklist: true });

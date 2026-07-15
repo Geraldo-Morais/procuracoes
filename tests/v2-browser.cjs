@@ -81,12 +81,11 @@ async function fillControls(page, values) {
 async function fillProcurement(page, scenario) {
   await page.goto(`${scenario.origin}/v2.html`, { waitUntil: 'domcontentloaded' });
   if (scenario.viewport.width < 1200) await page.click('#mobilePanelButton');
-  await page.selectOption('#benefitId', scenario.benefit || 'bpc-pcd');
-  await page.click('[data-step-target="representation"]');
-  await page.check(`input[name="representationMode"][value="${scenario.mode}"]`);
+  if (scenario.documentMode === 'procuracao') await page.check('input[name="documentMode"][value="procuracao"]');
+  if (!scenario.skipBenefit) await page.selectOption('#benefitId', scenario.benefit || 'bpc-pcd');
+  await page.selectOption('#representationMode', scenario.mode);
   if (scenario.mode !== 'self') await page.selectOption('#representationRole', scenario.role);
   if (scenario.illiterate) await page.check('#illiterate');
-  await page.click('[data-step-target="data"]');
 
   const values = {
     holderName: 'Titular de Teste',
@@ -111,7 +110,7 @@ async function fillProcurement(page, scenario) {
     witness2Cpf: CPFS.witness2
   });
   await fillControls(page, values);
-  await page.click('[data-step-target="review"]');
+  if (scenario.viewport.width < 1200) await page.keyboard.press('Escape');
 }
 
 async function assertA4(page, expectedPages) {
@@ -134,6 +133,28 @@ async function assertA4(page, expectedPages) {
   });
 }
 
+async function assertDesktopComposition(page) {
+  const result = await page.evaluate(() => {
+    const panel = document.querySelector('.side-panel').getBoundingClientRect();
+    const toolbar = document.querySelector('.workspace-bar').getBoundingClientRect();
+    const paper = document.querySelector('[data-document="procuracao"]');
+    const paperBox = paper.getBoundingClientRect();
+    const lastBox = paper.querySelector('.doc-body').lastElementChild.getBoundingClientRect();
+    return {
+      panelWidth: panel.width,
+      toolbarHeight: toolbar.height,
+      paperY: paperBox.y,
+      occupiedRatio: (lastBox.bottom - paperBox.top) / paperBox.height,
+      footers: document.querySelectorAll('.doc-footer').length
+    };
+  });
+  assert.ok(result.panelWidth <= 300, `painel largo demais: ${JSON.stringify(result)}`);
+  assert.ok(result.toolbarHeight <= 50, `barra alta demais: ${JSON.stringify(result)}`);
+  assert.ok(result.paperY >= 80 && result.paperY <= 105, `papel mal posicionado: ${JSON.stringify(result)}`);
+  assert.ok(result.occupiedRatio >= 0.85 && result.occupiedRatio <= 0.98, `procuração mal distribuída: ${JSON.stringify(result)}`);
+  assert.equal(result.footers, 0, 'rodapé lateral não deve voltar ao PDF');
+}
+
 async function savePdf(page, filename, expectedPages) {
   const file = path.join(OUTPUT, filename);
   await page.pdf({ path: file, printBackground: true, preferCSSPageSize: true });
@@ -151,7 +172,7 @@ async function testValidation(browser, origin) {
 
   await guarded.context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
   await page.selectOption('#benefitId', 'bpc-pcd');
-  await page.click('[data-step-target="documents"]');
+  await page.click('#benefitGuideDetails > summary');
   await page.click('#copyChecklist');
   assert.match(await page.evaluate(() => navigator.clipboard.readText()), /DOCUMENTOS - BPC\/LOAS/);
   await page.evaluate(() => {
@@ -170,7 +191,6 @@ async function testValidation(browser, origin) {
   assert.equal(checklistPrint.juridicalPages, 2);
   await page.evaluate(() => document.body.classList.remove('print-checklist-mode'));
 
-  await page.click('[data-step-target="data"]');
   await page.fill('#holderCpf', '12345678910');
   await page.fill('#holderPhone', '20991234567');
   assert.match(await page.locator('[data-error-for="holderCpf"]').textContent(), /inválido/i);
@@ -178,22 +198,16 @@ async function testValidation(browser, origin) {
   await page.fill('#holderPhone', '77988888888');
   assert.match(await page.locator('[data-error-for="holderPhone"]').textContent(), /inválido/i);
 
-  await page.click('[data-step-target="representation"]');
-  await page.check('input[name="representationMode"][value="represented"]');
+  await page.selectOption('#representationMode', 'represented');
   await page.selectOption('#representationRole', 'tutor_nato');
-  await page.click('[data-step-target="data"]');
   await page.fill('#holderCpf', CPFS.holder);
   await page.fill('#representativeCpf', CPFS.holder);
   assert.match(await page.locator('[data-error-for="representativeCpf"]').textContent(), /não pode repetir/i);
 
-  await page.click('[data-step-target="representation"]');
-  await page.check('input[name="representationMode"][value="self"]');
+  await page.selectOption('#representationMode', 'self');
   await page.check('#illiterate');
-  await page.click('[data-step-target="data"]');
   await page.fill('#rogoCpf', '12345678910');
-  await page.click('[data-step-target="representation"]');
   await page.uncheck('#illiterate');
-  await page.click('[data-step-target="review"]');
   const activeErrors = await page.locator('#reviewList').textContent();
   assert.doesNotMatch(activeErrors, /representante|assina a rogo|testemunha/i);
 
@@ -249,6 +263,7 @@ async function testRevocation(browser, origin) {
   const browser = await chromium.launch({ headless: true, executablePath: findChrome() });
   const scenarios = [
     { name: 'titular-normal', mode: 'self', role: '', illiterate: false, pages: 2, viewport: { width: 1280, height: 720 } },
+    { name: 'somente-procuracao', mode: 'self', role: '', illiterate: false, pages: 1, documentMode: 'procuracao', skipBenefit: true, viewport: { width: 1280, height: 720 } },
     { name: 'tutor-nato', mode: 'represented', role: 'tutor_nato', illiterate: false, pages: 3, viewport: { width: 768, height: 1024 } },
     { name: 'assistido', mode: 'assisted', role: 'tutor_nato', illiterate: false, pages: 3, viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' },
     { name: 'curador', mode: 'represented', role: 'curador', illiterate: false, pages: 3, viewport: { width: 1440, height: 900 } },
@@ -270,6 +285,7 @@ async function testRevocation(browser, origin) {
       page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
       await fillProcurement(page, { ...scenario, origin });
       await assertA4(page, scenario.pages);
+      if (['titular-normal', 'administrador-provisorio', 'rogo-administrador'].includes(scenario.name)) await assertDesktopComposition(page);
       if (scenario.reducedMotion === 'reduce') {
         const duration = await page.locator('.step-section.is-active').evaluate((element) => getComputedStyle(element).animationDuration);
         assert.ok(parseFloat(duration) <= 0.001, `movimento reduzido não respeitado: ${duration}`);

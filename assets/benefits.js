@@ -303,6 +303,7 @@ export function getRepresentationRole(id) {
 }
 
 export function resolveDocumentSet(state) {
+  if (state.documentMode === 'procuracao') return ['procuracao'];
   const documents = ['procuracao', 'anexo'];
   if (state.representationMode === 'represented' || state.representationMode === 'assisted') {
     documents.push('responsabilidade');
