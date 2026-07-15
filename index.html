@@ -613,9 +613,27 @@ body.sidebar-collapsed #docsArea { left: 0; }
 @media print {
     .page-termo:not(.show) { display: none !important; }
 }
+#print-benefit-blocker { display: none; }
+@media print {
+    body.print-benefit-blocked > *:not(#print-benefit-blocker) { display: none !important; }
+    body.print-benefit-blocked > #print-benefit-blocker {
+        display: block !important;
+        font-family: Arial, sans-serif;
+        font-size: 16pt;
+        line-height: 1.45;
+        text-align: center;
+        border: 2pt solid #622423;
+        padding: 24pt;
+        margin-top: 30mm;
+    }
+}
 </style>
 </head>
 <body>
+
+<div id="print-benefit-blocker">
+    Impressão bloqueada. Selecione o tipo de benefício no Termo de Benefício antes de gerar o PDF.
+</div>
 
 <div class="toolbar" id="toolbarEl">
     <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores">
@@ -2543,8 +2561,17 @@ function validateForm() {
      'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade']
         .forEach(function(id) { setError(id, false); });
 
-    // Permite gerar modelo em branco para preenchimento manual
-    if (!hasAnyMeaningfulInput()) { VAL_ERRORS = []; return []; }
+    // O benefício é obrigatório independentemente dos demais campos.
+    setError('anexo_beneficio', false);
+    setError('anexo_beneficio_outro', false);
+    var benef = fieldValue('anexo_beneficio');
+    if (!benef) { det.push({ id: 'anexo_beneficio', msg: 'Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.' }); setError('anexo_beneficio', true); }
+    else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) { det.push({ id: 'anexo_beneficio_outro', msg: 'Especifique o benefício no campo "Outro" do Termo de Benefício.' }); setError('anexo_beneficio_outro', true); }
+
+    if (!hasAnyMeaningfulInput()) {
+        VAL_ERRORS = det;
+        return det.map(function(e) { return e.msg; });
+    }
 
     var tipo = tipoAtual();
     var titularIncapaz = (tipo === 'incapaz');
@@ -2584,13 +2611,6 @@ function validateForm() {
         if (telefone && !isTelefoneCompleto(telefone)) { det.push({ id: 'telefone', msg: 'Telefone no formato (XX) X XXXX-XXXX.' }); setError('telefone', true); }
     }
 
-    // Tipo de benefício (Termo de Benefício) é obrigatório para emitir.
-    setError('anexo_beneficio', false);
-    setError('anexo_beneficio_outro', false);
-    var benef = fieldValue('anexo_beneficio');
-    if (!benef) { det.push({ id: 'anexo_beneficio', msg: 'Tipo de benefício (Termo de Benefício) é obrigatório para emitir a procuração.' }); setError('anexo_beneficio', true); }
-    else if (/outro/i.test(benef) && !fieldValue('anexo_beneficio_outro')) { det.push({ id: 'anexo_beneficio_outro', msg: 'Especifique o benefício no campo "Outro" do Termo de Benefício.' }); setError('anexo_beneficio_outro', true); }
-
     VAL_ERRORS = det;
     return det.map(function(e) { return e.msg; });
 }
@@ -2627,13 +2647,31 @@ function runPdfValidation() {
     return false;
 }
 function gerarPDF() {
+    document.body.classList.remove('print-benefit-blocked');
     if (!runPdfValidation()) return;
     window.print();
 }
-// Ctrl+P nativo dispara o mesmo aviso de validacao que o botao Gerar PDF.
-// O navegador nao permite cancelar a caixa de impressao a partir do beforeprint,
-// mas os campos obrigatorios ficam destacados em vermelho do mesmo jeito.
-window.addEventListener('beforeprint', function() { runPdfValidation(); });
+function beneficioProntoParaImpressao() {
+    var benef = fieldValue('anexo_beneficio');
+    return !!benef && (!/outro/i.test(benef) || !!fieldValue('anexo_beneficio_outro'));
+}
+// O atalho pode ser cancelado. O menu nativo nao pode, entao o beforeprint
+// substitui o documento por um aviso e impede que a procuracao incompleta saia.
+document.addEventListener('keydown', function(event) {
+    var isPrintShortcut = (event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'p';
+    if (!isPrintShortcut || beneficioProntoParaImpressao()) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    runPdfValidation();
+}, true);
+window.addEventListener('beforeprint', function() {
+    var blocked = !beneficioProntoParaImpressao();
+    document.body.classList.toggle('print-benefit-blocked', blocked);
+    if (blocked) runPdfValidation();
+});
+window.addEventListener('afterprint', function() {
+    document.body.classList.remove('print-benefit-blocked');
+});
 
 // === PREENCHER TESTE (dados stub) — segurar o botao ~1s para acionar ==========
 // CPFs abaixo sao validos para passar no isValidCPF (nao pertencem a ninguem).
