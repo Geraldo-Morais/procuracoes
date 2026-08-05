@@ -298,6 +298,56 @@ with sync_playwright() as p:
           f"modal: titulo com a contagem e itens numerados (got {mod})")
     pg.evaluate("fecharValModal()")
 
+    # --- qualidade: lista so no masculino, genero pelo estado civil ---
+    pg.goto(URL); pg.wait_for_timeout(400)
+    set_tipo("incapaz")
+    opts = pg.evaluate("()=>Array.from(document.getElementById('qualidade-rep-list').options).map(o=>o.value)")
+    check("Curadora" not in opts and "Curador" in opts and "Mãe" in opts,
+          f"qualidade: lista so no masculino (+ pai/mae/avo) (got {opts})")
+    casos = [("Casada", "Curador", "CURADORA"), ("Casado", "Curador", "CURADOR"),
+             ("Solteira", "Guardião", "GUARDIÃ"), ("Solteira", "Mãe", "MÃE"),
+             ("Viúva", "Administrador Provisório", "ADMINISTRADORA PROVISÓRIA")]
+    ruim = []
+    for ec, q, esperado in casos:
+        pg.evaluate("()=>{document.getElementById('rep_qualidade').value='';"
+                    " document.getElementById('rep_estado_civil').value='';}")
+        pg.fill("#rep_estado_civil", ec); pg.locator("#rep_estado_civil").blur(); pg.wait_for_timeout(220)
+        pg.fill("#rep_qualidade", q); pg.locator("#rep_qualidade").blur(); pg.wait_for_timeout(450)
+        got = pg.input_value("#rep_qualidade")
+        if got != esperado: ruim.append(f"{ec}+{q} -> {got} (esperado {esperado})")
+    check(not ruim, f"qualidade: genero aplicado pelo estado civil ({ruim})")
+
+    # --- nome sugerido do arquivo do PDF ---
+    pg.goto(URL); pg.wait_for_timeout(400)
+    set_tipo("normal")
+    pg.fill("#nome", "maria aparecida de souza"); pg.locator("#nome").blur(); pg.wait_for_timeout(200)
+    nome1 = pg.evaluate("()=>nomeDoArquivo()")
+    check(nome1 == "Procuração Ad Judicia et Extra e Termo de Benefício - Maria Souza",
+          f"nome do arquivo (normal) (got {nome1!r})")
+    set_tipo("incapaz"); pg.wait_for_timeout(300)
+    nome2 = pg.evaluate("()=>nomeDoArquivo()")
+    check(nome2 == "Procuração Ad Judicia et Extra e Termos - Maria Souza",
+          f"nome do arquivo (com termos) (got {nome2!r})")
+
+    # --- so um botao de recolher a barra lateral ---
+    nbtn = pg.evaluate("()=>document.querySelectorAll('button[onclick*=toggleSidebar]').length")
+    check(nbtn == 1, f"um unico botao de recolher a barra (got {nbtn})")
+
+    # --- ponte do guia (v2) -> gerador ---
+    pg.goto("about:blank")
+    pg.goto(URL + "#tipo=relativo&qualidade=Curador&beneficio=Aposentadoria%20por%20Idade%20Rural&naoassina=1")
+    pg.wait_for_timeout(1600)
+    guia = pg.evaluate("""()=>({tipo: document.getElementById('tipoSelect').value,
+        qual: document.getElementById('assist_qualidade').value,
+        benef: document.getElementById('anexo_beneficio').value,
+        analf: document.getElementById('analf_relativo_toggle').checked,
+        prof: document.getElementById('profissao').value,
+        hash: location.hash})""")
+    check(guia["tipo"] == "relativo" and guia["qual"] == "CURADOR"
+          and "Rural" in guia["benef"] and guia["analf"] and guia["hash"] == "",
+          f"guia: decisoes aplicadas e hash limpo (got {guia})")
+    check(guia["prof"].startswith("LAVRADOR"), f"guia: profissao rural preenchida (got {guia['prof']!r})")
+
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
 

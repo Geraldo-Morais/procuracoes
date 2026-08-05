@@ -900,9 +900,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 
 <div class="toolbar" id="toolbarEl">
-    <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores" aria-expanded="true" aria-controls="toolbarEl">
-        <span class="sc-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></span> Recolher barra
-    </button>
     <div class="tb-group">
         <div class="tb-row">
             <span class="tb-label">Tipo</span>
@@ -1132,29 +1129,30 @@ body.sidebar-collapsed #docsArea { left: 0; }
      Pai/Mãe → Tutor Nato · Tutor → Tutor Legal · Curador → Curador ·
      Guardião → Responsável Termo de Guarda · Administrador Provisório →
      Administrador Provisório · Procurador → Procurador -->
+<!-- Qualidade so no masculino: o genero e aplicado sozinho a partir do estado
+     civil da propria pessoa (ver flexionarQualidade). Pai/Mae/Avo/Ava ficam
+     como estao porque nao sao flexao, sao palavras diferentes. -->
 <datalist id="qualidade-rep-list">
     <option value="Pai">
     <option value="Mãe">
+    <option value="Avô">
+    <option value="Avó">
     <option value="Tutor">
-    <option value="Tutora">
     <option value="Curador">
-    <option value="Curadora">
-    <option value="Administrador Provisório">
-    <option value="Administradora Provisória">
     <option value="Guardião">
-    <option value="Guardiã">
+    <option value="Administrador Provisório">
     <option value="Procurador">
-    <option value="Procuradora">
 </datalist>
 <datalist id="qualidade-assist-list">
-    <option value="Genitor">
-    <option value="Genitora">
+    <option value="Pai">
+    <option value="Mãe">
+    <option value="Avô">
+    <option value="Avó">
+    <option value="Tutor">
     <option value="Curador">
-    <option value="Curadora">
+    <option value="Guardião">
     <option value="Administrador Provisório">
-    <option value="Administradora Provisória">
     <option value="Procurador">
-    <option value="Procuradora">
 </datalist>
 
 <!-- ====== REPRESENTANTE LEGAL (absolutamente incapaz) ====== -->
@@ -2001,6 +1999,44 @@ function onAnalfToggleChange() { updatePoderesDensity(); syncTermo(); }
 //   • Procurador                 → Procurador
 // A ordem importa: "provisório" vence — indica que a curatela/guarda ainda
 // não é definitiva, então é Administrador Provisório, não Curador/Guarda.
+// Palavras que mudam de forma no feminino. Pai/Mae/Avo/Ava ficam de fora:
+// nao sao flexao da mesma palavra, sao opcoes distintas na lista.
+var QUALIDADE_FEM = {
+    'TUTOR': 'Tutora',
+    'CURADOR': 'Curadora',
+    'GUARDIAO': 'Guardiã',
+    'ADMINISTRADOR PROVISORIO': 'Administradora Provisória',
+    'PROCURADOR': 'Procuradora',
+    'GENITOR': 'Genitora'
+};
+// Genero pelo estado civil da PROPRIA pessoa (Solteira/Casada/Viuva -> f).
+function generoPorEstadoCivil(id) {
+    var ec = (fieldValue(id) || '').trim();
+    if (!ec) return null;
+    var w = stripDiacritics(ec.split(/\s+/)[0]).toLowerCase();
+    if (/a$/.test(w)) return 'f';
+    if (/o$/.test(w)) return 'm';
+    return null;
+}
+// O parceiro escolhe "Curador"; se a pessoa for mulher, o documento sai
+// "CURADORA". Nada de duas entradas na lista pra ele errar.
+function flexionarQualidade(qualId, ecId) {
+    var el = document.getElementById(qualId);
+    if (!el || !el.value) return;
+    var chave = stripDiacritics(el.value).toUpperCase().replace(/\s+/g, ' ').trim();
+    var fem = QUALIDADE_FEM[chave];
+    if (!fem) return;
+    var g = generoPorEstadoCivil(ecId);
+    if (g !== 'f') return;
+    if (el.value.toUpperCase() === fem.toUpperCase()) return;
+    el.value = fem;
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+    el.dispatchEvent(new Event('blur', {bubbles:true}));
+}
+function aplicarGeneroQualidade() {
+    flexionarQualidade('rep_qualidade', 'rep_estado_civil');
+    flexionarQualidade('assist_qualidade', 'assist_estado_civil');
+}
 function qualidadeParaCheckbox(qv) {
     var s = stripDiacritics(qv || '').toUpperCase();
     if (!s) return null;
@@ -2009,7 +2045,7 @@ function qualidadeParaCheckbox(qv) {
     if (/GUARD/.test(s)) return 'ResponsavelTermoGuarda';
     if (/CURADOR|CURATELA/.test(s)) return 'Curador';
     if (/TUTOR/.test(s)) return 'TutorLegal';
-    if (/\bPAI\b|MAE|GENITOR|PATERN|MATERN/.test(s)) return 'TutorNato';
+    if (/\bPAI\b|MAE|GENITOR|PATERN|MATERN|\bAVO\b|\bAVOS\b/.test(s)) return 'TutorNato';
     return null;
 }
 function termoAplicavel(tipo) {
@@ -2877,6 +2913,14 @@ function closeTypeHelpPanel() {
         if (!all.length) return;
         if (!v) return;
         var alvo = norm(v);
+        // A lista de qualidade so tem as formas masculinas; o feminino e gerado
+        // pelo flexionarQualidade a partir do estado civil. Sem esta saida, o
+        // encaixe estrito devolveria "Curadora" para "Curador" no blur seguinte.
+        if (typeof QUALIDADE_FEM === 'object') {
+            for (var k in QUALIDADE_FEM) {
+                if (norm(QUALIDADE_FEM[k]) === alvo) return;
+            }
+        }
         var exato = all.filter(function(o) { return norm(o) === alvo; })[0];
         if (exato) { if (input.value !== exato) aplicar(input, exato); return; }
         var comeca = all.filter(function(o) { return norm(o).indexOf(alvo) === 0; })[0];
@@ -2930,7 +2974,14 @@ wireBidirectionalSync();
 ['rep_qualidade','assist_qualidade'].forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     el.addEventListener('input', remapQualidade);
-    el.addEventListener('blur', remapQualidade);
+    el.addEventListener('blur', function() { aplicarGeneroQualidade(); remapQualidade(); });
+});
+// Descobrir o estado civil depois tambem corrige a qualidade ja escolhida.
+['rep_estado_civil','assist_estado_civil'].forEach(function(id) {
+    var el = document.getElementById(id); if (!el) return;
+    el.addEventListener('blur', function() {
+        setTimeout(function() { aplicarGeneroQualidade(); remapQualidade(); }, 180);
+    });
 });
 
 // Durante o calculo do semaforo o validateForm roda "em silencio": so
@@ -3133,6 +3184,50 @@ Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id);
  'test1_rg_incapaz','test2_rg_incapaz','rogo_rg_incapaz',
  'test1_rg_relativo','test2_rg_relativo','rogo_rg_relativo',
  'anexo_rg','anexo_rogo_rg','anexo_t1_rg','anexo_t2_rg'].forEach(function(id) { applyRGFallback(id); });
+
+// O guia (v2.html) manda as decisoes pela URL:
+//   index.html#tipo=relativo&qualidade=Curador&beneficio=...&naoassina=1
+// Aplica uma vez, no carregamento, e limpa o hash pra nao repetir no F5.
+function aplicarDecisoesDoGuia() {
+    var h = (location.hash || '').replace(/^#/, '');
+    if (!h) return;
+    var q = {};
+    h.split('&').forEach(function(par) {
+        var kv = par.split('=');
+        if (kv[0]) q[kv[0]] = decodeURIComponent((kv[1] || '').replace(/\+/g, ' '));
+    });
+    if (!q.tipo && !q.beneficio) return;
+    if (q.tipo && ['normal','incapaz','relativo'].indexOf(q.tipo) >= 0) {
+        var sel = document.getElementById('tipoSelect');
+        if (sel) sel.value = q.tipo;
+        mudarTipo(q.tipo);
+    }
+    if (q.beneficio) {
+        var b = document.getElementById('anexo_beneficio');
+        if (b) {
+            var achou = Array.prototype.filter.call(b.options, function(o) {
+                return stripDiacritics(o.value).toUpperCase() === stripDiacritics(q.beneficio).toUpperCase();
+            })[0];
+            if (achou) { b.value = achou.value; onAnexoBeneficioChange(); }
+        }
+    }
+    if (q.qualidade) {
+        var alvo = (q.tipo === 'incapaz') ? 'rep_qualidade' : 'assist_qualidade';
+        var el = document.getElementById(alvo);
+        if (el) {
+            el.value = q.qualidade;
+            el.dispatchEvent(new Event('input', {bubbles:true}));
+            el.dispatchEvent(new Event('blur', {bubbles:true}));
+        }
+    }
+    if (q.naoassina === '1') setAnalfabetoAll(true);
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    setTimeout(function() {
+        var n = document.getElementById('nome');
+        if (n) { n.scrollIntoView({behavior:'smooth', block:'center'}); n.focus({preventScroll:true}); }
+        iaToast('Guia aplicado — agora é só preencher os dados.', 'ok');
+    }, 400);
+}
 
 function tipoAtual() { return (document.getElementById('tipoSelect') || {}).value || 'normal'; }
 function fieldValue(id) {
@@ -3409,18 +3504,45 @@ function runPdfValidation() {
     return false;
 }
 var INTERNAL_PRINT_BYPASS = false;
+// O Chrome usa o TITULO do documento como nome sugerido em "Salvar como PDF".
+// Nao da pra pular a caixa de impressao (nenhuma pagina pode), mas da pra
+// entregar o nome pronto: "Procuracao Ad Judicia et Extra e Termos - Fulano".
+function nomeDoArquivo() {
+    var nome = (fieldValue('nome') || '').trim().replace(/\s+/g, ' ');
+    var partes = nome.split(' ').filter(Boolean);
+    var curto = partes.length > 1 ? (partes[0] + ' ' + partes[partes.length - 1]) : (partes[0] || '');
+    curto = curto.replace(/\b\p{L}+/gu, function(w) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    });
+    var comTermos = termoAplicavel(tipoAtual()) &&
+                    document.getElementById('page-termoresp').classList.contains('show');
+    var base = comTermos
+        ? 'Procuração Ad Judicia et Extra e Termos'
+        : 'Procuração Ad Judicia et Extra e Termo de Benefício';
+    return curto ? (base + ' - ' + curto) : base;
+}
+var _tituloOriginal = null;
+function comNomeDeArquivo(fn) {
+    if (_tituloOriginal === null) _tituloOriginal = document.title;
+    document.title = nomeDoArquivo();
+    try { fn(); } finally {
+        setTimeout(function() {
+            if (_tituloOriginal !== null) { document.title = _tituloOriginal; _tituloOriginal = null; }
+        }, 1200);
+    }
+}
 function gerarPDF() {
     INTERNAL_PRINT_BYPASS = false;
     document.body.classList.remove('print-validation-blocked');
     if (!runPdfValidation()) return;
-    window.print();
+    comNomeDeArquivo(function() { window.print(); });
 }
 function imprimirModeloInterno() {
     INTERNAL_PRINT_BYPASS = true;
     document.body.classList.remove('print-validation-blocked');
     fecharValModal(false);
     iaToast('Impressão interna sem validação.', 'info');
-    window.print();
+    comNomeDeArquivo(function() { window.print(); });
     // Fallback para testes/headless que substituem window.print e não disparam
     // afterprint. Na impressão real, afterprint encerra o bypass antes disso.
     setTimeout(function() { INTERNAL_PRINT_BYPASS = false; }, 1500);
@@ -3435,6 +3557,7 @@ document.addEventListener('keydown', function(event) {
     event.stopImmediatePropagation();
 }, true);
 window.addEventListener('beforeprint', function() {
+    if (_tituloOriginal === null) { _tituloOriginal = document.title; document.title = nomeDoArquivo(); }
     if (INTERNAL_PRINT_BYPASS) {
         document.body.classList.remove('print-validation-blocked');
         return;
@@ -3443,6 +3566,7 @@ window.addEventListener('beforeprint', function() {
     document.body.classList.toggle('print-validation-blocked', !valid);
 });
 window.addEventListener('afterprint', function() {
+    if (_tituloOriginal !== null) { document.title = _tituloOriginal; _tituloOriginal = null; }
     INTERNAL_PRINT_BYPASS = false;
     document.body.classList.remove('print-validation-blocked');
 });
@@ -3824,7 +3948,7 @@ function toggleSidebar(forceCollapsed) {
     document.body.classList.toggle('sidebar-collapsed', collapsed);
     var toolbarEl = document.getElementById('toolbarEl');
     if (toolbarEl) toolbarEl.classList.toggle('collapsed', collapsed);
-    var collapseButton = document.getElementById('sidebarCollapseBtn');
+    var collapseButton = document.getElementById('wbPanelBtn');
     if (collapseButton) collapseButton.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     try { localStorage.setItem(LS_SIDEBAR, collapsed ? '1' : '0'); } catch (e) {}
     requestAnimationFrame(recalcLayout);
@@ -4060,11 +4184,15 @@ window.addEventListener('resize', function() {
     document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
     var toolbarEl = document.getElementById('toolbarEl');
     if (toolbarEl) toolbarEl.classList.toggle('collapsed', sidebarCollapsed);
-    var collapseButton = document.getElementById('sidebarCollapseBtn');
+    var collapseButton = document.getElementById('wbPanelBtn');
     if (collapseButton) collapseButton.setAttribute('aria-expanded', sidebarCollapsed ? 'false' : 'true');
 })();
 
 mudarTipo((document.getElementById('tipoSelect') || {}).value || 'normal');
+aplicarDecisoesDoGuia();
+// Se o hash chegar com a pagina ja aberta (link colado, voltar do guia sem
+// recarregar), aplica do mesmo jeito.
+window.addEventListener('hashchange', aplicarDecisoesDoGuia);
 loadEstadosIBGE().then(function() { syncEstadoCidade().then(function() { normalizeCidadeByIBGE(); }); });
 recalcLayout();
 </script>
