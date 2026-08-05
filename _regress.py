@@ -1,7 +1,27 @@
+"""Regressao do gerador de procuracoes (arquivo unico index.html).
+
+Dependencias (nao ha requirements.txt: o produto e HTML estatico, isto aqui e
+so ferramenta de teste):
+
+    pip install playwright pymupdf
+    python -m playwright install chromium
+
+Uso: python _regress.py   (pode rodar de qualquer diretorio)
+"""
 import sys, pathlib
 from playwright.sync_api import sync_playwright
 
-URL = pathlib.Path("index.html").resolve().as_uri()
+try:
+    import fitz  # PyMuPDF: le o PDF gerado pra contar/renderizar paginas
+except ImportError:
+    sys.exit("PyMuPDF ausente. Instale com: pip install pymupdf")
+
+# Ancorado no proprio arquivo, nao no cwd: rodar de outra pasta nao pode
+# apontar pra um index.html qualquer.
+HTML = pathlib.Path(__file__).resolve().parent / "index.html"
+if not HTML.is_file():
+    sys.exit(f"index.html nao encontrado em {HTML}")
+URL = HTML.as_uri()
 errs = []
 def check(cond, msg):
     print(("OK  " if cond else "FAIL") + " " + msg)
@@ -21,7 +41,7 @@ with sync_playwright() as p:
     check(pg.locator("#page-anexox").is_visible(), "anexo page visible (normal)")
 
     def set_tipo(t):
-        pg.eval_on_selector("#tipoSelect", "el=>{}")  # noop
+        pg.wait_for_selector("#tipoSelect", state="attached")
         pg.evaluate("t=>{document.getElementById('tipoSelect').value=t; mudarTipo(t);}", t)
         pg.wait_for_timeout(150)
 
@@ -130,7 +150,6 @@ with sync_playwright() as p:
     check(pg.locator("#anexo_beneficio_outro").is_visible(), "Outro reveals free field")
 
     # --- pagination via PDF ---
-    import fitz
     def pdf_pages(tipo):
         # O gate de beforeprint troca o documento por um aviso quando a validacao
         # falha (1 pagina). Pra contar folhas, o formulario precisa estar valido.
@@ -139,7 +158,7 @@ with sync_playwright() as p:
         pg.select_option("#anexo_beneficio", label="Aposentadoria por Idade Rural")
         pg.wait_for_timeout(350)
         assert pg.evaluate("validateForm().length") == 0, f"{tipo}: form invalido antes do PDF"
-        out = f"_r_{tipo}.pdf"
+        out = str(HTML.parent / f"_r_{tipo}.pdf")
         pg.pdf(path=out, format="A4", print_background=True)
         d = fitz.open(out); n = d.page_count; d.close()
         return n
