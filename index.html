@@ -441,6 +441,18 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 .esp-destaque .seta { margin: 0 4px; color: #b9a9a5; font-size: 14pt; }
 .esp-check { display: flex; align-items: center; gap: 8px; font-size: 8.8pt; color: #7a6a67; cursor: pointer; }
 .esp-check input { width: 14px; height: 14px; accent-color: #622423; }
+
+/* ===== Historico ======================================================== */
+.hist-nome { display: block; font-size: 9.8pt; }
+.hist-meta { display: block; font-size: 8.2pt; color: #8a6e6c; margin-top: 2px; }
+#clearDataBtn.segurando {
+    background: #b4453c !important; border-color: #d06a60 !important; color: #fff !important;
+}
+#clearDataBtn.segurando svg { animation: lixSegura .7s linear both; }
+@keyframes lixSegura {
+    from { transform: rotate(0) scale(1); }
+    to   { transform: rotate(-14deg) scale(1.18); }
+}
 .ia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 4000; display: flex; align-items: center; justify-content: center; }
 .ia-modal-overlay { animation: overlayIn 0.14s ease-out; }
 .ia-modal { background: #fff; width: min(430px, 92vw); border-radius: 10px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); font-family: Arial, sans-serif; animation: modalIn 0.16s ease-out; }
@@ -605,17 +617,59 @@ body.sidebar-collapsed #docsArea { left: 0; }
     padding: 0; margin-left: 4px; flex: 0 0 22px;
 }
 .toolbar .help-btn:hover { background: rgba(255,255,255,0.38); color: #fff; }
+/* Ajuda dos tipos: em vez de tres paragrafos de jargao, um cartao por
+   situacao real — "quem e" de um lado, "o que acontece" do outro. Clicar no
+   cartao ja escolhe o tipo. */
 .help-popup {
     display: none; position: fixed; z-index: 5000;
-    width: min(360px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto;
-    background: #fff; color: #333; padding: 15px 16px; border: 1px solid #dccbc8; border-radius: 8px;
-    box-shadow: 0 16px 44px rgba(38,18,16,0.3); font: normal 9pt/1.48 Arial, sans-serif; text-align: left;
+    width: min(420px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto;
+    background: #fff; color: #333; padding: 0; border: 1px solid #dccbc8; border-radius: 12px;
+    box-shadow: 0 22px 60px rgba(38,18,16,0.34); font: normal 9pt/1.48 Arial, sans-serif; text-align: left;
+    transform-origin: top left;
 }
-.help-popup.open { display: block; animation: helpIn 0.14s ease-out; }
-.help-popup p { margin: 0 0 10px; text-align: left; line-height: 1.48; }
-.help-popup p:last-child { margin-bottom: 0; }
-.help-popup b { color: #622423; }
-@keyframes helpIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.help-popup.open { display: block; animation: helpIn 0.26s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes helpIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.help-cab {
+    padding: 14px 16px; color: #f6ecea;
+    background: linear-gradient(180deg, #703030 0%, #55211e 100%);
+    border-radius: 11px 11px 0 0;
+}
+.help-cab b { display: block; font-size: 11.5pt; }
+.help-cab span { font-size: 8.2pt; opacity: 0.78; }
+.help-lista { padding: 12px 12px 6px; background: #faf8f7; }
+.help-card {
+    display: flex; align-items: flex-start; gap: 11px; width: 100%; text-align: left;
+    background: #fff; border: 1px solid #e3dcd8; border-radius: 10px;
+    padding: 11px 13px; margin-bottom: 8px; cursor: pointer; font-family: inherit;
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    animation: helpCard .32s ease both;
+}
+@keyframes helpCard { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.help-card:hover, .help-card:focus-visible {
+    border-color: #622423; transform: translateX(3px);
+    box-shadow: 0 5px 16px rgba(98,36,35,0.16); outline: none;
+}
+.help-card.ativo { border-color: #622423; box-shadow: 0 0 0 2px rgba(98,36,35,0.16); }
+.help-card .hc-ico {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #f4efed; color: #622423;
+}
+.help-card:hover .hc-ico { background: #622423; color: #fff; }
+.help-card .hc-ico svg { width: 16px; height: 16px; }
+.help-card .hc-txt { min-width: 0; }
+.help-card .hc-quem { display: block; font-size: 10pt; font-weight: bold; color: #3a2b28; line-height: 1.28; }
+.help-card .hc-oq { display: block; font-size: 8.5pt; color: #8a6e6c; line-height: 1.45; margin-top: 3px; }
+.help-card .hc-oq b { color: #622423; }
+.help-rodape {
+    padding: 11px 16px 13px; font-size: 8.3pt; color: #7a6a67; line-height: 1.5;
+    border-top: 1px solid #eee6e2; background: #fff; border-radius: 0 0 11px 11px;
+}
+.help-rodape b { color: #622423; }
+.help-rodape a { color: #622423; font-weight: bold; }
 /* Sections hidden by default */
 .tipo-section { display: none; }
 .tipo-section.active { display: block; }
@@ -940,10 +994,38 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 
 <div class="help-popup" id="typeHelpPanel" role="dialog" aria-label="Tipos de procuração" aria-hidden="true">
-    <p><b>Normal:</b> pessoa maior de 18 anos, capaz, que assina o documento.</p>
-    <p><b>Absolutamente incapaz:</b> menor de 16 anos ou curatelado. O representante legal assina pela pessoa.</p>
-    <p><b>Relativamente incapaz:</b> pessoa de 16 ou 17 anos, ou maior assistido. Assina com o assistente legal.</p>
-    <p>Quando o signatário não souber assinar, marque <b>“Signatário(a) analfabeto(a)”</b> no documento.</p>
+    <div class="help-cab">
+        <b>Qual é o caso?</b>
+        <span>Escolha pela situação da pessoa — o tipo entra sozinho.</span>
+    </div>
+    <div class="help-lista">
+        <button type="button" class="help-card" data-tipo="normal" style="animation-delay:.03s">
+            <span class="hc-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <span class="hc-txt">
+                <span class="hc-quem">Resolve as próprias coisas</span>
+                <span class="hc-oq">Maior de 18, sem curatela. Sai <b>Normal</b> — 2 folhas, e ela mesma assina.</span>
+            </span>
+        </button>
+        <button type="button" class="help-card" data-tipo="incapaz" style="animation-delay:.08s">
+            <span class="hc-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="10" r="3"/><path d="M12 13v8"/><path d="M9 17h6"/><path d="M4.5 7a7.5 7.5 0 0 1 15 0"/></svg></span>
+            <span class="hc-txt">
+                <span class="hc-quem">Criança de até 15 anos</span>
+                <span class="hc-oq">Sai <b>Absolutamente Incapaz</b> — 4 folhas. Quem assina é o <b>representante legal</b>, em nome dela.</span>
+            </span>
+        </button>
+        <button type="button" class="help-card" data-tipo="relativo" style="animation-delay:.13s">
+            <span class="hc-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <span class="hc-txt">
+                <span class="hc-quem">16 ou 17 anos, ou adulto que precisa de alguém</span>
+                <span class="hc-oq">Pessoa com deficiência, idoso, ou quem já tem responsável. Sai <b>Relativamente Incapaz</b> — 4 folhas, com <b>assistente legal</b>.</span>
+            </span>
+        </button>
+    </div>
+    <div class="help-rodape">
+        <b>Não sabe assinar?</b> Isso é outra coisa, e independe do tipo: marque
+        <b>“não assina”</b> no documento e todos ganham assinatura a rogo, duas
+        testemunhas e impressão digital.
+    </div>
 </div>
 
 
@@ -985,6 +1067,24 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 
 <!-- Modal proprio de validacao (substitui o alert() feio do navegador). -->
+<div class="ia-modal-overlay" id="histModal" style="display:none">
+    <div class="ia-modal val-modal" role="dialog" aria-modal="true" aria-labelledby="histTitulo">
+        <div class="val-head">
+            <span class="val-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
+            <div>
+                <div class="val-title" id="histTitulo">Últimos preenchimentos</div>
+                <div class="val-sub">Guardados só neste computador</div>
+            </div>
+        </div>
+        <div class="val-body" id="histLista"></div>
+        <div class="val-foot">
+            <span class="val-dica">Clique para carregar de volta.</span>
+            <button type="button" class="btn-ghost" id="histApagar">Apagar histórico</button>
+            <button type="button" class="btn-ghost" onclick="fecharHistModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <div class="ia-modal-overlay" id="clearModal" style="display:none">
     <div class="ia-modal">
         <div class="ia-modal-title">Limpar todos os dados?</div>
@@ -2799,7 +2899,7 @@ function setTypeHelpPanelOpen(open) {
     panel.classList.toggle('open', open);
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
     button.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) requestAnimationFrame(positionTypeHelpPanel);
+    if (open) { marcarCardAtivo(); requestAnimationFrame(positionTypeHelpPanel); }
 }
 function closeTypeHelpPanel() {
     TYPE_HELP_PINNED = false;
@@ -2837,7 +2937,25 @@ function closeTypeHelpPanel() {
         if (event.key === 'Escape') closeTypeHelpPanel();
     });
     window.addEventListener('resize', positionTypeHelpPanel);
+    // Clicar num cartao ja escolhe o tipo — a ajuda vira atalho, nao so texto.
+    panel.querySelectorAll('.help-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            var t = card.getAttribute('data-tipo');
+            var sel = document.getElementById('tipoSelect');
+            if (sel) sel.value = t;
+            mudarTipo(t);
+            closeTypeHelpPanel();
+            iaToast('Tipo alterado para ' + ({normal:'Normal', incapaz:'Absolutamente Incapaz', relativo:'Relativamente Incapaz'}[t]) + '.', 'ok');
+        });
+    });
 })();
+// Marca no painel o cartao do tipo em uso.
+function marcarCardAtivo() {
+    var t = tipoAtual();
+    document.querySelectorAll('#typeHelpPanel .help-card').forEach(function(c) {
+        c.classList.toggle('ativo', c.getAttribute('data-tipo') === t);
+    });
+}
 
 // === COMBOBOX custom (troca o <datalist> nativo por popup estilizado) ========
 // Aplica a TODO input[list]: qualidade (pai/mae/tutor...), estado civil, estado
@@ -3535,6 +3653,7 @@ function gerarPDF() {
     INTERNAL_PRINT_BYPASS = false;
     document.body.classList.remove('print-validation-blocked');
     if (!runPdfValidation()) return;
+    salvarNoHistorico();
     comNomeDeArquivo(function() { window.print(); });
 }
 function imprimirModeloInterno() {
@@ -3970,6 +4089,139 @@ function getActiveDocEls() {
 // --- Limpar dados (botao da lixeira na barra) --------------------------
 // Zera so o que foi PREENCHIDO nos documentos. Nao mexe no tipo de procuracao
 // nem na config da IA (chave/modelo ficam no localStorage).
+// ===== Historico local (segurar a lixeira) =================================
+// Guarda os ultimos preenchimentos SO neste navegador, pra nao redigitar quando
+// o mesmo cliente volta. Nada sai da maquina. O CPF aparece mascarado na lista.
+var HIST_LS = 'proc_historico';
+var HIST_MAX = 10;
+var HIST_CAMPOS = ['nome','cpf','rg','profissao','estado_civil','telefone','endereco',
+    'numero','bairro','cidade','estado','rep_nome','rep_cpf','rep_rg','rep_estado_civil',
+    'rep_qualidade','assist_nome','assist_cpf','assist_rg','assist_estado_civil',
+    'assist_qualidade','anexo_beneficio','anexo_beneficio_outro'];
+function lerHistorico() {
+    try { return JSON.parse(localStorage.getItem(HIST_LS) || '[]'); } catch (e) { return []; }
+}
+function salvarNoHistorico() {
+    var nome = fieldValue('nome');
+    if (!nome) return;
+    var reg = { t: Date.now(), tipo: tipoAtual(), dados: {} };
+    HIST_CAMPOS.forEach(function(id) {
+        var v = fieldValue(id);
+        if (v) reg.dados[id] = v;
+    });
+    var lista = lerHistorico().filter(function(r) {
+        return (r.dados.cpf || r.dados.nome) !== (reg.dados.cpf || reg.dados.nome);
+    });
+    lista.unshift(reg);
+    try { localStorage.setItem(HIST_LS, JSON.stringify(lista.slice(0, HIST_MAX))); } catch (e) {}
+}
+function cpfMascarado(c) {
+    if (!c) return '';
+    var d = c.replace(/\D/g, '');
+    return d.length === 11 ? ('•••.' + d.slice(3, 6) + '.•••-' + d.slice(9)) : c;
+}
+function quandoFoi(ts) {
+    var min = Math.floor((Date.now() - ts) / 60000);
+    if (min < 1) return 'agora';
+    if (min < 60) return min + ' min';
+    var h = Math.floor(min / 60);
+    if (h < 24) return h + 'h';
+    var d = Math.floor(h / 24);
+    return d === 1 ? 'ontem' : (d + ' dias');
+}
+var TIPO_CURTO = { normal: 'Normal', incapaz: 'Abs. Incapaz', relativo: 'Rel. Incapaz' };
+function abrirHistModal() {
+    var lista = lerHistorico();
+    var box = document.getElementById('histLista');
+    box.innerHTML = '';
+    if (!lista.length) {
+        box.innerHTML = '<p class="ia-note" style="padding:14px 4px;text-align:center">' +
+            'Ainda não há nada guardado.<br>Cada PDF gerado entra aqui automaticamente.</p>';
+    } else {
+        lista.forEach(function(r, i) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'val-item';
+            btn.style.animationDelay = (i * 0.04) + 's';
+            btn.setAttribute('data-i', i);
+            btn.innerHTML = '<span class="val-num">' + (i + 1) + '</span>' +
+                '<span class="val-txt"><b class="hist-nome"></b>' +
+                '<span class="hist-meta"></span></span><span class="val-seta">↺</span>';
+            btn.querySelector('.hist-nome').textContent = r.dados.nome || '(sem nome)';
+            btn.querySelector('.hist-meta').textContent =
+                [cpfMascarado(r.dados.cpf), TIPO_CURTO[r.tipo] || r.tipo,
+                 r.dados.anexo_beneficio || '', quandoFoi(r.t)].filter(Boolean).join(' · ');
+            box.appendChild(btn);
+        });
+    }
+    document.getElementById('histModal').style.display = 'flex';
+}
+function fecharHistModal() { document.getElementById('histModal').style.display = 'none'; }
+function carregarDoHistorico(i) {
+    var r = lerHistorico()[i];
+    if (!r) return;
+    fecharHistModal();
+    limparDados();
+    setTimeout(function() {
+        var sel = document.getElementById('tipoSelect');
+        if (sel && r.tipo) { sel.value = r.tipo; mudarTipo(r.tipo); }
+        Object.keys(r.dados).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.value = r.dados[id];
+            el.dispatchEvent(new Event('input', {bubbles:true}));
+            el.dispatchEvent(new Event('change', {bubbles:true}));
+            el.dispatchEvent(new Event('blur', {bubbles:true}));
+        });
+        onAnexoBeneficioChange();
+        remapQualidade();
+        recalcLayout();
+        agendarStatusDocs();
+        iaToast('Dados de ' + (r.dados.nome || 'cliente') + ' carregados.', 'ok');
+    }, 120);
+}
+(function wireHistorico() {
+    var box = document.getElementById('histLista');
+    if (box) box.addEventListener('click', function(e) {
+        var b = e.target.closest('.val-item'); if (!b) return;
+        carregarDoHistorico(+b.getAttribute('data-i'));
+    });
+    var ap = document.getElementById('histApagar');
+    if (ap) ap.addEventListener('click', function() {
+        try { localStorage.removeItem(HIST_LS); } catch (e) {}
+        abrirHistModal();
+        iaToast('Histórico apagado.', 'ok');
+    });
+    var ov = document.getElementById('histModal');
+    if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) fecharHistModal(); });
+    // Segurar a lixeira ~700ms abre o historico; clique rapido limpa os dados.
+    var lix = document.getElementById('clearDataBtn');
+    if (!lix) return;
+    var timer = null, disparou = false;
+    function inicia(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        disparou = false;
+        lix.classList.add('segurando');
+        timer = setTimeout(function() {
+            disparou = true;
+            lix.classList.remove('segurando');
+            abrirHistModal();
+        }, 700);
+    }
+    function cancela() { if (timer) { clearTimeout(timer); timer = null; } lix.classList.remove('segurando'); }
+    lix.addEventListener('mousedown', inicia);
+    lix.addEventListener('touchstart', inicia, {passive:true});
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev) {
+        lix.addEventListener(ev, cancela);
+    });
+    lix.addEventListener('click', function(e) {
+        if (disparou) { e.preventDefault(); e.stopImmediatePropagation(); disparou = false; return; }
+        abrirClearModal();
+    });
+    lix.removeAttribute('onclick');
+    lix.title = 'Limpar os dados — segure para ver o histórico';
+})();
+
 function abrirClearModal() {
     var m = document.getElementById('clearModal');
     if (m) m.style.display = 'flex';
