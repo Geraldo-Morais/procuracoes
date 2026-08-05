@@ -98,27 +98,49 @@ with sync_playwright() as p:
     ac = pg.input_value("#anexo_cpf")
     check(ac=="123.456.789-09", f"sync cpf->anexo_cpf (got {ac!r})")
 
-    # --- sync REVERSO: preencher a ULTIMA folha alimenta todas as outras ---
+    # --- espelhos: campo de termo e somente leitura e leva a procuracao ---
     set_tipo("incapaz")
-    pg.evaluate("setAnalfabetoAll(true)"); pg.wait_for_timeout(150)
-    def setf(i, v):
-        pg.fill("#"+i, v); pg.locator("#"+i).blur(); pg.wait_for_timeout(110)
-    setf("termocomp_benef_nome", "Joana Da Silva")
-    setf("termocomp_nome", "Pedro Da Silva")
-    setf("termocomp_rogo_cpf", "52601815906")
-    setf("termocomp_t1_cpf", "08301661305")
-    setf("termocomp_t2_rg", "5551112")
-    esperado = {
-        "nome": "JOANA DA SILVA", "rep_nome": "PEDRO DA SILVA",
-        "rogo_cpf_incapaz": "526.018.159-06", "test1_cpf_incapaz": "083.016.613-05",
-        "test2_rg_incapaz": "5551112",
-        "anexo_nome": "JOANA DA SILVA", "anexo_rogo_cpf": "526.018.159-06",
-        "termoresp_nome": "PEDRO DA SILVA", "termoresp_t1_cpf": "083.016.613-05",
-        "termoresp_t2_rg": "5551112",
-    }
-    ruins = {k: pg.input_value("#"+k) for k, v in esperado.items() if pg.input_value("#"+k) != v}
-    check(not ruins, f"sync reverso (Termo de Compromisso -> demais folhas) (divergentes={ruins})")
+    pg.evaluate("setAnalfabetoAll(true)"); pg.wait_for_timeout(250)
+    esp = pg.evaluate("""()=>{
+        var ids=['termocomp_benef_nome','termoresp_nome','anexo_nome','anexo_endereco',
+                 'anexo_local_cidade','termoresp_t1_cpf'];
+        var o={};
+        ids.forEach(function(i){var e=document.getElementById(i);
+            o[i] = e ? (e.readOnly && e.classList.contains('js-espelho') ? e.dataset.dono : 'EDITAVEL') : 'AUSENTE';});
+        return o;}""")
+    check(all(v not in ("EDITAVEL", "AUSENTE") for v in esp.values()),
+          f"espelhos: campos dos termos sao somente leitura (got {esp})")
+    check(esp.get("anexo_endereco") == "endereco" and esp.get("termocomp_benef_nome") == "nome",
+          f"espelhos: apontam pro campo certo da procuracao (got {esp})")
+    # o campo do Termo de Beneficio (sem contraparte na procuracao) segue editavel
+    livre = pg.evaluate("()=>{var e=document.getElementById('anexo_beneficio');"
+                        " return !e.readOnly && !e.classList.contains('js-espelho');}")
+    check(livre, "espelhos: o tipo de beneficio continua editavel no proprio termo")
+    # clicar num espelho manda o foco pro dono, na procuracao
+    pg.evaluate("()=>document.getElementById('anexo_nome').focus()")
+    pg.wait_for_timeout(600)
+    foco = pg.evaluate("()=>document.activeElement && document.activeElement.id")
+    check(foco == "nome", f"espelhos: focar o espelho leva ao campo da procuracao (got {foco!r})")
     pg.evaluate("setAnalfabetoAll(false)")
+    pg.goto(URL); pg.wait_for_timeout(350)
+
+    # --- trocar de tipo leva o que ja foi digitado ---
+    set_tipo("incapaz")
+    pg.fill("#rep_nome", "Pedro Da Silva"); pg.locator("#rep_nome").blur()
+    pg.fill("#rep_cpf", "52601815906"); pg.locator("#rep_cpf").blur()
+    pg.fill("#rep_qualidade", "Curador"); pg.locator("#rep_qualidade").blur()
+    pg.wait_for_timeout(250)
+    set_tipo("relativo"); pg.wait_for_timeout(300)
+    mig = {i: pg.input_value("#" + i) for i in ["assist_nome", "assist_cpf", "assist_qualidade"]}
+    check(mig["assist_nome"] == "PEDRO DA SILVA" and mig["assist_cpf"] == "526.018.159-06",
+          f"trocar incapaz->relativo leva representante para assistente (got {mig})")
+    pg.goto(URL); pg.wait_for_timeout(350)
+
+    # --- lista fechada: estado civil e qualidade encaixam na opcao certa ---
+    set_tipo("normal")
+    pg.fill("#estado_civil", "solteria"); pg.locator("#estado_civil").blur(); pg.wait_for_timeout(400)
+    ec = pg.input_value("#estado_civil")
+    check(ec.upper() == "SOLTEIRA", f"estado civil digitado errado encaixa na lista (got {ec!r})")
     pg.goto(URL); pg.wait_for_timeout(350)
 
     # --- telefone NAO e obrigatorio ---
