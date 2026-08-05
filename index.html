@@ -444,7 +444,38 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 
 /* ===== Historico ======================================================== */
 .hist-nome { display: block; font-size: 9.8pt; }
-.hist-meta { display: block; font-size: 8.2pt; color: #8a6e6c; margin-top: 2px; }
+.hist-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 8.2pt; color: #8a6e6c; margin-top: 3px; }
+/* Etiqueta do beneficio: da pra bater o olho e saber o que foi pedido. */
+.hist-tag {
+    display: inline-block; padding: 1.5px 7px; border-radius: 20px;
+    font-size: 7.4pt; font-weight: bold; letter-spacing: 0.2pt;
+    background: #efe7e5; color: #6d4a47; border: 1px solid #e0d3d0;
+}
+.hist-tag.bpc    { background: #eef3ee; color: #3f6b46; border-color: #d6e4d8; }
+.hist-tag.rural  { background: #f3f0e6; color: #6d6127; border-color: #e5dfc9; }
+.hist-tag.inc    { background: #f2edf4; color: #5c4270; border-color: #e2d7e8; }
+.hist-tag.pensao { background: #f4eeec; color: #7a4a3f; border-color: #e8d9d4; }
+.hist-sep { opacity: 0.45; }
+.hist-busca {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 18px; background: #fff; border-bottom: 1px solid #eee6e2;
+}
+.hist-busca .hb-ico { flex: 0 0 auto; color: #a89490; display: flex; }
+.hist-busca .hb-ico svg { width: 15px; height: 15px; }
+.hist-busca input {
+    flex: 1 1 auto; min-width: 0; border: none; outline: none; background: transparent;
+    font-family: Arial, sans-serif; font-size: 9.8pt; color: #3a2b28; padding: 3px 0;
+}
+.hist-busca input::placeholder { color: #b3a29e; }
+.hist-busca .hb-limpa {
+    flex: 0 0 auto; border: none; background: #f2ecea; color: #8a6e6c; cursor: pointer;
+    width: 20px; height: 20px; border-radius: 50%; font-size: 12pt; line-height: 1;
+    display: none; align-items: center; justify-content: center; font-family: inherit;
+}
+.hist-busca .hb-limpa.mostrar { display: flex; }
+.hist-busca .hb-limpa:hover { background: #622423; color: #fff; }
+.hist-vazio { padding: 22px 10px; text-align: center; font-size: 9pt; color: #8a6e6c; line-height: 1.55; }
+.hist-vazio b { color: #622423; }
 #clearDataBtn.segurando {
     background: #b4453c !important; border-color: #d06a60 !important; color: #fff !important;
 }
@@ -1076,9 +1107,14 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <div class="val-sub">Guardados só neste computador</div>
             </div>
         </div>
+        <div class="hist-busca">
+            <span class="hb-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+            <input type="text" id="histFiltro" placeholder="Buscar por nome ou CPF…" autocomplete="off" spellcheck="false">
+            <button type="button" class="hb-limpa" id="histFiltroLimpa" aria-label="Limpar busca">×</button>
+        </div>
         <div class="val-body" id="histLista"></div>
         <div class="val-foot">
-            <span class="val-dica">Clique para carregar de volta.</span>
+            <span class="val-dica" id="histContagem">Clique para carregar de volta.</span>
             <button type="button" class="btn-ghost" id="histApagar">Apagar histórico</button>
             <button type="button" class="btn-ghost" onclick="fecharHistModal()">Fechar</button>
         </div>
@@ -4130,31 +4166,101 @@ function quandoFoi(ts) {
     return d === 1 ? 'ontem' : (d + ' dias');
 }
 var TIPO_CURTO = { normal: 'Normal', incapaz: 'Abs. Incapaz', relativo: 'Rel. Incapaz' };
-function abrirHistModal() {
-    var lista = lerHistorico();
+// Etiqueta curta do beneficio, pra bater o olho na lista.
+function tagBeneficio(b) {
+    var t = stripDiacritics(b || '').toUpperCase();
+    if (!t) return null;
+    if (/BPC|LOAS/.test(t)) return { txt: 'BPC', cls: 'bpc' };
+    if (/APOSENTADORIA.*RURAL/.test(t)) return { txt: 'Ap. Rural', cls: 'rural' };
+    if (/APOSENTADORIA.*URBANA/.test(t)) return { txt: 'Ap. Urbana', cls: '' };
+    if (/APOSENTADORIA.*HIBRIDA/.test(t)) return { txt: 'Ap. Híbrida', cls: '' };
+    if (/INCAPACIDADE/.test(t)) return { txt: 'Incapacidade', cls: 'inc' };
+    if (/ACIDENTE/.test(t)) return { txt: 'Aux. Acidente', cls: 'inc' };
+    if (/RECLUSAO/.test(t)) return { txt: 'Aux. Reclusão', cls: '' };
+    if (/MATERNIDADE.*RURAL/.test(t)) return { txt: 'Sal. Mat. Rural', cls: 'rural' };
+    if (/MATERNIDADE/.test(t)) return { txt: 'Sal. Maternidade', cls: '' };
+    if (/PENSAO.*RURAL/.test(t)) return { txt: 'Pensão Rural', cls: 'rural' };
+    if (/PENSAO/.test(t)) return { txt: 'Pensão', cls: 'pensao' };
+    if (/REVISAO/.test(t)) return { txt: 'Revisão', cls: '' };
+    return { txt: b.length > 18 ? (b.slice(0, 17) + '…') : b, cls: '' };
+}
+function normBusca(v) { return stripDiacritics(String(v || '')).toUpperCase(); }
+// Casa por nome (sem acento) ou por CPF (so digitos, casa parcial).
+function casaBusca(reg, termo) {
+    if (!termo) return true;
+    var t = normBusca(termo).trim();
+    if (!t) return true;
+    var dig = t.replace(/\D/g, '');
+    if (dig.length >= 3 && (reg.dados.cpf || '').replace(/\D/g, '').indexOf(dig) >= 0) return true;
+    if (normBusca(reg.dados.nome).indexOf(t) >= 0) return true;
+    if (normBusca(reg.dados.rep_nome).indexOf(t) >= 0 && t.length >= 3) return true;
+    if (normBusca(reg.dados.assist_nome).indexOf(t) >= 0 && t.length >= 3) return true;
+    return false;
+}
+function renderHistLista() {
+    var termo = (document.getElementById('histFiltro') || {}).value || '';
+    var todos = lerHistorico();
     var box = document.getElementById('histLista');
+    var cont = document.getElementById('histContagem');
     box.innerHTML = '';
-    if (!lista.length) {
-        box.innerHTML = '<p class="ia-note" style="padding:14px 4px;text-align:center">' +
-            'Ainda não há nada guardado.<br>Cada PDF gerado entra aqui automaticamente.</p>';
-    } else {
-        lista.forEach(function(r, i) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'val-item';
-            btn.style.animationDelay = (i * 0.04) + 's';
-            btn.setAttribute('data-i', i);
-            btn.innerHTML = '<span class="val-num">' + (i + 1) + '</span>' +
-                '<span class="val-txt"><b class="hist-nome"></b>' +
-                '<span class="hist-meta"></span></span><span class="val-seta">↺</span>';
-            btn.querySelector('.hist-nome').textContent = r.dados.nome || '(sem nome)';
-            btn.querySelector('.hist-meta').textContent =
-                [cpfMascarado(r.dados.cpf), TIPO_CURTO[r.tipo] || r.tipo,
-                 r.dados.anexo_beneficio || '', quandoFoi(r.t)].filter(Boolean).join(' · ');
-            box.appendChild(btn);
-        });
+    if (!todos.length) {
+        box.innerHTML = '<div class="hist-vazio">Ainda não há nada guardado.<br>' +
+            'Cada PDF gerado entra aqui <b>automaticamente</b>.</div>';
+        if (cont) cont.textContent = '';
+        return;
     }
+    var vis = 0;
+    todos.forEach(function(r, i) {
+        if (!casaBusca(r, termo)) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'val-item';
+        btn.style.animationDelay = (vis * 0.035) + 's';
+        btn.setAttribute('data-i', i);
+        btn.innerHTML = '<span class="val-num">' + (vis + 1) + '</span>' +
+            '<span class="val-txt"><b class="hist-nome"></b>' +
+            '<span class="hist-meta"></span></span><span class="val-seta">↺</span>';
+        btn.querySelector('.hist-nome').textContent = r.dados.nome || '(sem nome)';
+        var meta = btn.querySelector('.hist-meta');
+        var tag = tagBeneficio(r.dados.anexo_beneficio || r.dados.anexo_beneficio_outro);
+        if (tag) {
+            var sp = document.createElement('span');
+            sp.className = 'hist-tag ' + tag.cls;
+            sp.textContent = tag.txt;
+            meta.appendChild(sp);
+        }
+        [cpfMascarado(r.dados.cpf), TIPO_CURTO[r.tipo] || r.tipo, quandoFoi(r.t)]
+            .filter(Boolean).forEach(function(txt, k) {
+                if (k || tag) {
+                    var s2 = document.createElement('span');
+                    s2.className = 'hist-sep'; s2.textContent = '·';
+                    meta.appendChild(s2);
+                }
+                var s3 = document.createElement('span');
+                s3.textContent = txt;
+                meta.appendChild(s3);
+            });
+        box.appendChild(btn);
+        vis++;
+    });
+    if (!vis) {
+        box.innerHTML = '<div class="hist-vazio">Nada encontrado para <b>' +
+            termo.replace(/</g, '&lt;') + '</b>.</div>';
+    }
+    if (cont) {
+        cont.textContent = termo
+            ? (vis + ' de ' + todos.length + (todos.length === 1 ? ' registro' : ' registros'))
+            : 'Clique para carregar de volta.';
+    }
+    var lim = document.getElementById('histFiltroLimpa');
+    if (lim) lim.classList.toggle('mostrar', !!termo);
+}
+function abrirHistModal() {
+    var f = document.getElementById('histFiltro');
+    if (f) f.value = '';
+    renderHistLista();
     document.getElementById('histModal').style.display = 'flex';
+    setTimeout(function() { if (f) f.focus(); }, 60);
 }
 function fecharHistModal() { document.getElementById('histModal').style.display = 'none'; }
 function carregarDoHistorico(i) {
@@ -4189,8 +4295,23 @@ function carregarDoHistorico(i) {
     var ap = document.getElementById('histApagar');
     if (ap) ap.addEventListener('click', function() {
         try { localStorage.removeItem(HIST_LS); } catch (e) {}
-        abrirHistModal();
+        renderHistLista();
         iaToast('Histórico apagado.', 'ok');
+    });
+    var filtro = document.getElementById('histFiltro');
+    if (filtro) {
+        filtro.addEventListener('input', renderHistLista);
+        filtro.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { filtro.value = ''; renderHistLista(); }
+            if (e.key === 'Enter') {
+                var primeiro = document.querySelector('#histLista .val-item');
+                if (primeiro) primeiro.click();
+            }
+        });
+    }
+    var limpaBusca = document.getElementById('histFiltroLimpa');
+    if (limpaBusca) limpaBusca.addEventListener('click', function() {
+        filtro.value = ''; renderHistLista(); filtro.focus();
     });
     var ov = document.getElementById('histModal');
     if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) fecharHistModal(); });
