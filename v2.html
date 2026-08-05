@@ -54,11 +54,13 @@ body {
 .topo .pular:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
 
 /* ---------- palco ---------- */
-.palco { flex: 1 1 auto; overflow-y: auto; padding: 26px 20px 40px; }
+/* O palco rola sozinho e o conteudo nunca encosta na borda: em 100% de zoom
+   a coluna da direita (consequencias) somada as opcoes estourava a altura. */
+.palco { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 22px 20px 36px; }
 .centro { max-width: 1020px; margin: 0 auto; }
 
 /* ---------- trilha de passos ---------- */
-.trilha { display: flex; align-items: center; gap: 0; margin: 0 auto 26px; max-width: 560px; }
+.trilha { display: flex; align-items: center; gap: 0; margin: 0 auto 20px; max-width: 520px; }
 .trilha[hidden] { display: none; }
 .trilha .no {
     flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
@@ -79,24 +81,24 @@ body {
 
 .pergunta {
     background: #fff; border: 1px solid var(--linha); border-radius: 12px;
-    padding: 26px 26px 22px; box-shadow: 0 6px 24px rgba(62,35,31,0.09);
+    padding: 22px 24px 18px; box-shadow: 0 6px 24px rgba(62,35,31,0.09);
     animation: entra .28s ease both;
 }
 @keyframes entra { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .pergunta .passo { font-size: 8pt; font-weight: bold; letter-spacing: 0.8pt; text-transform: uppercase; color: var(--suave); }
 .pergunta h1 {
     font-family: 'Times New Roman', Times, serif;
-    font-size: 21pt; line-height: 1.22; margin: 6px 0 4px; color: var(--vinho);
+    font-size: 19pt; line-height: 1.2; margin: 5px 0 3px; color: var(--vinho);
 }
-.pergunta .ajuda { font-size: 9.5pt; color: var(--suave); line-height: 1.5; margin: 0 0 18px; }
+.pergunta .ajuda { font-size: 9pt; color: var(--suave); line-height: 1.45; margin: 0 0 14px; }
 
-.opcoes { display: grid; gap: 10px; }
+.opcoes { display: grid; gap: 8px; }
 .opcoes.duas { grid-template-columns: 1fr 1fr; }
 @media (max-width: 640px) { .opcoes.duas { grid-template-columns: 1fr; } }
 .opcao {
-    display: flex; align-items: flex-start; gap: 12px; text-align: left;
+    display: flex; align-items: flex-start; gap: 11px; text-align: left;
     background: #fdfbfa; border: 1.5px solid var(--linha); border-radius: 10px;
-    padding: 13px 15px; cursor: pointer; font-family: inherit; color: inherit;
+    padding: 11px 13px; cursor: pointer; font-family: inherit; color: inherit;
     transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease;
 }
 .opcao:hover { border-color: var(--vinho); background: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(62,35,31,0.12); }
@@ -109,7 +111,7 @@ body {
 }
 .opcao.marcada .tecla, .opcao:hover .tecla { background: var(--vinho); color: #fff; border-color: var(--vinho); }
 .opcao .rot { min-width: 0; }
-.opcao b { display: block; font-size: 10.5pt; line-height: 1.3; }
+.opcao b { display: block; font-size: 10pt; line-height: 1.28; }
 .opcao .desc { display: block; font-size: 8.8pt; color: var(--suave); line-height: 1.45; margin-top: 3px; }
 
 .rodape-cena { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
@@ -128,8 +130,8 @@ body {
 /* ---------- painel de consequências ---------- */
 .consequencia {
     background: #fff; border: 1px solid var(--linha); border-radius: 12px;
-    padding: 18px 18px 14px; box-shadow: 0 6px 24px rgba(62,35,31,0.07);
-    position: sticky; top: 0;
+    padding: 16px 16px 13px; box-shadow: 0 6px 24px rgba(62,35,31,0.07);
+    position: sticky; top: 0; max-height: calc(100vh - 150px); overflow-y: auto;
 }
 .consequencia h2 {
     font-size: 8pt; letter-spacing: 0.8pt; text-transform: uppercase;
@@ -291,7 +293,7 @@ var PERGUNTAS = [
             { v: 'adulto',    t: 'Um adulto que resolve as próprias coisas', d: 'Maior de 18 anos, sem curatela e sem representante definido.' },
             { v: 'crianca',   t: 'Uma criança de até 15 anos',               d: 'Quem responde é o representante legal, em nome dela.' },
             { v: 'adolesc',   t: 'Um adolescente de 16 ou 17 anos',          d: 'Ela participa do ato, assistida por um responsável.' },
-            { v: 'assistida', t: 'Um adulto com curatela, guarda ou representante', d: 'Pessoa com deficiência, idoso ou qualquer adulto que já tenha responsável definido.' }
+            { v: 'assistida', t: 'Um adulto que precisa de outra pessoa para resolver as coisas', d: 'Não resolve sozinho: pessoa com deficiência, idoso, ou quem já tem alguém respondendo por ele.' }
         ]
     },
     {
@@ -304,8 +306,7 @@ var PERGUNTAS = [
             { v: 'Curador',    t: 'Curador, com sentença de curatela', d: 'Existe processo de curatela concluído.' },
             { v: 'TutorLegal', t: 'Tutor nomeado pelo juiz',           d: 'Há termo de tutela.' },
             { v: 'Guarda',     t: 'Guardião, com termo de guarda',     d: 'Guarda deferida judicialmente.' },
-            { v: 'AdmProv',    t: 'Administrador provisório',          d: 'Cadastrado no INSS enquanto a curatela não sai.' },
-            { v: 'Procurador', t: 'Procurador',                        d: 'Apenas procuração, sem representação legal.' }
+            { v: 'AdmProv',    t: 'Administrador provisório',          d: 'Cadastrado no INSS enquanto a curatela não sai. É a opção para quem ainda não tem documento de representação.' }
         ]
     },
     {
@@ -339,7 +340,7 @@ function tipoDeduzido() {
 }
 var QUALIDADE_NOME = {
     TutorNato: 'Tutor nato (pai ou mãe)', Curador: 'Curador', TutorLegal: 'Tutor legal',
-    Guarda: 'Responsável por termo de guarda', AdmProv: 'Administrador provisório', Procurador: 'Procurador'
+    Guarda: 'Responsável por termo de guarda', AdmProv: 'Administrador provisório'
 };
 function papelDoSignatario() {
     var t = tipoDeduzido();
