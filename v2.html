@@ -338,9 +338,16 @@ function tipoDeduzido() {
     if (respostas.quem === 'adolesc' || respostas.quem === 'assistida') return { id: 'relativo', nome: 'Relativamente Incapaz' };
     return { id: 'normal', nome: 'Normal' };
 }
+// O rotulo curto e o que aparece na trilha; QUALIDADE_CAMPO e o valor que vai
+// pro campo "Qualidade" do gerador — sempre no masculino, porque la o genero e
+// aplicado sozinho a partir do estado civil da pessoa.
 var QUALIDADE_NOME = {
-    TutorNato: 'Tutor nato (pai ou mãe)', Curador: 'Curador', TutorLegal: 'Tutor legal',
-    Guarda: 'Responsável por termo de guarda', AdmProv: 'Administrador provisório'
+    TutorNato: 'Pai ou mãe', Curador: 'Curador', TutorLegal: 'Tutor',
+    Guarda: 'Guardião', AdmProv: 'Administrador provisório'
+};
+var QUALIDADE_CAMPO = {
+    TutorNato: 'Pai', Curador: 'Curador', TutorLegal: 'Tutor',
+    Guarda: 'Guardião', AdmProv: 'Administrador provisório'
 };
 function papelDoSignatario() {
     var t = tipoDeduzido();
@@ -466,7 +473,7 @@ function renderResultado() {
     el.hidden = false;
     el.innerHTML =
         '<div class="capa"><h1>Pronto &mdash; é isto que vai ser gerado</h1>' +
-        '<p class="sub">' + docs.length + ' documentos, cada um em uma folha A4. Agora é só preencher os dados direto neles.</p>' +
+        '<p class="sub">' + docs.length + ' documentos, cada um em uma folha A4. O gerador já abre com tudo isto marcado — é só preencher os dados direto nos documentos.</p>' +
         '<div class="grade-res">' +
         '<div class="card-res"><dt>Tipo</dt><dd>' + t.nome + '</dd></div>' +
         '<div class="card-res"><dt>Quem assina</dt><dd>' + papelDoSignatario() + '</dd></div>' +
@@ -477,7 +484,7 @@ function renderResultado() {
         '<ul class="regras" style="margin-bottom:22px">' +
         regrasAtivas().map(function (r) { return '<li' + (r.ok ? ' class="ok"' : '') + '>' + r.txt + '</li>'; }).join('') +
         '</ul><div class="acoes">' +
-        '<a class="btn-principal" href="index.html">Abrir o gerador &rarr;</a>' +
+        '<a class="btn-principal" href="' + linkDoGerador() + '">Abrir o gerador com tudo pronto &rarr;</a>' +
         '<button type="button" class="btn-secundario" id="btnRefazer">Refazer o guia</button>' +
         '</div></div>';
     document.getElementById('btnRefazer').addEventListener('click', function () {
@@ -488,6 +495,21 @@ function renderResultado() {
     });
     renderTrilhaCompacta();
 }
+// As decisoes viajam no hash; o gerador (index.html) le, aplica e limpa a URL.
+function linkDoGerador() {
+    var t = tipoDeduzido();
+    var q = [];
+    if (t) q.push('tipo=' + t.id);
+    if (respostas.quemresponde && QUALIDADE_CAMPO[respostas.quemresponde]) {
+        q.push('qualidade=' + encodeURIComponent(QUALIDADE_CAMPO[respostas.quemresponde]));
+    }
+    if (respostas.beneficio && respostas.beneficio !== 'Outro') {
+        q.push('beneficio=' + encodeURIComponent(respostas.beneficio));
+    }
+    if (respostas.assina === 'nao') q.push('naoassina=1');
+    return 'index.html' + (q.length ? '#' + q.join('&') : '');
+}
+
 function render() {
     renderTrilha();
     renderPergunta();
