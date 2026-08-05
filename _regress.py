@@ -116,11 +116,23 @@ with sync_playwright() as p:
     livre = pg.evaluate("()=>{var e=document.getElementById('anexo_beneficio');"
                         " return !e.readOnly && !e.classList.contains('js-espelho');}")
     check(livre, "espelhos: o tipo de beneficio continua editavel no proprio termo")
-    # clicar num espelho manda o foco pro dono, na procuracao
+    # clicar num espelho abre o modal explicando, e o botao leva ao campo dono
     pg.evaluate("()=>document.getElementById('anexo_nome').focus()")
-    pg.wait_for_timeout(600)
+    pg.wait_for_timeout(300)
+    check(pg.locator("#espModal").is_visible(), "espelhos: clicar abre o modal de campo travado")
+    campo = pg.inner_text("#espCampo")
+    check("Nome" in campo, f"espelhos: modal diz qual campo foi clicado (got {campo!r})")
+    pg.click("#espIr"); pg.wait_for_timeout(700)
     foco = pg.evaluate("()=>document.activeElement && document.activeElement.id")
-    check(foco == "nome", f"espelhos: focar o espelho leva ao campo da procuracao (got {foco!r})")
+    check(foco == "nome", f"espelhos: o botao do modal leva ao campo da procuracao (got {foco!r})")
+    # com "nao mostrar de novo" marcado, pula o modal e vai direto
+    pg.evaluate("()=>localStorage.setItem('proc_esp_nao_mostrar','1')")
+    pg.evaluate("()=>document.getElementById('anexo_cpf').focus()")
+    pg.wait_for_timeout(700)
+    foco2 = pg.evaluate("()=>document.activeElement && document.activeElement.id")
+    check(not pg.locator("#espModal").is_visible() and foco2 == "cpf",
+          f"espelhos: com aviso desligado vai direto ao campo (got {foco2!r})")
+    pg.evaluate("()=>localStorage.removeItem('proc_esp_nao_mostrar')")
     pg.evaluate("setAnalfabetoAll(false)")
     pg.goto(URL); pg.wait_for_timeout(350)
 
@@ -267,6 +279,24 @@ with sync_playwright() as p:
     # profissao coerente com o beneficio (rural -> LAVRADOR/A)
     prof = pg.input_value("#profissao")
     check(prof.upper().startswith("LAVRADOR"), f"beneficio rural -> profissao lavrador (got {prof!r})")
+
+    # --- modal de validacao agrupado por documento ---
+    pg.goto(URL); pg.wait_for_timeout(400)
+    set_tipo("normal")
+    pg.evaluate("runPdfValidation()"); pg.wait_for_timeout(400)
+    mod = pg.evaluate("""()=>{
+        var g = Array.from(document.querySelectorAll('#valList .val-grupo')).map(function(x){
+            return {doc: x.querySelector('.val-grupo-cab').textContent.replace(/\d+ pend.*/,'').trim(),
+                    n: x.querySelectorAll('.val-item').length};});
+        return {titulo: document.getElementById('valTitulo').textContent,
+                grupos: g,
+                numerados: document.querySelectorAll('#valList .val-num').length};}""")
+    check(len(mod["grupos"]) >= 2, f"modal: pendencias agrupadas por documento (got {mod})")
+    check(any(g["doc"].startswith("Termo de Benef") for g in mod["grupos"]),
+          f"modal: o beneficio aparece no grupo do Termo de Beneficio (got {mod})")
+    check("Faltam" in mod["titulo"] and mod["numerados"] == sum(g["n"] for g in mod["grupos"]),
+          f"modal: titulo com a contagem e itens numerados (got {mod})")
+    pg.evaluate("fecharValModal()")
 
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
