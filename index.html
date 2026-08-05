@@ -412,9 +412,12 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .footer-page { font-family: 'Times New Roman', serif; font-size: 8pt; color: #555; white-space: nowrap; padding-left: 12pt; }
 /* Testemunhas (analfabeto) */
 .testemunha-bloco { margin-bottom: 4pt; }
-.testemunha-titulo { font-weight: bold; font-size: 9pt; margin-bottom: 1pt; }
+/* "1a TESTEMUNHA" e "Assinatura (igual ao documento):" na mesma linha: o que
+   sobra de altura vai pra linha de assinatura, que e onde a pessoa escreve. */
+.testemunha-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6pt; margin-bottom: 1pt; }
+.testemunha-titulo { font-weight: bold; font-size: 9pt; white-space: nowrap; }
 .testemunha-nome-label { font-size: 8pt; color: #555; }
-.testemunha-linha { display: block; width: 100%; border-bottom: 1pt solid #000; height: 6pt; margin-bottom: 2pt; }
+.testemunha-linha { display: block; width: 100%; border-bottom: 1pt solid #000; height: 15pt; margin-bottom: 2pt; }
 .testemunha-campos { display: flex; gap: 8pt; }
 .testemunha-campo { flex: 1; font-size: 9pt; }
 .testemunha-campo .label { font-size: 7pt; }
@@ -472,14 +475,19 @@ body.sidebar-collapsed #docsArea { left: 0; }
     background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
 }
 .pg-analf-toggle input { width: 14px; height: 14px; accent-color: #622423; flex: 0 0 auto; }
-.pg-analf-block { display: none; margin-top: 8pt; font-size: 10pt; border-top: 1.2pt solid #622423; padding-top: 8pt; }
+/* Sem barra em cima: no analfabeto quem assina e o terceiro a rogo (coluna da
+   esquerda), entao a regua cheia so polui e confunde. Mesmo criterio ja
+   aplicado aos termos. */
+.pg-analf-block { display: none; margin-top: 8pt; font-size: 10pt; padding-top: 2pt; }
 .pg-analf-block.show { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; }
 .pg-analf-block .pg-analf-col-title { font-weight: bold; font-size: 10.5pt; margin-bottom: 6pt; text-align: center; color: #622423; text-transform: uppercase; letter-spacing: 0.3pt; line-height: 1.25; }
 .pg-analf-block .pg-analf-sign-line { display: inline-block; width: 100%; border-bottom: 1pt solid #000; height: 8pt; margin-bottom: 2pt; }
 .pg-analf-block .pg-analf-obs { font-size: 8pt; color: #622423; font-style: italic; text-align: center; margin-bottom: 5pt; }
-.pg-analf-block .pg-analf-digital { text-align: center; margin-top: 5pt; }
+.pg-analf-block .pg-analf-digital { text-align: center; margin-top: 8pt; }
 .pg-analf-block .pg-analf-digital-label { font-size: 8pt; color: #555; }
-.pg-analf-block .pg-analf-digital-box { border: 1pt solid #999; width: 44pt; height: 22pt; margin: 2pt auto 0; border-radius: 2px; }
+/* Um polegar tem ~25x20mm. A caixa antiga (44x22pt) nao cabia a digital e
+   deixava a coluna da esquerda vazia. */
+.pg-analf-block .pg-analf-digital-box { border: 1pt solid #999; width: 72pt; height: 58pt; margin: 3pt auto 0; border-radius: 2px; }
 /* incapaz/relativo (.compact) ja tem representante/assistente ocupando a
    página — com o bloco de rogo+testemunhas embutido tambem ativo, estoura a
    folha (confirmado: 91-92% de aproveitamento e ainda transborda 1 pagina
@@ -490,11 +498,11 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .page.compact .pg-analf-block .pg-analf-col-title { margin-bottom: 3pt; font-size: 9.5pt; line-height: 1.15; }
 .page.compact .pg-analf-block .pg-analf-sign-line { height: 5pt; margin-bottom: 1pt; }
 .page.compact .pg-analf-block .pg-analf-obs { margin-bottom: 2pt; font-size: 7.5pt; }
-.page.compact .pg-analf-block .pg-analf-digital { margin-top: 2pt; }
-.page.compact .pg-analf-block .pg-analf-digital-box { height: 16pt; margin-top: 1pt; }
+.page.compact .pg-analf-block .pg-analf-digital { margin-top: 4pt; }
+.page.compact .pg-analf-block .pg-analf-digital-box { width: 64pt; height: 42pt; margin-top: 2pt; }
 .page.compact .pg-analf-block .testemunha-bloco { margin-bottom: 2pt; }
 .page.compact .pg-analf-block .testemunha-titulo { margin-bottom: 0; line-height: 1.1; }
-.page.compact .pg-analf-block .testemunha-linha { height: 4pt; margin-bottom: 1pt; }
+.page.compact .pg-analf-block .testemunha-linha { height: 11pt; margin-bottom: 1pt; }
 .page.compact .pg-analf-block .testemunha-campo,
 .page.compact .pg-analf-block .testemunha-campo input { font-size: 8.5pt; }
 @media print { .pg-analf-toggle, .termo-analf-toggle { display: none !important; } }
@@ -673,7 +681,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .termo-analf-block .termo-sign-rogo { border-top: 1pt solid #000; margin: 14pt 0 2pt; padding-top: 2pt; }
 .termo-analf-block .termo-obs-rogo { font-size: 8.5pt; color: #622423; font-style: italic; text-align: center; margin-bottom: 6pt; }
 .termo-lbl-top { font-size: 9pt; font-weight: bold; color: #622423; }
-.termo-digital-box { border: 1pt solid #622423; width: 48pt; height: 26pt; margin: 4pt auto 0; border-radius: 2px; }
+.termo-digital-box { border: 1pt solid #622423; width: 72pt; height: 58pt; margin: 4pt auto 0; border-radius: 2px; }
 /* Exibição em pilha vertical (estilo github.io): documentos em tamanho A4 real,
    um embaixo do outro, centralizados; rola pra baixo pra ver todos. Sem
    escala/encolhimento. */
@@ -994,8 +1002,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_normal" value="" maxlength="14"></div>
@@ -1003,8 +1010,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
         </div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_normal" value="" maxlength="14"></div>
@@ -1044,8 +1050,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_incapaz" value="" maxlength="14"></div>
@@ -1053,8 +1058,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
         </div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_incapaz" value="" maxlength="14"></div>
@@ -1094,8 +1098,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
     <div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test1_cpf_relativo" value="" maxlength="14"></div>
@@ -1103,8 +1106,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
         </div>
         <div class="testemunha-bloco">
-            <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-            <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+            <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
             <span class="testemunha-linha">&nbsp;</span>
             <div class="testemunha-campos">
                 <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="test2_cpf_relativo" value="" maxlength="14"></div>
@@ -1253,8 +1255,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t1_cpf" maxlength="14"></div>
@@ -1262,8 +1263,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t2_cpf" maxlength="14"></div>
@@ -1383,8 +1383,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t1_cpf" maxlength="14"></div>
@@ -1392,8 +1391,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t2_cpf" maxlength="14"></div>
@@ -1518,8 +1516,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">1ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t1_cpf" maxlength="14"></div>
@@ -1527,8 +1524,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª TESTEMUNHA</div>
-                    <div class="testemunha-nome-label">Assinatura (igual ao documento):</div>
+                    <div class="testemunha-head"><span class="testemunha-titulo">2ª TESTEMUNHA</span><span class="testemunha-nome-label">Assinatura (igual ao documento):</span></div>
                     <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t2_cpf" maxlength="14"></div>
