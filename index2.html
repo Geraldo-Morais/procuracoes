@@ -577,6 +577,93 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 .pc-item:hover .pc-i-seta { opacity: 1; transform: none; }
 .pc-vazio { padding: 20px 8px; text-align: center; font-size: 9pt; color: #8a6e6c; line-height: 1.5; }
 
+/* ===== CONTRATO ========================================================
+   Unico documento MULTIPAGINA. Por isso ele nao usa a moldura de altura fixa
+   dos outros: a folha dele e "fluida" e o Chrome pagina sozinho. O cabecalho
+   e o rodape se repetem em toda pagina via <thead>/<tfoot> de tabela — o
+   unico jeito confiavel de repetir no print do Chrome. */
+.page-contrato { display: none; }
+/* a marca d'agua grande (.logo absoluta) e das folhas de altura fixa; num
+   documento que pagina sozinho ela ficaria atravessada no meio do texto */
+.page-contrato > .logo, #page-contrato > img.logo { display: none !important; }
+.page-contrato.show { display: block; }
+.ct-folha { width: 100%; border-collapse: collapse; }
+.ct-folha { display: table !important; }
+.ct-folha > thead { display: table-header-group !important; }
+.ct-folha > tfoot { display: table-footer-group; }
+.ct-folha > thead td, .ct-folha > tfoot td, .ct-folha > tbody > tr > td { padding: 0; border: none; }
+.ct-cab-espaco { height: 6pt; }
+.ct-rodape {
+    padding-top: 5pt; margin-top: 8pt; border-top: 0.6pt solid #d6cdc9;
+    font-family: 'Times New Roman', serif; font-size: 7.2pt; color: #8a7d79; line-height: 1.4;
+    display: flex; justify-content: space-between; gap: 10pt;
+}
+.ct-corpo { font-family: 'Times New Roman', serif; font-size: 11.5pt; line-height: 1.34; color: #000; }
+.ct-titulo {
+    font-family: 'Times New Roman', serif; font-weight: bold; font-style: italic;
+    font-size: 13.5pt; line-height: 1.3; text-align: center; color: #000;
+    margin: 4pt 0 2pt; letter-spacing: 0.2pt;
+}
+.ct-titulo b { font-weight: bold; }
+.ct-sub {
+    text-align: center; font-style: italic; font-size: 9pt; color: #622423;
+    margin-bottom: 12pt;
+}
+.ct-rotulo {
+    font-weight: bold; font-size: 11pt; color: #622423; margin: 14pt 0 6pt;
+    padding-bottom: 2pt; border-bottom: 1pt solid #622423;
+}
+.ct-secao {
+    font-weight: bold; font-size: 12pt; color: #622423; text-align: center;
+    margin: 16pt 0 8pt; padding-bottom: 3pt; border-bottom: 1.2pt solid #622423;
+}
+.ct-clausula {
+    font-size: 11.6pt; font-weight: bold; color: #000; margin: 13pt 0 4pt;
+    padding-bottom: 2pt; border-bottom: 0.8pt solid #622423;
+    break-after: avoid; page-break-after: avoid;
+}
+.ct-p { text-align: justify; margin: 0 0 5pt; text-indent: 0.65cm; }
+.ct-lista { margin: 0 0 6pt; padding-left: 16pt; list-style: none; }
+.ct-li {
+    text-align: justify; font-size: 11pt; margin-bottom: 4pt; position: relative;
+    padding-left: 10pt;
+}
+.ct-li::before { content: "•"; position: absolute; left: 0; color: #622423; font-weight: bold; }
+.ct-campo { font-weight: bold; color: #622423; }
+.ct-tabela { width: 100%; border-collapse: collapse; margin: 8pt 0 10pt; font-size: 10.5pt; }
+.ct-tabela td, .ct-tabela th { border: 0.7pt solid #d6cdc9; padding: 4pt 7pt; vertical-align: top; text-align: left; }
+.ct-tabela th { background: #622423; color: #fff; font-size: 10.5pt; text-align: center; letter-spacing: 0.3pt; }
+.ct-tabela td.ct-rot {
+    background: #f6f2f0; width: 27%; font-family: Arial, sans-serif; font-size: 8pt;
+    color: #6d5a57; text-transform: uppercase; letter-spacing: 0.3pt; line-height: 1.35;
+}
+.ct-caixa { margin: 10pt 0 12pt; break-inside: avoid; page-break-inside: avoid; }
+.ct-caixa-tit {
+    background: #622423; color: #fff; font-weight: bold; font-size: 10.6pt;
+    text-align: center; padding: 4pt 8pt; letter-spacing: 0.3pt;
+}
+.ct-caixa-corpo {
+    border: 0.7pt solid #622423; border-top: none; background: #fdfaf9;
+    padding: 8pt 10pt; text-align: justify; font-size: 11pt;
+}
+.ct-assinaturas { display: flex; gap: 26pt; margin-top: 34pt; }
+.ct-assinaturas > div { flex: 1 1 0; text-align: center; }
+.ct-assin-linha { border-top: 1pt solid #000; margin-bottom: 3pt; }
+.ct-assin-nome { font-size: 10.5pt; }
+.ct-assin-papel { font-size: 9.5pt; font-weight: bold; }
+@media print {
+    /* a folha do contrato nao tem altura fixa: quem pagina e o navegador */
+    .print-sheet.sheet-fluido {
+        height: auto !important; overflow: visible !important;
+        page-break-after: always; break-after: page;
+    }
+    .print-sheet.sheet-fluido .page {
+        height: auto !important; padding: 0 !important;
+        transform: none !important; width: 100% !important;
+    }
+    .print-sheet.sheet-fluido .pg-carimbo { display: none !important; }
+}
+
 /* Carimbo no rodape de cada folha: sai na tela E na impressao. Absoluto, pra
    nao entrar no calculo de altura da folha. */
 .pg-carimbo {
@@ -893,7 +980,11 @@ body.sidebar-collapsed #docsArea { left: 0; }
        (display:none inline). Procuracao vira bloco normal; os termos
        precisam continuar flex-column para o .termo-content ocupar a folha e
        manter o rodape no fundo tambem na impressao. */
-    .page:not(.page-termo):not(.page-anexo) { display: block !important; }
+    .page:not(.page-termo):not(.page-anexo):not(.page-contrato) { display: block !important; }
+    /* o contrato so imprime quando marcado — a caixa "ja tem contrato" tira ele
+       do conjunto sem mexer nos outros documentos */
+    .page-contrato { display: none !important; }
+    .page-contrato.show { display: block !important; }
     .page-termo.show, .page-anexo { display: flex !important; flex-direction: column !important; }
     /* .termo-content so consegue empurrar o ultimo bloco para o fundo se a
        .page tiver altura real — min-height:auto (de cima) tira essa altura,
@@ -1101,6 +1192,11 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
     <hr>
 
+    <label id="contrato-toggle-wrap" class="tb-toggle">
+        <input type="checkbox" id="contratoPularCheck">
+        <span>Cliente já tem contrato assinado — não imprimir (renovação)</span>
+    </label>
+
     <div class="pc-bloco">
         <div class="pc-titulo">Quem está preenchendo</div>
         <button type="button" class="pc-escolher pendente" id="pcEscolher">
@@ -1307,6 +1403,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
         <button type="button" class="doc-tab" role="tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/></svg><span class="tab-txt">Procuração</span></button>
         <button type="button" class="doc-tab" role="tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M15 2v20"/><path d="M15 7h5"/><path d="M15 12h5"/><path d="M15 17h5"/></svg><span class="tab-txt">Termo de Benefício</span></button>
         <button type="button" class="doc-tab" role="tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span class="tab-txt">Termo de Responsabilidade</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-contrato" id="tabContrato" hidden onclick="focusDoc('page-contrato')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span class="tab-txt">Contrato</span></button>
         <button type="button" class="doc-tab" role="tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span class="tab-txt">Termo de Compromisso</span></button>
     </div>
     <div class="wb-meta">
@@ -2028,6 +2125,174 @@ body.sidebar-collapsed #docsArea { left: 0; }
     </div>
 </div><!-- .page-termocomp -->
 </div><!-- .print-sheet-termocomp -->
+
+<!-- ============================================================ -->
+<!-- CONTRATO DE HONORARIOS (multipagina)                          -->
+<!-- ============================================================ -->
+<div class="print-sheet sheet-fluido" id="sheet-contrato">
+<div class="page page-contrato" id="page-contrato">
+<table class="ct-folha">
+    <thead><tr><td>
+        <div class="header">
+            <table>
+                <tr>
+                    <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
+                    <td style="width:34%; text-align:center; vertical-align:bottom;">
+                        <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                    </td>
+                    <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
+                        Menezes Advocacia &amp; Consultoria Jurídica
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="ct-cab-espaco"></div>
+    </td></tr></thead>
+    <tfoot><tr><td>
+        <div class="ct-rodape">
+            <span>Av. Ascendino Melo, nº 297, Shopping Itatiaia, Sala 12, Centro, Vitória da Conquista – Bahia
+                  &nbsp;·&nbsp; 77 99927-1876 &nbsp;·&nbsp; menezesadv49@gmail.com</span>
+            <span id="ct-carimbo"></span>
+        </div>
+    </td></tr></tfoot>
+    <tbody><tr><td>
+        <div class="ct-corpo" id="ct-corpo">
+<!-- conteudo do contrato, portado do DOCX -->
+<h1 class="ct-titulo"><b>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</b><br><b>JURÍDICOS E HONORÁRIOS</b><br><b>ADVOCATÍCIOS,</b><br><b>NA FORMA ABAIXO:</b></h1>
+<div class="ct-sub">Atuação previdenciária e assistencial - vias administrativa e judicial</div>
+<div class="ct-rotulo"><b>IDENTIFICAÇÃO DAS PARTES E DO SERVIÇO</b></div>
+<p class="ct-p"><b>CONTRATANTE</b>/TITULAR: <b><span class="ct-campo" data-campo="titular_nome">{{titular_nome}}</span></b>, <b><span class="ct-campo" data-campo="titular_nacionalidade">{{titular_nacionalidade}}</span></b>, <b><span class="ct-campo" data-campo="titular_estado_civil">{{titular_estado_civil}}</span></b>, <b><span class="ct-campo" data-campo="titular_profissao">{{titular_profissao}}</span></b>, portador(a) do RG nº <b><span class="ct-campo" data-campo="titular_rg">{{titular_rg}}</span></b> e inscrito(a) no CPF nº <b><span class="ct-campo" data-campo="titular_cpf">{{titular_cpf}}</span></b>, residente e domiciliado(a) em <b><span class="ct-campo" data-campo="titular_endereco_completo">{{titular_endereco_completo}}</span></b>, telefone <b><span class="ct-campo" data-campo="titular_telefone">{{titular_telefone}}</span></b>.</p>
+<p class="ct-p ct-cond" data-cond-campo="tipo_procuracao" data-cond-valor="absolutamente_incapaz" hidden><b>[[IF tipo_procuracao=absolutamente_incapaz]]</b> O presente instrumento é firmado, em nome do titular, por <b><span class="ct-campo" data-campo="representante_nome">{{representante_nome}}</span></b>, <b><span class="ct-campo" data-campo="representante_nacionalidade">{{representante_nacionalidade}}</span></b>, <b><span class="ct-campo" data-campo="representante_estado_civil">{{representante_estado_civil}}</span></b>, portador(a) do RG nº <b><span class="ct-campo" data-campo="representante_rg">{{representante_rg}}</span></b> e CPF nº <b><span class="ct-campo" data-campo="representante_cpf">{{representante_cpf}}</span></b>, na qualidade de REPRESENTANTE LEGAL (<b><span class="ct-campo" data-campo="representante_qualidade">{{representante_qualidade}}</span></b>). <b>[[ENDIF]]</b></p>
+<p class="ct-p ct-cond" data-cond-campo="tipo_procuracao" data-cond-valor="relativamente_incapaz" hidden><b>[[IF tipo_procuracao=relativamente_incapaz]]</b> O presente instrumento é firmado por <b><span class="ct-campo" data-campo="assistente_nome">{{assistente_nome}}</span></b>, <b><span class="ct-campo" data-campo="assistente_nacionalidade">{{assistente_nacionalidade}}</span></b>, <b><span class="ct-campo" data-campo="assistente_estado_civil">{{assistente_estado_civil}}</span></b>, portador(a) do RG nº <b><span class="ct-campo" data-campo="assistente_rg">{{assistente_rg}}</span></b> e CPF nº <b><span class="ct-campo" data-campo="assistente_cpf">{{assistente_cpf}}</span></b>, na qualidade de ASSISTENTE LEGAL (<b><span class="ct-campo" data-campo="assistente_qualidade">{{assistente_qualidade}}</span></b>), conforme a lógica de assinatura adotada nos demais documentos do gerador. <b>[[ENDIF]]</b></p>
+<p class="ct-p"><b>CONTRATADA</b>: CLAYTON MENEZES SOCIEDADE INDIVIDUAL DE ADVOCACIA, inscrita no CNPJ sob o nº 42.205.081/0001-06, com sede na Av. Ascendino Melo, nº 297, Shopping Itatiaia, Sala 12, Centro, Vitória da Conquista - Bahia, neste ato representada por seu sócio Clayton Gonçalves Menezes, advogado inscrito na OAB/BA nº 49.167, doravante denominada <b>CONTRATADA</b>.</p>
+<p class="ct-p">As partes identificadas celebram o presente contrato único para atuação administrativa e judicial, regido pelo Quadro-Resumo, pelas cláusulas abaixo e pela fórmula específica do benefício selecionado.</p>
+<table class="ct-tabela ct-quadro">
+<tr><th colspan="2"><b>QUADRO-RESUMO - OBJETO, HONORÁRIOS E AUTORIZAÇÕES</b></th></tr>
+<tr><td class="ct-rot"><b>BENEFÍCIO/SERVIÇO</b></td><td><b><span class="ct-campo" data-campo="tipo_beneficio">{{tipo_beneficio}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>TITULAR E SIGNATÁRIO</b></td><td><b><span class="ct-campo" data-campo="titular_nome">{{titular_nome}}</span></b> - CPF <b><span class="ct-campo" data-campo="titular_cpf">{{titular_cpf}}</span></b>Signatário: <b><span class="ct-campo" data-campo="signatario_nome">{{signatario_nome}}</span></b> - <b><span class="ct-campo" data-campo="signatario_papel_qualidade">{{signatario_papel_qualidade}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>FASE ADMINISTRATIVA</b></td><td><b><span class="ct-campo" data-campo="formula_administrativa">{{formula_administrativa}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>FASE JUDICIAL - TOTAL DAS FASES</b></td><td><b><span class="ct-campo" data-campo="formula_judicial_total">{{formula_judicial_total}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>COMPONENTE VARIÁVEL E BASE</b></td><td>40% da <b>PVE</b>, salvo fórmula especial. Base: <b><span class="ct-campo" data-campo="base_calculo_especifica">{{base_calculo_especifica}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>TETO E FORMA DE PAGAMENTO</b></td><td><b><span class="ct-campo" data-campo="teto_especifico">{{teto_especifico}}</span></b>Forma de pagamento: <b><span class="ct-campo" data-campo="forma_pagamento">{{forma_pagamento}}</span></b></td></tr>
+<tr><td class="ct-rot"><b>SERVIÇOS AUTÔNOMOS ADICIONAIS</b></td><td><b><span class="ct-campo" data-campo="servicos_adicionais_se_houver">{{servicos_adicionais_se_houver}}</span></b></td></tr>
+</table>
+<div class="ct-secao"><b>CLÁUSULAS CONTRATUAIS</b></div>
+<h3 class="ct-clausula"><b>CLÁUSULA PRIMEIRA – DEFINIÇÕES CONTRATUAIS</b></h3>
+<p class="ct-p">Para conferir certeza, liquidez e verificabilidade aos cálculos, adotam-se as seguintes definições:</p>
+<ul class="ct-lista">
+<li class="ct-li"><b></b><b>RMR</b> — Renda Mensal de Referência: valor mensal bruto implantado para o benefício objeto do contrato, antes de descontos voluntários, empréstimos ou consignações. Na revisão, corresponde somente ao acréscimo mensal obtido; na pensão e no auxílio-reclusão, à cota individual do contratante; no auxílio-acidente, apenas ao valor desse benefício.</li>
+<li class="ct-li"><b></b><b>PVE</b> — Parcelas Vencidas Efetivamente Disponibilizadas: valores retroativos, atualização monetária e juros que forem efetivamente liberados ao titular, depois das retenções legais na fonte, como imposto de renda ou contribuição obrigatória, e antes da dedução de honorários contratuais e despesas reembolsáveis.</li>
+<li class="ct-li"><b></b><b>VAE</b> — Vantagem Econômica Apurável: soma da <b>PVE</b> com as parcelas mensais que a fórmula específica autorizar considerar, limitada a 12 <b>RMR</b> nos benefícios assistenciais, a 13 <b>RMR</b> nos previdenciários continuados ou ao período efetivamente devido nos benefícios temporários e finitos.</li>
+<li class="ct-li"><b></b><b>DER</b>, <b>DIB</b> e <b>DIP</b>: respectivamente, data do requerimento, data de início do benefício e data de início do pagamento, conforme reconhecidas pelo <b>INSS</b> ou pelo juízo.</li>
+<li class="ct-li"><b></b>Êxito: concessão, implantação, restabelecimento, revisão, acordo, tutela, liberação de atrasados, <b>RPV</b>, precatório ou qualquer resultado econômico diretamente ligado ao objeto contratado, ainda que provisório ou ocorrido após o encerramento, nas condições da Cláusula Décima Nona.</li>
+</ul><h3 class="ct-clausula"><b>CLÁUSULA SEGUNDA – OBJETO E EXTENSÃO DO PATROCÍNIO</b></h3>
+<p class="ct-p">A <b>CONTRATADA</b> prestará serviços jurídicos previdenciários e assistenciais referentes a <b><span class="ct-campo" data-campo="tipo_beneficio">{{tipo_beneficio}}</span></b>, compreendendo a análise técnica e documental, definição de estratégia, formulação e acompanhamento do requerimento administrativo, cumprimento de exigências, apresentação de manifestações e recurso administrativo e, quando necessário e juridicamente viável, ajuizamento e acompanhamento da ação judicial destinada à concessão, revisão, restabelecimento ou pagamento das parcelas relacionadas ao mesmo objeto.</p>
+<p class="ct-p">A fase judicial ordinária compreende a petição inicial, instrução, perícia ou audiência quando cabíveis, sentença, recurso ordinário à Turma Recursal ou ao Tribunal Regional Federal, implantação e providências usuais para expedição e levantamento de <b>RPV</b> ou precatório. Recursos excepcionais ao STJ ou STF, ação rescisória, ação autônoma de curatela, inventário, alvará independente, reclamação constitucional, execução contra terceiro, ação trabalhista, tributária ou qualquer procedimento não diretamente abrangido exigem novo ajuste escrito.</p>
+<p class="ct-p">A <b>CONTRATADA</b> poderá recusar medida sem viabilidade técnica, contrária à lei ou à ética, explicando ao <b>CONTRATANTE</b> as razões essenciais. O contrato não transfere ao advogado a decisão de mérito do <b>INSS</b>, do <b>CRPS</b>, do perito ou do Poder Judiciário.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA TERCEIRA – OBRIGAÇÃO DE MEIO, INÍCIO E PRAZO DOS TRABALHOS</b></h3>
+<p class="ct-p">A advocacia constitui obrigação de meio. A <b>CONTRATADA</b> compromete-se a atuar com diligência, independência técnica, sigilo e boa-fé, sem prometer resultado, prazo de decisão, data de perícia, implantação ou valor final.</p>
+<p class="ct-p">O prazo interno para preparação do primeiro protocolo começa no primeiro dia útil seguinte à entrega completa e legível dos documentos, informações, assinaturas e meios de acesso necessários. Salvo urgência comprovada ou prazo legal menor, o protocolo será preparado em até <b><span class="ct-campo" data-campo="prazo_inicio_dias_uteis">{{prazo_inicio_dias_uteis}}</span></b> dias úteis, valor padrão de 15 dias úteis, podendo ser prorrogado quando houver diligência externa, documento de terceiro, indisponibilidade de sistema ou necessidade de complementação comunicada ao <b>CONTRATANTE</b>.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA QUARTA – DEVERES DO CONTRATANTE</b></h3>
+<p class="ct-p">O <b>CONTRATANTE</b> obriga-se a:</p>
+<ul class="ct-lista">
+<li class="ct-li"><b></b>fornecer documentos verdadeiros, completos, legíveis e atualizados, informando fatos desfavoráveis, processos anteriores, vínculos, rendas, contribuições e benefícios recebidos;</li>
+<li class="ct-li"><b></b>entregar os documentos solicitados dentro do prazo informado e confirmar o recebimento das mensagens urgentes;</li>
+<li class="ct-li"><b></b>comparecer a perícias médicas, avaliações sociais, entrevistas, justificações, audiências e demais atos para os quais for convocado;</li>
+<li class="ct-li"><b></b>comunicar imediatamente alteração de emprego, renda, contribuição, atividade, composição familiar, endereço, telefone, e-mail, conta bancária, estado de saúde, reclusão, soltura, recebimento de outro benefício ou fato capaz de afetar o direito;</li>
+<li class="ct-li"><b></b>não protocolar, desistir, aceitar acordo, alterar dados relevantes ou contratar terceiro para o mesmo objeto sem comunicar a <b>CONTRATADA</b>;</li>
+<li class="ct-li"><b></b>preservar documentos originais e apresentar-se para assinatura, validação facial ou confirmação eletrônica quando indispensável.</li>
+</ul><p class="ct-p">A falta, omissão ou atraso do <b>CONTRATANTE</b> não gera desistência automática. A <b>CONTRATADA</b> deverá notificá-lo pelo canal informado, registrar a providência solicitada e conceder prazo compatível com a urgência. Persistindo a omissão e ficando materialmente inviável a atuação, poderão ser suspensos os atos impedidos e, depois de nova comunicação, ocorrer renúncia ao mandato e cobrança proporcional do trabalho realizado.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA QUINTA – EXIGÊNCIAS, PERDA DE PRAZO E RETRABALHO</b></h3>
+<p class="ct-p">Sempre que o <b>INSS</b>, o <b>CRPS</b> ou o juízo exigir documento, comparecimento ou manifestação dependente do <b>CONTRATANTE</b>, a <b>CONTRATADA</b> registrará a data da ciência, o conteúdo da solicitação, o prazo oficial e a comunicação enviada. Mensagens por WhatsApp, e-mail ou outro canal indicado constituem prova de comunicação quando houver confirmação, resposta, entrega eletrônica ou registro técnico equivalente.</p>
+<p class="ct-p">Se a falta injustificada de colaboração causar arquivamento, indeferimento, perda de <b>DER</b>, cessação ou necessidade de novo requerimento, permanecem devidos os honorários proporcionais do primeiro trabalho. A repetição integral do serviço será objeto de aditivo ou novo Quadro-Resumo, sem imputar à <b>CONTRATADA</b> o prejuízo econômico decorrente da conduta do cliente. Esta regra não se aplica quando o prejuízo decorrer de erro comprovadamente atribuível à <b>CONTRATADA</b>.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA SEXTA – COOPERAÇÃO DIGITAL, MEU INSS E GOV.BR</b></h3>
+<p class="ct-p">O <b>CONTRATANTE</b> manterá conta gov.br ativa e, quando necessário, em nível prata ou ouro; concederá e manterá a procuração eletrônica disponível; fornecerá código de verificação em duas etapas quando solicitado para ato específico; manterá e-mail e telefone de recuperação atualizados; comparecerá para validação facial somente quando indispensável; e comunicará previamente alteração de senha ou configuração de segurança capaz de impedir o serviço.</p>
+<p class="ct-p">A <b>CONTRATADA</b> utilizará os acessos apenas para atos vinculados ao objeto, com sigilo, finalidade determinada e registro operacional de data, responsável, canal, finalidade, protocolo e resultado, sem reproduzir senha ou código no contrato, no protocolo ou na prestação de contas. Sempre que a via de procuração eletrônica, PAT/GERID, entidade conveniada, Central 135 ou APS for suficiente, deverá ser priorizada conforme a disponibilidade real do serviço.</p>
+<p class="ct-p">No encerramento, será emitido Termo de Restituição de Acesso, com cessação dos acessos operacionais, orientação para redefinição de senha, revisão da verificação em duas etapas e revogação da procuração eletrônica quando não mais necessária. A revogação de autorização ou a recusa injustificada de cooperação não apagam os atos já praticados nem os honorários proporcionais, e podem inviabilizar a continuidade do serviço após notificação.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA SÉTIMA – PROCESSOS ANTERIORES E DADOS SENSÍVEIS</b></h3>
+<p class="ct-p">O <b>CONTRATANTE</b> autoriza a <b>CONTRATADA</b> a localizar, solicitar, receber, copiar e analisar processos administrativos e judiciais anteriores relacionados à sua situação previdenciária ou assistencial, inclusive CNIS, laudos médicos, prontuários juntados em processo, avaliações biopsicossociais, estudos sociais, cadastros e documentos de renda, apenas para análise, prova, prevenção de contradições, defesa de direitos e execução deste contrato.</p>
+<p class="ct-p">O tratamento de dados comuns fundamenta-se na execução do contrato e no exercício regular de direitos. O tratamento indispensável de dados sensíveis de saúde ou condição social fundamenta-se no exercício regular de direitos em contrato e em processo administrativo ou judicial, sem prejuízo do consentimento específico e destacado para solicitações a terceiros quando necessário. A revogação do consentimento não alcança tratamentos que devam continuar por obrigação legal, defesa de direitos, prestação de contas, segurança ou guarda legítima.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA OITAVA – PROTEÇÃO DE DADOS, SIGILO E GUARDA</b></h3>
+<p class="ct-p">A <b>CONTRATADA</b> adotará medidas razoáveis de segurança, controle de acesso, minimização e confidencialidade. Os dados poderão ser compartilhados, no limite necessário, com <b>INSS</b>, <b>CRPS</b>, Poder Judiciário, peritos, assistentes técnicos, correspondentes, advogados substabelecidos, contadores, profissionais auxiliares e fornecedores tecnológicos sujeitos a dever de sigilo ou instrumento adequado.</p>
+<p class="ct-p">O titular poderá solicitar confirmação de tratamento, acesso, correção e informação sobre compartilhamentos, observadas as limitações legais e o sigilo profissional. Os documentos serão conservados durante a relação contratual e, após o encerramento, pelo prazo necessário ao cumprimento de obrigações, à prestação de contas e à defesa de direitos, tomando-se como referência mínima cinco anos, sem prejuízo de prazo maior exigido por processo pendente, lei ou norma ética.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA NONA – SERVIÇOS EXCLUÍDOS E COMPONENTES SEPARÁVEIS</b></h3>
+<p class="ct-p">Serviços autônomos que não sejam consequência ordinária do objeto — como regularização contributiva complexa, ação de curatela, produção antecipada de prova, reclamatória trabalhista, demanda tributária, segundo benefício, novo fato gerador, novo requerimento por conduta do cliente, recurso excepcional ou procedimento de terceiro — somente serão cobrados se identificados no Quadro-Resumo ou em aditivo escrito, com componente e base próprios. A existência de mais de um serviço não autoriza duplicar a mesma base econômica.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA – HONORÁRIOS POR FASE E FÓRMULA ESPECÍFICA</b></h3>
+<p class="ct-p">A fórmula aplicável é a indicada no Quadro-Resumo e no bloco específico de <b><span class="ct-campo" data-campo="tipo_beneficio">{{tipo_beneficio}}</span></b>, reproduzido integralmente abaixo. Os valores padrão são editáveis antes da assinatura; qualquer alteração deve constar simultaneamente no campo numérico e por extenso, prevalecendo a versão assinada.</p>
+<div class="ct-caixa"><div class="ct-caixa-tit"><b>CLÁUSULA DINÂMICA DO BENEFÍCIO</b></div><div class="ct-caixa-corpo"><b><span class="ct-campo" data-campo="clausula_honorarios_beneficio">{{clausula_honorarios_beneficio}}</span></b></div></div>
+<p class="ct-p">Quando houver componente fixo administrativo e componente judicial total, estes não se acumulam integralmente. Na judicialização, o valor judicial representa o total das duas fases para o mesmo objeto, deduzindo-se integralmente o componente fixo administrativo já pago ou exigível. O percentual de 40% da <b>PVE</b> incide uma única vez sobre cada parcela econômica efetivamente disponibilizada.</p>
+<p class="ct-p">Nos benefícios com fórmula especial — especialmente salário-maternidade, incapacidade, auxílio-reclusão e revisão — a regra específica prevalece sobre qualquer campo genérico de rendas mensais.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA PRIMEIRA – MODERAÇÃO, RISCO E TETO QUOTA LITIS</b></h3>
+<p class="ct-p">As partes registram que a remuneração foi ajustada considerando a relevância, complexidade e dificuldade da matéria; o tempo de análise documental e acompanhamento; a possibilidade de demora administrativa e judicial; a necessidade de perícias e diligências; o valor econômico; a condição do cliente; a atuação sem pagamento integral antecipado; o risco de não obtenção do resultado; e os custos internos de estrutura suportados pela <b>CONTRATADA</b>.</p>
+<p class="ct-p">Apesar de mantido o componente variável de 40% da <b>PVE</b>, sua incidência é excepcionalmente justificada pelo regime de êxito e pelas circunstâncias acima. O <b>CONTRATANTE</b> conserva 60% da <b>PVE</b> antes de eventual pagamento do componente fixo e de despesas externas reembolsáveis. Em nenhuma hipótese a soma dos honorários contratuais e sucumbenciais poderá ultrapassar 50% da <b>VAE</b>. Se o cálculo ultrapassar esse teto, a parcela contratual será reduzida no montante estritamente necessário.</p>
+<p class="ct-p">A soma de componentes de serviços autônomos também se submete ao teto correspondente à vantagem econômica efetivamente produzida por cada objeto, vedada a cobrança repetida sobre o mesmo crédito.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA SEGUNDA – EXIGIBILIDADE, IMPLANTAÇÃO E CRÉDITO ENTRE FASES</b></h3>
+<p class="ct-p">Os honorários de êxito tornam-se exigíveis quando ocorrer a implantação, o início do pagamento regular, a disponibilização de atrasados, o depósito, a liberação, o saque, o acordo ou a possibilidade jurídica de levantamento, ainda que por tutela provisória e sem trânsito em julgado. Se o resultado provisório for posteriormente desfeito, será realizado acerto de contas quanto às parcelas efetivamente conservadas pelo cliente.</p>
+<p class="ct-p">O componente fixo da fase correspondente será exigível a partir do primeiro pagamento ou da implantação. Se o crédito disponibilizado não bastar ou se a fórmula determinar pagamento a partir das rendas mensais, o saldo poderá ser parcelado em até <b><span class="ct-campo" data-campo="numero_parcelas">{{numero_parcelas}}</span></b> parcelas mensais, padrão de 6, vencendo a primeira em <b><span class="ct-campo" data-campo="vencimento_primeira_parcela">{{vencimento_primeira_parcela}}</span></b> e as demais no mesmo dia dos meses seguintes.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA TERCEIRA – AUTORIZAÇÃO DE DESTAQUE, DEDUÇÃO E PRESTAÇÃO DE CONTAS</b></h3>
+<div class="ct-caixa"><div class="ct-caixa-tit"><b>AUTORIZAÇÃO EXPRESSA DE PAGAMENTO</b></div><div class="ct-caixa-corpo">O <b>CONTRATANTE</b> autoriza expressamente a juntada deste contrato ao processo, o destaque ou pagamento direto dos honorários quando juridicamente admitido, e a dedução dos honorários vencidos e das despesas comprovadas dos valores recebidos pela <b>CONTRATADA</b> em seu nome, sempre acompanhada de Recibo e Prestação de Contas Final discriminando valor bruto, retenções legais, <b>PVE</b>, honorários variáveis, componente fixo, créditos anteriores, despesas, valor líquido do cliente e comprovante de transferência.</div></div>
+<p class="ct-p">A prestação de contas será realizada sem demora injustificada e, sempre que possível, no mesmo dia útil da transferência ao cliente. O recebimento de valores por conta do mandato não autoriza retenção além do contrato. Erro aritmético ou classificação incorreta deverá ser corrigido por demonstrativo substitutivo e acerto financeiro.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA QUARTA – HONORÁRIOS DE SUCUMBÊNCIA</b></h3>
+<p class="ct-p">Os honorários de sucumbência, arbitrados ou fixados judicialmente pertencem à <b>CONTRATADA</b> e não substituem nem compensam os honorários contratuais, ressalvada apenas a redução necessária para cumprir o teto quota litis da Cláusula Décima Primeira. A <b>CONTRATADA</b> poderá requerer expedição de <b>RPV</b>, precatório ou alvará próprio para a sucumbência.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA QUINTA – CUSTAS, DESPESAS E REEMBOLSO</b></h3>
+<p class="ct-p">Os custos internos ordinários do escritório e o risco de trabalhar sem recebimento integral antecipado são suportados pela <b>CONTRATADA</b>. Custas judiciais, honorários periciais, taxas, emolumentos, certidões, cópias especiais, diligências de terceiros, deslocamento, hospedagem e outras despesas externas necessárias são de responsabilidade do <b>CONTRATANTE</b>, desde que previamente autorizadas por escrito, inclusive por mensagem eletrônica.</p>
+<p class="ct-p">O reembolso somente será exigível mediante demonstrativo consolidado acompanhado dos comprovantes. Em situação urgente, para evitar arquivamento, deserção ou prejuízo imediato, a <b>CONTRATADA</b> poderá adiantar despesa sem assumir obrigação permanente de financiar a causa, devendo ser ressarcida pelo valor comprovado, sem dedução dos honorários.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA SEXTA – ACORDO, TUTELA, RPV E PRECATÓRIO</b></h3>
+<p class="ct-p">Acordo, desistência parcial, reconhecimento administrativo no curso da ação, tutela provisória, implantação por decisão interlocutória, pagamento complementar, <b>RPV</b> ou precatório não reduzem os honorários da fórmula aplicável. Nenhum acordo será aceito sem ciência do <b>CONTRATANTE</b>, mas a composição direta pelo cliente ou por terceiro não prejudica os honorários relativos ao resultado abrangido pelo trabalho da <b>CONTRATADA</b>.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA SÉTIMA – MORA E PARCELAMENTO</b></h3>
+<p class="ct-p">Parcela não paga no vencimento será atualizada pelo IPCA, ou índice oficial que o substitua, e acrescida dos juros legais do art. 406 do Código Civil a partir da mora, além das despesas comprovadas de cobrança. Antes da cobrança judicial, a <b>CONTRATADA</b> enviará demonstrativo do débito e oportunidade de regularização. Para cobrar judicialmente honorários do cliente ainda representado, a <b>CONTRATADA</b> observará o dever ético de renunciar previamente ao mandato.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA OITAVA – ENCERRAMENTO E TABELA DE PROPORCIONALIDADE</b></h3>
+<p class="ct-p">O mandato e este contrato podem ser encerrados por revogação, renúncia, acordo, perda de objeto, impossibilidade de cooperação ou justa causa, sem multa de permanência. Permanecem devidos os honorários proporcionais ao trabalho útil efetivamente realizado, calculados sobre o componente fixo da fase conforme a tabela abaixo, sem vencimento antecipado do valor integral por simples ruptura.</p>
+<table class="ct-tabela ct-quadro">
+<tr><th><b>Estágio</b></th><th><b>Marco objetivo alcançado</b></th><th><b>Fração</b></th></tr>
+<tr><td><b>1</b></td><td>Análise inicial, definição do objeto e orientação documental formalizada</td><td><b>20%</b></td></tr>
+<tr><td class="ct-rot"><b>2</b></td><td class="ct-rot">Dossiê essencial completo e requerimento ou peça principal preparada/protocolada</td><td class="ct-rot"><b>40%</b></td></tr>
+<tr><td><b>3</b></td><td>Cumprimento de exigência, perícia, avaliação social, justificação ou instrução relevante</td><td><b>60%</b></td></tr>
+<tr><td class="ct-rot"><b>4</b></td><td class="ct-rot">Decisão administrativa ou recurso administrativo apresentado</td><td class="ct-rot"><b>75%</b></td></tr>
+<tr><td><b>5</b></td><td>Ação judicial protocolada</td><td><b>85%</b></td></tr>
+<tr><td class="ct-rot"><b>6</b></td><td class="ct-rot">Perícia/audiência/instrução encerrada ou decisão judicial de mérito obtida</td><td class="ct-rot"><b>95%</b></td></tr>
+<tr><td><b>7</b></td><td>Implantação, acordo ou disponibilização do resultado econômico</td><td><b>100%</b></td></tr>
+</table>
+<p class="ct-p">A fração incide sobre o componente fixo previsto para a fase em que o contrato foi encerrado. Havendo mais de um objeto autônomo, a apuração será separada. Se o encerramento decorrer de falta grave comprovada da <b>CONTRATADA</b>, somente será devido o valor do trabalho que permaneça objetivamente útil ao cliente, sem penalidade adicional.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA DÉCIMA NONA – ÊXITO POSTERIOR E NEXO COM O TRABALHO REALIZADO</b></h3>
+<p class="ct-p">O encerramento não importa renúncia aos honorários relativos a evento de êxito posterior ligado ao trabalho da <b>CONTRATADA</b>. Considera-se êxito posterior direto aquele obtido no mesmo protocolo, <b>DER</b>, NB, recurso, processo judicial, acordo ou execução iniciados pela <b>CONTRATADA</b>; nessa hipótese, o componente variável de 40% da <b>PVE</b> permanece integralmente devido, além da fração do componente fixo apurada na Cláusula Décima Oitava, sempre observado o teto.</p>
+<p class="ct-p">Se o cliente ou novo patrono iniciar procedimento formalmente distinto, haverá êxito posterior derivado quando a concessão ou o crédito utilizar substancialmente petição, cálculo, prova, laudo, dossiê, tese ou instrução produzidos pela <b>CONTRATADA</b> para o mesmo objeto. Nessa hipótese, o componente variável será devido na mesma fração percentual do estágio alcançado no encerramento, mediante demonstração documental do nexo, sem duplicidade com honorários pagos ao novo patrono além do teto global aplicável.</p>
+<p class="ct-p">O <b>CONTRATANTE</b> deverá informar à <b>CONTRATADA</b>, em até 10 dias da ciência, qualquer concessão, implantação, acordo ou pagamento posterior relacionado ao objeto, autorizada a consulta aos processos para apuração do evento.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA VIGÉSIMA – RENÚNCIA, SUBSTABELECIMENTO E PROFISSIONAIS AUXILIARES</b></h3>
+<p class="ct-p">A <b>CONTRATADA</b> poderá substabelecer, com ou sem reserva, e designar advogado, correspondente ou profissional auxiliar, mantido o dever de sigilo e sem aumento automático dos honorários. Na renúncia, serão observadas a comunicação ao cliente e a continuidade da representação pelo prazo legal, salvo substituição anterior. Honorários entre profissionais serão ajustados internamente, sem prejuízo da proporcionalidade devida pelo cliente.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA VIGÉSIMA PRIMEIRA – MORTE, INCAPACIDADE E SUCESSÃO</b></h3>
+<p class="ct-p">A morte ou incapacidade do titular, do signatário ou do advogado não extingue automaticamente os direitos e obrigações já constituídos. O escritório comunicará a necessidade de regularização da representação. Os sucessores do cliente respondem nos limites da herança e do proveito recebido; os sucessores ou representantes do advogado poderão receber os honorários proporcionais ao trabalho realizado, na forma legal.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA VIGÉSIMA SEGUNDA – COMUNICAÇÕES, INTEGRIDADE E ALTERAÇÕES</b></h3>
+<p class="ct-p">São canais válidos os telefones, WhatsApp, e-mails e endereços constantes do cadastro e do Quadro-Resumo. O <b>CONTRATANTE</b> deverá comunicar alteração em até 5 dias. A ausência de atualização torna válidas as comunicações enviadas aos dados anteriores quando houver registro de entrega ou tentativa documentada.</p>
+<p class="ct-p">Este contrato, o Quadro-Resumo, a cláusula específica do benefício e os aditivos formam um único conjunto. Alteração de valor, base, objeto ou serviço adicional exige registro escrito. A nulidade de uma disposição não invalida as demais, que serão interpretadas conforme a boa-fé, a função social, a legislação da advocacia e o objeto efetivamente contratado.</p>
+<h3 class="ct-clausula"><b>CLÁUSULA VIGÉSIMA TERCEIRA – ASSINATURA, FORÇA EXECUTIVA E FORO</b></h3>
+<p class="ct-p">O instrumento poderá ser assinado fisicamente ou por meio eletrônico apto a identificar o signatário. O contrato escrito de honorários constitui título executivo nos termos do Estatuto da Advocacia, devendo a cobrança demonstrar obrigação certa, líquida e exigível pelas fórmulas e documentos de prestação de contas. Uma via integral será entregue ao <b>CONTRATANTE</b>, com registro da entrega.</p>
+<p class="ct-p">Fica eleito o foro da Comarca de Vitória da Conquista – Bahia, sede da <b>CONTRATADA</b> e local de cumprimento das obrigações contratuais, para dirimir as controvérsias decorrentes deste instrumento.</p>
+<div class="ct-secao"><b>DECLARAÇÕES FINAIS E ASSINATURAS</b></div>
+<div class="ct-caixa"><div class="ct-caixa-tit"><b>DECLARAÇÃO DE CIÊNCIA</b></div><div class="ct-caixa-corpo">O <b>CONTRATANTE</b> declara ter recebido explicação sobre o objeto, a obrigação de meio, as fórmulas administrativa e judicial, a incidência de 40% sobre a <b>PVE</b> ou a fórmula especial do benefício, o teto global, a separação da sucumbência, os deveres de colaboração e as consequências de perda de prazo, encerramento e êxito posterior. Declara, ainda, ter recebido ou receberá uma via integral deste instrumento.</div></div>
+<div class="ct-rotulo"><b><span class="ct-campo" data-campo="local_assinatura">{{local_assinatura}}</span></b>, <b><span class="ct-campo" data-campo="dia_assinatura">{{dia_assinatura}}</span></b> de <b><span class="ct-campo" data-campo="mes_assinatura">{{mes_assinatura}}</span></b> de <b><span class="ct-campo" data-campo="ano_assinatura">{{ano_assinatura}}</span></b>.</div>
+<p class="ct-p ct-cond" data-cond-campo="analfabeto" data-cond-valor="false" hidden><b>[[IF analfabeto=false]]</b></p>
+<table class="ct-tabela">
+<tr><td>____________________________________________<b><span class="ct-campo" data-campo="signatario_nome">{{signatario_nome}}</span></b><b><span class="ct-campo" data-campo="signatario_papel_qualidade">{{signatario_papel_qualidade}}</span></b> - <b>CONTRATANTE</b></td><td>____________________________________________Clayton Gonçalves MenezesOAB/BA nº 49.167 - <b>CONTRATADA</b></td></tr>
+</table>
+<p class="ct-p"><b>[[ENDIF]]</b></p>
+<div class="ct-caixa"><div class="ct-caixa-tit"><b>REGISTRO DE ENTREGA</b></div><div class="ct-caixa-corpo">Via integral entregue em <b><span class="ct-campo" data-campo="meio_entrega_contrato">{{meio_entrega_contrato}}</span></b> na data de <b><span class="ct-campo" data-campo="data_entrega_contrato">{{data_entrega_contrato}}</span></b>, com confirmação por <b><span class="ct-campo" data-campo="prova_entrega_contrato">{{prova_entrega_contrato}}</span></b>.</div></div>
+<p class="ct-p ct-cond" data-cond-campo="analfabeto" data-cond-valor="true" hidden><b>[[IF analfabeto=true]]</b></p>
+<div class="ct-secao"><b>TERMO DE LEITURA E ESCLARECIMENTO PARA PESSOA QUE NÃO LÊ OU NÃO ASSINA</b></div>
+<div class="ct-caixa"><div class="ct-caixa-tit"><b>DECLARAÇÃO DE LEITURA</b></div><div class="ct-caixa-corpo">O presente contrato, inclusive o Quadro-Resumo e a cláusula específica de honorários, foi integralmente lido em voz alta ao <b>CONTRATANTE</b>, em linguagem compreensível, na presença das duas testemunhas abaixo. Foram explicados o percentual, a base de cálculo, o componente em rendas mensais, o teto, a autorização de dedução, os deveres de colaboração, a prestação de contas e o êxito posterior. Após os esclarecimentos solicitados, o <b>CONTRATANTE</b> declarou compreender e concordar, manifestando sua vontade por impressão digital e assinatura a rogo.</div></div>
+<table class="ct-tabela">
+<tr><td><b>IMPRESSÃO DIGITAL DO CONTRATANTE</b><b><span class="ct-campo" data-campo="titular_nome">{{titular_nome}}</span></b> [ ÁREA PARA IMPRESSÃO DIGITAL ]</td><td>____________________________________________<b><span class="ct-campo" data-campo="rogo_nome">{{rogo_nome}}</span></b><b>ASSINATURA A ROGO</b>CPF <b><span class="ct-campo" data-campo="rogo_cpf">{{rogo_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="rogo_rg">{{rogo_rg}}</span></b>Declaro que assinei a pedido do contratante e após a leitura integral do instrumento.</td></tr>
+</table>
+<p class="ct-p">____________________________________________<b><span class="ct-campo" data-campo="testemunha1_nome">{{testemunha1_nome}}</span></b>CPF <b><span class="ct-campo" data-campo="testemunha1_cpf">{{testemunha1_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha1_rg">{{testemunha1_rg}}</span></b> - Endereço: <b><span class="ct-campo" data-campo="testemunha1_endereco">{{testemunha1_endereco}}</span></b><b>TESTEMUNHA 1</b></p>
+<p class="ct-p">____________________________________________<b><span class="ct-campo" data-campo="testemunha2_nome">{{testemunha2_nome}}</span></b>CPF <b><span class="ct-campo" data-campo="testemunha2_cpf">{{testemunha2_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha2_rg">{{testemunha2_rg}}</span></b> - Endereço: <b><span class="ct-campo" data-campo="testemunha2_endereco">{{testemunha2_endereco}}</span></b><b>TESTEMUNHA 2</b></p>
+<p class="ct-p">____________________________________________Clayton Gonçalves Menezes - OAB/BA nº 49.167 - CONTRATADA</p>
+<p class="ct-p">Data e local: <b><span class="ct-campo" data-campo="local_assinatura">{{local_assinatura}}</span></b>, <b><span class="ct-campo" data-campo="data_assinatura_extenso">{{data_assinatura_extenso}}</span></b>.</p>
+<p class="ct-p"><b>[[ENDIF]]</b></p>
+        </div>
+    </td></tr></tbody>
+</table>
+</div><!-- .page-contrato -->
+</div><!-- .print-sheet-contrato -->
 </div><!-- #docs-wrap -->
 </div><!-- #docsViewport -->
 </div><!-- #docsArea -->
@@ -3495,6 +3760,7 @@ function aplicarDecisoesDoGuia() {
         }
     }
     if (q.naoassina === '1') setAnalfabetoAll(true);
+    atualizarContrato();
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     setTimeout(function() {
         var n = document.getElementById('nome');
@@ -3653,6 +3919,115 @@ function valProximoCampo() {
     _valIdx = (_valIdx + 1) % VAL_ERRORS.length;
     iaVaiParaCampo(VAL_ERRORS[_valIdx].id);
 }
+// ===== Contrato de honorarios =============================================
+// Unico documento multipagina. Sai por padrao; a caixa "ja tem contrato"
+// tira ele do conjunto sem afetar os outros.
+// Os campos {{...}} sao espelhos dos dados ja preenchidos na procuracao.
+var CT_MAPA = {
+    titular_nome: 'nome', titular_cpf: 'cpf', titular_rg: 'rg',
+    titular_profissao: 'profissao', titular_estado_civil: 'estado_civil',
+    titular_telefone: 'telefone',
+    representante_nome: 'rep_nome', representante_cpf: 'rep_cpf',
+    representante_rg: 'rep_rg', representante_estado_civil: 'rep_estado_civil',
+    representante_qualidade: 'rep_qualidade',
+    assistente_nome: 'assist_nome', assistente_cpf: 'assist_cpf',
+    assistente_rg: 'assist_rg', assistente_estado_civil: 'assist_estado_civil',
+    assistente_qualidade: 'assist_qualidade',
+    rogo_cpf: null, rogo_rg: null
+};
+function ctValor(campo) {
+    if (CT_MAPA[campo]) {
+        var v = fieldValue(CT_MAPA[campo]);
+        if (v) return v;
+    }
+    var tipo = tipoAtual();
+    switch (campo) {
+        case 'titular_nacionalidade':
+        case 'representante_nacionalidade':
+        case 'assistente_nacionalidade': return 'brasileiro(a)';
+        case 'titular_endereco_completo': {
+            var pedacos = [fieldValue('endereco'), fieldValue('numero'), fieldValue('bairro'),
+                           fieldValue('cidade'), fieldValue('estado')].filter(Boolean);
+            return pedacos.length ? pedacos.join(', ') : '';
+        }
+        case 'tipo_beneficio': return fieldValue('anexo_beneficio') || fieldValue('anexo_beneficio_outro');
+        case 'signatario_nome':
+            return tipo === 'incapaz' ? fieldValue('rep_nome')
+                 : tipo === 'relativo' ? fieldValue('assist_nome') : fieldValue('nome');
+        case 'signatario_papel_qualidade':
+            return tipo === 'incapaz' ? 'REPRESENTANTE LEGAL'
+                 : tipo === 'relativo' ? 'ASSISTENTE LEGAL' : 'TITULAR DO BENEFÍCIO';
+        case 'local_assinatura': {
+            var ld = fonteLocalData(tipo);
+            var c = fieldValue(ld.cidade), u = fieldValue(ld.uf);
+            return c ? (c + (u ? ' - ' + u : '')) : '';
+        }
+        case 'dia_assinatura': return fieldValue(fonteLocalData(tipo).dia);
+        case 'mes_assinatura': return fieldValue(fonteLocalData(tipo).mes);
+        case 'ano_assinatura': return fieldValue(fonteLocalData(tipo).ano);
+        case 'data_assinatura_extenso':
+        case 'data_entrega_contrato': {
+            var l = fonteLocalData(tipo);
+            var d = fieldValue(l.dia), m = fieldValue(l.mes), a = fieldValue(l.ano);
+            return (d && m && a) ? (d + ' de ' + m + ' de ' + a) : '';
+        }
+        case 'testemunha1_nome': case 'testemunha2_nome': return '';
+        case 'testemunha1_cpf': return fieldValue(fonteRogo(tipo).t1cpf);
+        case 'testemunha1_rg':  return fieldValue(fonteRogo(tipo).t1rg);
+        case 'testemunha2_cpf': return fieldValue(fonteRogo(tipo).t2cpf);
+        case 'testemunha2_rg':  return fieldValue(fonteRogo(tipo).t2rg);
+        case 'rogo_cpf': return fieldValue(fonteRogo(tipo).cpf);
+        case 'rogo_rg':  return fieldValue(fonteRogo(tipo).rg);
+        case 'prazo_inicio_dias_uteis': return '15';
+        case 'numero_parcelas': return '6';
+        case 'meio_entrega_contrato': return 'via física e arquivo PDF';
+        case 'prova_entrega_contrato': return 'assinatura e confirmação de recebimento';
+        case 'servicos_adicionais_se_houver': return 'Não há serviços autônomos adicionais nesta contratação.';
+        default: return '';
+    }
+}
+function atualizarContrato() {
+    var chk = document.getElementById('contratoPularCheck');
+    var pg = document.getElementById('page-contrato');
+    var mostra = !(chk && chk.checked);
+    if (pg) pg.classList.toggle('show', mostra);
+    var sheet = document.getElementById('sheet-contrato');
+    if (sheet) sheet.classList.toggle('print-sheet-hidden', !mostra);
+    var tab = document.getElementById('tabContrato');
+    if (tab) tab.hidden = !mostra;
+    if (typeof updateLastVisibleSheet === 'function') updateLastVisibleSheet();
+    if (!mostra) { atualizarContagemDocs(); return; }
+
+    document.querySelectorAll('#ct-corpo .ct-campo').forEach(function(el) {
+        var v = ctValor(el.getAttribute('data-campo'));
+        el.textContent = v || ('{{' + el.getAttribute('data-campo') + '}}');
+        el.classList.toggle('ct-campo-vazio', !v);
+    });
+    // blocos condicionais: so aparece o aplicavel
+    var tipo = tipoAtual();
+    document.querySelectorAll('#ct-corpo .ct-cond').forEach(function(el) {
+        var campo = el.getAttribute('data-cond-campo');
+        var valor = el.getAttribute('data-cond-valor');
+        var ok = false;
+        if (campo === 'tipo_procuracao') {
+            ok = (valor === 'absolutamente_incapaz' && tipo === 'incapaz') ||
+                 (valor === 'relativamente_incapaz' && tipo === 'relativo');
+        } else if (campo === 'analfabeto') {
+            ok = (valor === 'true') === analfabetoAtivo();
+        }
+        el.hidden = !ok;
+    });
+    atualizarContagemDocs();
+}
+(function wireContrato() {
+    var chk = document.getElementById('contratoPularCheck');
+    if (chk) chk.addEventListener('change', function() { atualizarContrato(); recalcLayout(); });
+    var wrap = document.getElementById('docs-wrap');
+    if (wrap) ['input', 'change'].forEach(function(ev) {
+        wrap.addEventListener(ev, function() { requestAnimationFrame(atualizarContrato); }, true);
+    });
+})();
+
 // ===== Quem esta preenchendo (parceiro) ====================================
 // A lista vem de parceiros.json (mesmas etiquetas do Tramitacao). Assim, incluir
 // parceiro novo e editar um JSON — nao precisa mexer nesta pagina.
@@ -3691,6 +4066,8 @@ function aplicarParceiro() {
     }
     // carimbo em todas as folhas
     var txt = p ? ('Preenchido por ' + p.tag) : '';
+    var ctc = document.getElementById('ct-carimbo');
+    if (ctc) ctc.textContent = txt;
     document.querySelectorAll('.page').forEach(function(pg) {
         var el = pg.querySelector('.pg-carimbo');
         if (!el) {
@@ -3803,7 +4180,11 @@ function atualizarStatusDocs() {
         });
     });
     tabs.forEach(function(tab) {
-        var faltas = pend[tab.getAttribute('data-doc')] || [];
+        var alvo = tab.getAttribute('data-doc');
+        // O contrato nao tem campo proprio: tudo nele vem da procuracao.
+        var faltas = (alvo === 'page-contrato')
+            ? (pend['page-procuracao'] || []).concat(pend['page-anexox'] || [])
+            : (pend[alvo] || []);
         var st = faltas.length ? (_tentouGerarPdf ? 'erro' : 'pend') : 'ok';
         tab.classList.toggle('st-ok', st === 'ok');
         tab.classList.toggle('st-pend', st === 'pend');
@@ -3835,9 +4216,10 @@ var DOC_NOME = {
     'page-procuracao': 'Procuração',
     'page-anexox': 'Termo de Benefício',
     'page-termoresp': 'Termo de Responsabilidade',
-    'page-termocomp': 'Termo de Compromisso'
+    'page-termocomp': 'Termo de Compromisso',
+    'page-contrato': 'Contrato'
 };
-var DOC_ORDEM = ['page-procuracao', 'page-anexox', 'page-termoresp', 'page-termocomp'];
+var DOC_ORDEM = ['page-procuracao', 'page-anexox', 'page-termoresp', 'page-termocomp', 'page-contrato'];
 // A pendencia e listada no documento onde o campo REALMENTE se digita — que,
 // depois dos espelhos, e quase sempre a procuracao.
 function docDaPendencia(id) {
@@ -4726,7 +5108,12 @@ function updateLastVisibleSheet() {
     var visivel = [];
     sheets.forEach(function(s) {
         var termo = s.querySelector('.page-termo');
-        var aplicavel = !termo || termo.classList.contains('show');
+        var contrato = s.querySelector('.page-contrato');
+        // o contrato tem estado proprio (caixa "ja tem contrato"); sem isto ele
+        // continuava contando como folha visivel e o documento anterior mantinha
+        // a quebra de pagina, gerando uma folha em branco no fim
+        var aplicavel = contrato ? contrato.classList.contains('show')
+                                 : (!termo || termo.classList.contains('show'));
         s.classList.toggle('print-sheet-hidden', !aplicavel);
         s.classList.remove('last-visible');
         if (aplicavel) visivel.push(s);
@@ -4801,6 +5188,7 @@ window.addEventListener('resize', function() {
 
 mudarTipo((document.getElementById('tipoSelect') || {}).value || 'normal');
 aplicarParceiro();
+atualizarContrato();
 aplicarDecisoesDoGuia();
 // Se o hash chegar com a pagina ja aberta (link colado, voltar do guia sem
 // recarregar), aplica do mesmo jeito.
