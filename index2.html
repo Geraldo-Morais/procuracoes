@@ -526,21 +526,27 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 .pc-escolher svg { width: 16px; height: 16px; flex: 0 0 auto; opacity: .85; }
 .pc-escolher.pendente { border-color: #f0b429; box-shadow: 0 0 0 2px rgba(240,180,41,0.18); }
 .pc-chip {
-    display: none; align-items: flex-start; gap: 9px;
+    display: none;
     background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.28);
     border-radius: 8px; padding: 9px 11px; animation: pcEntra .3s ease both;
 }
-.pc-chip.mostrar { display: flex; }
+.pc-chip.mostrar { display: block; }
 @keyframes pcEntra { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
-.pc-chip .pc-ok { flex: 0 0 auto; margin-top: 1px; color: #7ee0a4; }
-.pc-chip .pc-ok svg { width: 15px; height: 15px; }
-.pc-chip .pc-txt { flex: 1 1 auto; min-width: 0; }
-.pc-chip b { display: block; font-size: 9.4pt; line-height: 1.25; }
-.pc-chip span { display: block; font-size: 7.8pt; opacity: 0.72; line-height: 1.35; margin-top: 1px; }
+.pc-chip .pc-linha1 { display: flex; align-items: center; gap: 7px; }
+.pc-chip .pc-ok { flex: 0 0 auto; color: #7ee0a4; display: flex; }
+.pc-chip .pc-ok svg { width: 14px; height: 14px; }
+.pc-chip .pc-nome {
+    flex: 1 1 auto; min-width: 0; font-size: 9.4pt; font-weight: bold; line-height: 1.25;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pc-chip .pc-lugar {
+    display: block; font-size: 7.8pt; opacity: 0.7; line-height: 1.35;
+    margin: 2px 0 0 21px;
+}
 .pc-chip .pc-trocar {
-    flex: 0 0 auto; background: none; border: none; color: rgba(255,255,255,0.75);
-    font-family: inherit; font-size: 7.8pt; font-weight: bold; cursor: pointer;
-    text-decoration: underline; padding: 2px 0;
+    display: block; margin: 6px 0 0 21px; background: none; border: none; padding: 0;
+    color: rgba(255,255,255,0.78); font-family: inherit; font-size: 7.8pt; font-weight: bold;
+    cursor: pointer; text-decoration: underline;
 }
 .pc-chip .pc-trocar:hover { color: #fff; }
 
@@ -576,6 +582,18 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
     font-weight: bold; transition: opacity .14s ease, transform .14s ease; }
 .pc-item:hover .pc-i-seta { opacity: 1; transform: none; }
 .pc-vazio { padding: 20px 8px; text-align: center; font-size: 9pt; color: #8a6e6c; line-height: 1.5; }
+.pc-vazio b { color: #622423; }
+.pc-novo { padding: 14px 18px 16px; background: #fff; border-top: 1px solid #eee6e2; }
+.pc-novo[hidden] { display: none; }
+.pc-novo-tit { font-size: 8.4pt; font-weight: bold; letter-spacing: 0.5pt; text-transform: uppercase;
+    color: #8a6e6c; margin-bottom: 9px; }
+.pc-novo-campo { display: block; font-size: 8.6pt; color: #7a6a67; margin-bottom: 9px; }
+.pc-novo-campo input {
+    width: 100%; margin-top: 3px; padding: 8px 10px; font-size: 10pt;
+    border: 1px solid #ded5d1; border-radius: 7px; font-family: Arial, sans-serif; box-sizing: border-box;
+}
+.pc-novo-campo input:focus { border-color: #622423; outline: none; }
+.val-foot #pcAbrirNovo { margin-right: auto; }
 
 /* ===== CONTRATO ========================================================
    Unico documento MULTIPAGINA. Por isso ele nao usa a moldura de altura fixa
@@ -630,6 +648,12 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 }
 .ct-li::before { content: "•"; position: absolute; left: 0; color: #622423; font-weight: bold; }
 .ct-campo { font-weight: bold; color: #622423; }
+/* Nome de testemunha e de quem assina a rogo NAO se digita — e linha em branco,
+   assinada a mao depois de imprimir, igual na procuracao. */
+.ct-linha {
+    display: inline-block; min-width: 180pt; border-bottom: 0.8pt solid #000;
+    height: 1pt; vertical-align: bottom; margin-bottom: -1pt;
+}
 .ct-tabela { width: 100%; border-collapse: collapse; margin: 8pt 0 10pt; font-size: 10.5pt; }
 .ct-tabela td, .ct-tabela th { border: 0.7pt solid #d6cdc9; padding: 4pt 7pt; vertical-align: top; text-align: left; }
 .ct-tabela th { background: #622423; color: #fff; font-size: 10.5pt; text-align: center; letter-spacing: 0.3pt; }
@@ -1200,12 +1224,15 @@ body.sidebar-collapsed #docsArea { left: 0; }
     <div class="pc-bloco">
         <div class="pc-titulo">Quem está preenchendo</div>
         <button type="button" class="pc-escolher pendente" id="pcEscolher">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Identifique-se para gerar o PDF</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/></svg>
+            <span>De qual escritório você é?</span>
         </button>
         <div class="pc-chip" id="pcChip">
-            <span class="pc-ok"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
-            <span class="pc-txt"><b id="pcNome">—</b><span id="pcLugar"></span></span>
+            <div class="pc-linha1">
+                <span class="pc-ok"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+                <span class="pc-nome" id="pcNome">—</span>
+            </div>
+            <span class="pc-lugar" id="pcLugar"></span>
             <button type="button" class="pc-trocar" id="pcTrocar">trocar</button>
         </div>
     </div>
@@ -1298,17 +1325,27 @@ body.sidebar-collapsed #docsArea { left: 0; }
         <div class="val-head">
             <span class="val-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
             <div>
-                <div class="val-title" id="pcTitulo">Quem está preenchendo?</div>
-                <div class="val-sub">É por aqui que o cliente fica vinculado a você</div>
+                <div class="val-title" id="pcTitulo">De qual escritório você é?</div>
+                <div class="val-sub">Digite a cidade — é assim que o cliente fica vinculado a você</div>
             </div>
         </div>
         <div class="pc-busca">
             <span class="hb-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
-            <input type="text" id="pcFiltro" placeholder="Digite seu nome ou sua cidade…" autocomplete="off" spellcheck="false">
+            <input type="text" id="pcFiltro" placeholder="Digite a cidade…" autocomplete="off" spellcheck="false">
         </div>
         <div class="pc-lista" id="pcLista"></div>
+        <div class="pc-novo" id="pcNovo" hidden>
+            <div class="pc-novo-tit">Não encontrou? Informe seus dados</div>
+            <label class="pc-novo-campo">Seu nome
+                <input type="text" id="pcNovoNome" autocomplete="off" placeholder="Como você se chama">
+            </label>
+            <label class="pc-novo-campo">Sua cidade
+                <input type="text" id="pcNovoCidade" autocomplete="off" placeholder="Cidade onde você atende">
+            </label>
+            <button type="button" class="btn-cta" id="pcNovoSalvar">Usar estes dados &rarr;</button>
+        </div>
         <div class="val-foot">
-            <span class="val-dica" id="pcContagem"></span>
+            <button type="button" class="btn-ghost" id="pcAbrirNovo">Não encontrou? Informe o nome</button>
             <button type="button" class="btn-ghost" onclick="fecharPcModal()">Fechar</button>
         </div>
     </div>
@@ -2281,10 +2318,10 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <div class="ct-secao"><b>TERMO DE LEITURA E ESCLARECIMENTO PARA PESSOA QUE NÃO LÊ OU NÃO ASSINA</b></div>
 <div class="ct-caixa"><div class="ct-caixa-tit"><b>DECLARAÇÃO DE LEITURA</b></div><div class="ct-caixa-corpo">O presente contrato, inclusive o Quadro-Resumo e a cláusula específica de honorários, foi integralmente lido em voz alta ao <b>CONTRATANTE</b>, em linguagem compreensível, na presença das duas testemunhas abaixo. Foram explicados o percentual, a base de cálculo, o componente em rendas mensais, o teto, a autorização de dedução, os deveres de colaboração, a prestação de contas e o êxito posterior. Após os esclarecimentos solicitados, o <b>CONTRATANTE</b> declarou compreender e concordar, manifestando sua vontade por impressão digital e assinatura a rogo.</div></div>
 <table class="ct-tabela">
-<tr><td><b>IMPRESSÃO DIGITAL DO CONTRATANTE</b><b><span class="ct-campo" data-campo="titular_nome">{{titular_nome}}</span></b> [ ÁREA PARA IMPRESSÃO DIGITAL ]</td><td>____________________________________________<b><span class="ct-campo" data-campo="rogo_nome">{{rogo_nome}}</span></b><b>ASSINATURA A ROGO</b>CPF <b><span class="ct-campo" data-campo="rogo_cpf">{{rogo_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="rogo_rg">{{rogo_rg}}</span></b>Declaro que assinei a pedido do contratante e após a leitura integral do instrumento.</td></tr>
+<tr><td><b>IMPRESSÃO DIGITAL DO CONTRATANTE</b><b><span class="ct-campo" data-campo="titular_nome">{{titular_nome}}</span></b> [ ÁREA PARA IMPRESSÃO DIGITAL ]</td><td>____________________________________________<b><span class="ct-linha" aria-label="rogo nome">&nbsp;</span></b><b>ASSINATURA A ROGO</b>CPF <b><span class="ct-campo" data-campo="rogo_cpf">{{rogo_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="rogo_rg">{{rogo_rg}}</span></b>Declaro que assinei a pedido do contratante e após a leitura integral do instrumento.</td></tr>
 </table>
-<p class="ct-p">____________________________________________<b><span class="ct-campo" data-campo="testemunha1_nome">{{testemunha1_nome}}</span></b>CPF <b><span class="ct-campo" data-campo="testemunha1_cpf">{{testemunha1_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha1_rg">{{testemunha1_rg}}</span></b> - Endereço: <b><span class="ct-campo" data-campo="testemunha1_endereco">{{testemunha1_endereco}}</span></b><b>TESTEMUNHA 1</b></p>
-<p class="ct-p">____________________________________________<b><span class="ct-campo" data-campo="testemunha2_nome">{{testemunha2_nome}}</span></b>CPF <b><span class="ct-campo" data-campo="testemunha2_cpf">{{testemunha2_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha2_rg">{{testemunha2_rg}}</span></b> - Endereço: <b><span class="ct-campo" data-campo="testemunha2_endereco">{{testemunha2_endereco}}</span></b><b>TESTEMUNHA 2</b></p>
+<p class="ct-p">____________________________________________<b><span class="ct-linha" aria-label="testemunha1 nome">&nbsp;</span></b>CPF <b><span class="ct-campo" data-campo="testemunha1_cpf">{{testemunha1_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha1_rg">{{testemunha1_rg}}</span></b> - Endereço: <b><span class="ct-linha" aria-label="testemunha1 endereco">&nbsp;</span></b><b>TESTEMUNHA 1</b></p>
+<p class="ct-p">____________________________________________<b><span class="ct-linha" aria-label="testemunha2 nome">&nbsp;</span></b>CPF <b><span class="ct-campo" data-campo="testemunha2_cpf">{{testemunha2_cpf}}</span></b> - RG <b><span class="ct-campo" data-campo="testemunha2_rg">{{testemunha2_rg}}</span></b> - Endereço: <b><span class="ct-linha" aria-label="testemunha2 endereco">&nbsp;</span></b><b>TESTEMUNHA 2</b></p>
 <p class="ct-p">____________________________________________Clayton Gonçalves Menezes - OAB/BA nº 49.167 - CONTRATADA</p>
 <p class="ct-p">Data e local: <b><span class="ct-campo" data-campo="local_assinatura">{{local_assinatura}}</span></b>, <b><span class="ct-campo" data-campo="data_assinatura_extenso">{{data_assinatura_extenso}}</span></b>.</p>
 <p class="ct-p"><b>[[ENDIF]]</b></p>
@@ -4065,7 +4102,9 @@ function aplicarParceiro() {
         document.getElementById('pcLugar').textContent = p.lugar || p.tag;
     }
     // carimbo em todas as folhas
-    var txt = p ? ('Preenchido por ' + p.tag) : '';
+    var txt = p ? ('Preenchido por ' + (p.novo
+        ? (p.nome + ' — ' + p.lugar + ' (parceiro ainda não cadastrado)')
+        : p.tag)) : '';
     var ctc = document.getElementById('ct-carimbo');
     if (ctc) ctc.textContent = txt;
     document.querySelectorAll('.page').forEach(function(pg) {
@@ -4079,40 +4118,48 @@ function aplicarParceiro() {
     });
 }
 function normPc(v) { return stripDiacritics(String(v || '')).toLowerCase(); }
+var PC_MAX_SUG = 6;
+// Sugere, nao lista: sem nada digitado nao aparece ninguem, e mesmo digitando
+// mostra no maximo 6. Assim um parceiro nao fica sabendo dos outros.
 function renderPcLista() {
     var box = document.getElementById('pcLista');
     if (!box) return;
     var termo = normPc((document.getElementById('pcFiltro') || {}).value).trim();
-    var vis = 0;
     box.innerHTML = '';
-    PARCEIROS.forEach(function(p) {
-        // casa por NOME ou por CIDADE — a pessoa digita o que souber
-        if (termo && normPc(p.nome).indexOf(termo) < 0 &&
-            normPc(p.lugar).indexOf(termo) < 0 &&
-            normPc(p.tag).indexOf(termo) < 0) return;
+    if (termo.length < 2) {
+        box.innerHTML = '<div class="pc-vazio">Comece a digitar a <b>cidade</b> onde você atende.</div>';
+        return;
+    }
+    // a cidade manda: casa primeiro por lugar, depois por nome
+    var achados = PARCEIROS.filter(function(p) {
+        return normPc(p.lugar).indexOf(termo) >= 0 || normPc(p.nome).indexOf(termo) >= 0;
+    }).sort(function(a, b) {
+        return (normPc(a.lugar).indexOf(termo) === 0 ? 0 : 1) - (normPc(b.lugar).indexOf(termo) === 0 ? 0 : 1);
+    }).slice(0, PC_MAX_SUG);
+    if (!achados.length) {
+        box.innerHTML = '<div class="pc-vazio">Nenhum escritório com <b>' +
+            String(termo).replace(/</g, '&lt;') + '</b>.<br>' +
+            'Confira a grafia ou use <b>“Não encontrou? Informe o nome”</b>, abaixo.</div>';
+        return;
+    }
+    achados.forEach(function(p, i) {
         var b = document.createElement('button');
         b.type = 'button';
         b.className = 'pc-item' + (p.especial ? ' pc-especial' : '');
-        b.style.animationDelay = Math.min(vis, 12) * 0.025 + 's';
+        b.style.animationDelay = (i * 0.03) + 's';
         b.innerHTML = '<span><span class="pc-i-nome"></span><span class="pc-i-lugar"></span></span>' +
                       '<span class="pc-i-seta">&rarr;</span>';
-        b.querySelector('.pc-i-nome').textContent = p.nome;
-        b.querySelector('.pc-i-lugar').textContent = p.lugar || p.tag;
+        b.querySelector('.pc-i-nome').textContent = p.lugar || p.nome;
+        b.querySelector('.pc-i-lugar').textContent = p.lugar ? p.nome : '';
         b.addEventListener('click', function() { definirParceiro(p); fecharPcModal(); });
         box.appendChild(b);
-        vis++;
     });
-    if (!vis) {
-        box.innerHTML = '<div class="pc-vazio">Não achei <b>' +
-            String(termo).replace(/</g, '&lt;') + '</b>.<br>' +
-            'Tente o nome da cidade, ou fale com o escritório para te cadastrar.</div>';
-    }
-    var c = document.getElementById('pcContagem');
-    if (c) c.textContent = termo ? (vis + ' de ' + PARCEIROS.length) : (PARCEIROS.length + ' cadastrados');
 }
 function abrirPcModal() {
     var f = document.getElementById('pcFiltro');
     if (f) f.value = '';
+    var novo = document.getElementById('pcNovo');
+    if (novo) novo.hidden = true;
     renderPcLista();
     document.getElementById('pcModal').style.display = 'flex';
     setTimeout(function() { if (f) f.focus(); }, 60);
@@ -4136,6 +4183,24 @@ function fecharPcModal() { document.getElementById('pcModal').style.display = 'n
     }
     var ov = document.getElementById('pcModal');
     if (ov) ov.addEventListener('mousedown', function(e) { if (e.target === ov) fecharPcModal(); });
+    // Parceiro ainda sem etiqueta: registra nome + cidade em texto livre. O
+    // carimbo sai marcado como NAO CADASTRADO, pro escritorio criar a etiqueta.
+    var abrirNovo = document.getElementById('pcAbrirNovo');
+    if (abrirNovo) abrirNovo.addEventListener('click', function() {
+        var n = document.getElementById('pcNovo');
+        n.hidden = false;
+        document.getElementById('pcNovoCidade').value =
+            (document.getElementById('pcFiltro').value || '').trim();
+        setTimeout(function() { document.getElementById('pcNovoNome').focus(); }, 30);
+    });
+    var salvar = document.getElementById('pcNovoSalvar');
+    if (salvar) salvar.addEventListener('click', function() {
+        var nome = (document.getElementById('pcNovoNome').value || '').trim();
+        var cid = (document.getElementById('pcNovoCidade').value || '').trim();
+        if (!nome || !cid) { iaToast('Preencha o nome e a cidade.', 'err'); return; }
+        definirParceiro({ tag: 'PARCEIRO:NAO_CADASTRADO', nome: nome, lugar: cid, novo: true });
+        fecharPcModal();
+    });
 })();
 
 // ===== Semaforo das abas ===================================================

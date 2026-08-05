@@ -432,12 +432,43 @@ with sync_playwright() as p:
     d.close()
     check(com > 8, f"contrato: sai multipagina junto com os demais (got {com})")
     check(cabs == com - 4, f"contrato: cabecalho repete em todas as {com-4} paginas dele (got {cabs})")
+    linhas = pg.evaluate("()=>document.querySelectorAll('#ct-corpo .ct-linha').length")
+    check(linhas == 5, f"contrato: nome de testemunha/rogo e linha em branco, como na procuracao (got {linhas})")
     pg.evaluate("()=>{document.getElementById('contratoPularCheck').checked=true;"
                 " atualizarContrato(); recalcLayout();}")
     pg.wait_for_timeout(500)
     pg.pdf(path=out, format="A4", print_background=True)
     d = fitz.open(out); sem = d.page_count; d.close()
     check(sem == 4, f"contrato: caixa de renovacao tira ele do conjunto (got {sem}, esperado 4)")
+
+    # --- seletor de escritorio: sugere, nao lista ---
+    pg.goto("about:blank"); pg.goto(URL); pg.wait_for_timeout(900)
+    pg.evaluate("()=>localStorage.removeItem('proc_parceiro')")
+    pg.evaluate("abrirPcModal()"); pg.wait_for_timeout(250)
+    def sug():
+        return pg.evaluate("()=>Array.from(document.querySelectorAll('#pcLista .pc-item'))"
+                           ".map(b=>b.querySelector('.pc-i-nome').textContent)")
+    check(len(sug()) == 0 and "Comece a digitar" in pg.inner_text("#pcLista"),
+          "seletor: ao abrir nao mostra ninguem")
+    pg.fill("#pcFiltro", "m"); pg.wait_for_timeout(220)
+    check(len(sug()) == 0, "seletor: 1 letra ainda nao sugere")
+    pg.fill("#pcFiltro", "mai"); pg.wait_for_timeout(220)
+    check(sug() == ["Maiquinique"], f"seletor: sugere pela cidade (got {sug()})")
+    pg.fill("#pcFiltro", "batuque"); pg.wait_for_timeout(220)
+    check(len(sug()) == 2, f"seletor: cidade com 2 escritorios mostra os 2 (got {sug()})")
+    pg.fill("#pcFiltro", "xpto"); pg.wait_for_timeout(220)
+    check(len(sug()) == 0 and "Nenhum escritório" in pg.inner_text("#pcLista"),
+          "seletor: sem resultado avisa e oferece o cadastro manual")
+    todos = pg.evaluate("()=>PARCEIROS.length")
+    check(todos > 40 and len(sug()) == 0,
+          f"seletor: nunca lista os {todos} cadastros de uma vez")
+    pg.click("#pcAbrirNovo"); pg.wait_for_timeout(200)
+    pg.fill("#pcNovoNome", "Fulana de Tal")
+    pg.fill("#pcNovoCidade", "Cidade Nova")
+    pg.click("#pcNovoSalvar"); pg.wait_for_timeout(500)
+    car = pg.evaluate("()=>document.querySelector('.pg-carimbo').textContent")
+    check("Fulana de Tal" in car and "não cadastrado" in car,
+          f"seletor: parceiro novo carimba como nao cadastrado (got {car!r})")
 
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
