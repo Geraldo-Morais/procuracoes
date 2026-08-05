@@ -348,6 +348,45 @@ with sync_playwright() as p:
           f"guia: decisoes aplicadas e hash limpo (got {guia})")
     check(guia["prof"].startswith("LAVRADOR"), f"guia: profissao rural preenchida (got {guia['prof']!r})")
 
+    # --- ajuda do "?" em cartoes, e o cartao escolhe o tipo ---
+    pg.goto("about:blank"); pg.goto(URL); pg.wait_for_timeout(700)
+    pg.click("#typeHelpBtn"); pg.wait_for_timeout(400)
+    cards = pg.evaluate("()=>Array.from(document.querySelectorAll('#typeHelpPanel .help-card'))"
+                        ".map(c=>c.getAttribute('data-tipo'))")
+    check(cards == ["normal", "incapaz", "relativo"], f"ajuda: um cartao por tipo (got {cards})")
+    pg.click("#typeHelpPanel .help-card[data-tipo='relativo']"); pg.wait_for_timeout(400)
+    check(pg.evaluate("()=>document.getElementById('tipoSelect').value") == "relativo",
+          "ajuda: clicar no cartao troca o tipo")
+    check(not pg.locator("#typeHelpPanel").evaluate("e=>e.classList.contains('open')"),
+          "ajuda: o painel fecha depois de escolher")
+
+    # --- historico local (segurar a lixeira) ---
+    pg.goto("about:blank"); pg.goto(URL); pg.wait_for_timeout(700)
+    pg.evaluate("()=>{localStorage.removeItem('proc_historico'); window.print=function(){};}")
+    for nome, cpf in (("Maria Aparecida de Souza", "529.982.247-25"),
+                      ("Joao Carlos Pereira", "111.444.777-35")):
+        pg.evaluate("preencherStub()"); pg.wait_for_timeout(300)
+        pg.fill("#nome", nome); pg.locator("#nome").blur()
+        pg.fill("#cpf", cpf); pg.locator("#cpf").blur(); pg.wait_for_timeout(300)
+        pg.evaluate("gerarPDF()"); pg.wait_for_timeout(300)
+    pg.evaluate("abrirHistModal()"); pg.wait_for_timeout(400)
+    itens = pg.evaluate("()=>Array.from(document.querySelectorAll('#histLista .val-item'))"
+                        ".map(e=>e.querySelector('.hist-nome').textContent)")
+    check(len(itens) == 2 and itens[0] == "JOAO CARLOS PEREIRA",
+          f"historico: guarda os preenchimentos, mais novo primeiro (got {itens})")
+    mask = pg.evaluate("()=>document.querySelector('#histLista .hist-meta').textContent")
+    check("•••" in mask and "111.444" not in mask, f"historico: CPF mascarado na lista (got {mask!r})")
+    pg.evaluate("()=>limparDados()"); pg.wait_for_timeout(300)
+    pg.evaluate("carregarDoHistorico(1)"); pg.wait_for_timeout(1100)
+    volta = {i: pg.input_value("#" + i) for i in ["nome", "cpf", "bairro", "anexo_beneficio"]}
+    check(volta["nome"] == "MARIA APARECIDA DE SOUZA" and volta["bairro"] == "CENTRO" and volta["anexo_beneficio"],
+          f"historico: carregar de volta repoe tudo (got {volta})")
+    check(pg.evaluate("validateForm()") == [], "historico: o carregado ja passa na validacao")
+    pg.evaluate("()=>{document.getElementById('histApagar').click();}"); pg.wait_for_timeout(300)
+    vazio = pg.evaluate("()=>document.querySelectorAll('#histLista .val-item').length")
+    check(vazio == 0, f"historico: apagar limpa a lista (got {vazio})")
+    pg.evaluate("fecharHistModal()")
+
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
 
