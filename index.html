@@ -83,7 +83,7 @@ body {
 p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 .espaco-antes { margin-top: 16pt; }
 .assinatura { text-align: center; margin-top: 32pt; }
-.assinatura-label { font-weight: bold; font-size: 12pt; }
+.assinatura-label { font-weight: bold; font-size: 12pt; text-transform: uppercase; }
 .assinatura-linha { display: inline-block; width: 270pt; border-bottom: 1pt solid #000; height: 1pt; vertical-align: bottom; margin-bottom: -1pt; }
 .local-data-line {
     text-align: center;
@@ -571,7 +571,12 @@ body.sidebar-collapsed #docsArea { left: 0; }
 .page-anexo { display: flex; flex-direction: column; }
 .termo-content { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; }
 .termo-blk { flex: 0 0 auto; }
-.termo-content > .termo-blk:last-child { margin-top: auto; }
+/* O ultimo bloco (Local/Data + assinatura ou rogo) desce pro fundo da folha.
+   O padding-bottom e a folga de seguranca: na impressao a .page tem a altura
+   EXATA do .print-sheet (overflow:hidden), entao o que encostar na borda de
+   baixo e cortado — foi o que comia a linha de assinatura e a caixa da
+   impressao digital. */
+.termo-content > .termo-blk:last-child { margin-top: auto; padding-bottom: 10pt; }
 /* Itens do box "Requerimento" do Anexo X (checkbox + rótulo/seleção). */
 .anexo-req-item { display: flex; align-items: flex-start; gap: 8pt; margin: 4pt 0; font-size: 10.5pt; text-align: justify; line-height: 1.32; }
 .anexo-req-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #622423; margin-top: 3px; flex: 0 0 auto; }
@@ -647,8 +652,10 @@ body.sidebar-collapsed #docsArea { left: 0; }
    ajuda a encher a folha; no modo analfabeto o bloco todo some, entao nao
    corre risco de estourar. */
 .termo-sign-space { height: 40pt; }
-.termo-sign-line { display: inline-block; border-top: 1.2pt solid #000; width: 62%; margin: 0 auto; }
-.termo-sign-caption { font-weight: bold; font-size: 11pt; margin-top: 4pt; }
+/* Assinatura dos Termos no MESMO formato da procuracao:
+   "OUTORGANTE: ______" (rotulo à esquerda, linha à direita) — nao mais
+   legenda embaixo da linha. O espaco de assinatura vem do .termo-sign-space. */
+.termo-sign-block .assinatura { margin-top: 0; }
 .termo-analf-toggle {
     flex: 0 0 auto; margin-top: 8pt; display: flex; align-items: center; gap: 7pt; font-size: 9.5pt; cursor: pointer;
     padding: 5pt 9pt; background: #fdf3f2; border: 0.8pt dashed #622423; border-radius: 3px;
@@ -1230,8 +1237,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
         <div class="termo-sign-block">
             <div class="termo-sign-space"></div>
-            <div class="termo-sign-line">&nbsp;</div>
-            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel-anexo">Outorgante</span></div>
+            <div class="assinatura">
+                <span class="assinatura-label"><span class="js-papel-anexo">Outorgante</span>:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+            </div>
         </div>
         <div class="termo-analf-block" id="anexo_analf_block">
             <div>
@@ -1249,18 +1257,18 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="anexo_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t1_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="anexo_t1_rg" maxlength="25"></div>
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="anexo_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="anexo_t2_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="anexo_t2_rg" maxlength="25"></div>
@@ -1360,8 +1368,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
         <div class="termo-sign-block">
             <div class="termo-sign-space"></div>
-            <div class="termo-sign-line">&nbsp;</div>
-            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel">Representante Legal</span></div>
+            <div class="assinatura">
+                <span class="assinatura-label"><span class="js-papel">Representante Legal</span>:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+            </div>
         </div>
         <div class="termo-analf-block" id="termoresp_analf_block">
             <div>
@@ -1379,18 +1388,18 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="termoresp_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t1_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termoresp_t1_rg" maxlength="25"></div>
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="termoresp_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termoresp_t2_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termoresp_t2_rg" maxlength="25"></div>
@@ -1495,8 +1504,9 @@ body.sidebar-collapsed #docsArea { left: 0; }
         </div>
         <div class="termo-sign-block">
             <div class="termo-sign-space"></div>
-            <div class="termo-sign-line">&nbsp;</div>
-            <div class="termo-sign-caption">Assinatura do(a) <span class="js-papel">Representante Legal</span></div>
+            <div class="assinatura">
+                <span class="assinatura-label"><span class="js-papel">Representante Legal</span>:</span>&nbsp;&nbsp;<span class="assinatura-linha">&nbsp;</span>
+            </div>
         </div>
         <div class="termo-analf-block" id="termocomp_analf_block">
             <div>
@@ -1514,18 +1524,18 @@ body.sidebar-collapsed #docsArea { left: 0; }
             </div>
             <div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">1ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="termocomp_t1_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">1ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t1_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termocomp_t1_rg" maxlength="25"></div>
                     </div>
                 </div>
                 <div class="testemunha-bloco">
-                    <div class="testemunha-titulo">2ª Testemunha:</div>
-                    <div class="testemunha-nome-label">Nome:</div>
-                    <input type="text" id="termocomp_t2_nome" maxlength="50" style="font-family:'Times New Roman',serif; font-weight:bold; font-size:10pt; border:none; outline:none; background:#fff8dc; width:100%; padding:1pt 2pt; margin-bottom:2pt;">
+                    <div class="testemunha-titulo">2ª TESTEMUNHA:</div>
+                    <div class="testemunha-nome-label">NOME:</div>
+                    <span class="testemunha-linha">&nbsp;</span>
                     <div class="testemunha-campos">
                         <div class="testemunha-campo"><span class="label">CPF:</span><input type="text" id="termocomp_t2_cpf" maxlength="14"></div>
                         <div class="testemunha-campo"><span class="label">RG:</span><input type="text" id="termocomp_t2_rg" maxlength="25"></div>
@@ -1845,9 +1855,8 @@ function activeSyncGroups() {
     groups.push({key:'t1_rg', ids:[rg2.t1rg,'anexo_t1_rg'].concat(termoRogo?['termoresp_t1_rg','termocomp_t1_rg']:[])});
     groups.push({key:'t2_cpf', ids:[rg2.t2cpf,'anexo_t2_cpf'].concat(termoRogo?['termoresp_t2_cpf','termocomp_t2_cpf']:[])});
     groups.push({key:'t2_rg', ids:[rg2.t2rg,'anexo_t2_rg'].concat(termoRogo?['termoresp_t2_rg','termocomp_t2_rg']:[])});
-    // nomes das testemunhas (procuração usa só linha em branco): Anexo X + termos.
-    groups.push({key:'t1_nome', ids:['anexo_t1_nome'].concat(termoRogo?['termoresp_t1_nome','termocomp_t1_nome']:[])});
-    groups.push({key:'t2_nome', ids:['anexo_t2_nome'].concat(termoRogo?['termoresp_t2_nome','termocomp_t2_nome']:[])});
+    // Nome das testemunhas nao e campo digitavel em nenhum documento: em TODOS
+    // (procuracao e termos) e uma linha em branco, assinada a mao apos imprimir.
     return groups;
 }
 function propagateFieldChange(changedId) {
@@ -1868,17 +1877,17 @@ var SYNC_FIELD_IDS = [
     'rogo_cpf_relativo','rogo_rg_relativo','test1_cpf_relativo','test1_rg_relativo','test2_cpf_relativo','test2_rg_relativo',
     'termoresp_nome','termoresp_cpf','termoresp_benef_nome','termoresp_benef_cpf',
     'termoresp_local_cidade','termoresp_local_uf','termoresp_dia','termoresp_mes','termoresp_ano',
-    'termoresp_rogo_cpf','termoresp_rogo_rg','termoresp_t1_nome','termoresp_t1_cpf','termoresp_t1_rg',
-    'termoresp_t2_nome','termoresp_t2_cpf','termoresp_t2_rg',
+    'termoresp_rogo_cpf','termoresp_rogo_rg','termoresp_t1_cpf','termoresp_t1_rg',
+    'termoresp_t2_cpf','termoresp_t2_rg',
     'termocomp_nome','termocomp_cpf','termocomp_benef_nome','termocomp_benef_cpf',
     'termocomp_local_cidade','termocomp_local_uf','termocomp_dia','termocomp_mes','termocomp_ano',
-    'termocomp_rogo_cpf','termocomp_rogo_rg','termocomp_t1_nome','termocomp_t1_cpf','termocomp_t1_rg',
-    'termocomp_t2_nome','termocomp_t2_cpf','termocomp_t2_rg',
+    'termocomp_rogo_cpf','termocomp_rogo_rg','termocomp_t1_cpf','termocomp_t1_rg',
+    'termocomp_t2_cpf','termocomp_t2_rg',
     'anexo_nome','anexo_cpf','anexo_rg','anexo_endereco','anexo_numero','anexo_cidade','anexo_uf',
     'anexo_rep_nome','anexo_rep_cpf',
     'anexo_local_cidade','anexo_local_uf','anexo_dia','anexo_mes','anexo_ano',
-    'anexo_rogo_cpf','anexo_rogo_rg','anexo_t1_nome','anexo_t1_cpf','anexo_t1_rg',
-    'anexo_t2_nome','anexo_t2_cpf','anexo_t2_rg'
+    'anexo_rogo_cpf','anexo_rogo_rg','anexo_t1_cpf','anexo_t1_rg',
+    'anexo_t2_cpf','anexo_t2_rg'
 ];
 function wireBidirectionalSync() {
     SYNC_FIELD_IDS.forEach(function(id) {
@@ -2165,20 +2174,20 @@ var FIELDS = {
     termoresp_nome: {fmt:'upper',allow:'text'}, termoresp_cpf: {fmt:'cpf',allow:'num'},
     termoresp_benef_nome: {fmt:'upper',allow:'text'}, termoresp_benef_cpf: {fmt:'cpf',allow:'num'},
     termoresp_rogo_cpf: {fmt:'cpf',allow:'num'}, termoresp_rogo_rg: {fmt:'rg',allow:null},
-    termoresp_t1_nome: {fmt:'upper',allow:'text'}, termoresp_t1_cpf: {fmt:'cpf',allow:'num'}, termoresp_t1_rg: {fmt:'rg',allow:null},
-    termoresp_t2_nome: {fmt:'upper',allow:'text'}, termoresp_t2_cpf: {fmt:'cpf',allow:'num'}, termoresp_t2_rg: {fmt:'rg',allow:null},
+    termoresp_t1_cpf: {fmt:'cpf',allow:'num'}, termoresp_t1_rg: {fmt:'rg',allow:null},
+    termoresp_t2_cpf: {fmt:'cpf',allow:'num'}, termoresp_t2_rg: {fmt:'rg',allow:null},
     termocomp_nome: {fmt:'upper',allow:'text'}, termocomp_cpf: {fmt:'cpf',allow:'num'},
     termocomp_benef_nome: {fmt:'upper',allow:'text'}, termocomp_benef_cpf: {fmt:'cpf',allow:'num'},
     termocomp_rogo_cpf: {fmt:'cpf',allow:'num'}, termocomp_rogo_rg: {fmt:'rg',allow:null},
-    termocomp_t1_nome: {fmt:'upper',allow:'text'}, termocomp_t1_cpf: {fmt:'cpf',allow:'num'}, termocomp_t1_rg: {fmt:'rg',allow:null},
-    termocomp_t2_nome: {fmt:'upper',allow:'text'}, termocomp_t2_cpf: {fmt:'cpf',allow:'num'}, termocomp_t2_rg: {fmt:'rg',allow:null},
+    termocomp_t1_cpf: {fmt:'cpf',allow:'num'}, termocomp_t1_rg: {fmt:'rg',allow:null},
+    termocomp_t2_cpf: {fmt:'cpf',allow:'num'}, termocomp_t2_rg: {fmt:'rg',allow:null},
     anexo_nome: {fmt:'upper',allow:'text'}, anexo_cpf: {fmt:'cpf',allow:'num'}, anexo_rg: {fmt:'rg',allow:null},
     anexo_endereco: {fmt:'upper',allow:null}, anexo_numero: {fmt:null,allow:null},
     anexo_cidade: {fmt:'upper',allow:'text'}, anexo_uf: {fmt:'upper',allow:'text'},
     anexo_rep_nome: {fmt:'upper',allow:'text'}, anexo_rep_cpf: {fmt:'cpf',allow:'num'},
     anexo_rogo_cpf: {fmt:'cpf',allow:'num'}, anexo_rogo_rg: {fmt:'rg',allow:null},
-    anexo_t1_nome: {fmt:'upper',allow:'text'}, anexo_t1_cpf: {fmt:'cpf',allow:'num'}, anexo_t1_rg: {fmt:'rg',allow:null},
-    anexo_t2_nome: {fmt:'upper',allow:'text'}, anexo_t2_cpf: {fmt:'cpf',allow:'num'}, anexo_t2_rg: {fmt:'rg',allow:null}
+    anexo_t1_cpf: {fmt:'cpf',allow:'num'}, anexo_t1_rg: {fmt:'rg',allow:null},
+    anexo_t2_cpf: {fmt:'cpf',allow:'num'}, anexo_t2_rg: {fmt:'rg',allow:null}
 };
 var REALTIME = { upper: true, uf: true, cpf: true, fone: true, rg: true };
 function normalize(id, v) {
@@ -2746,8 +2755,7 @@ var VAL_ERRORS = [];
 function validateForm() {
     var det = [];
     ['nome','profissao','estado_civil','telefone','endereco','numero','estado','cidade','bairro',
-     'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade',
-     'anexo_t1_nome','anexo_t2_nome']
+     'cpf','rep_nome','rep_cpf','rep_qualidade','assist_nome','assist_cpf','assist_qualidade']
         .forEach(function(id) { setError(id, false); });
     Object.keys(FIELDS).forEach(function(id) {
         if (FIELDS[id].fmt === 'cpf') setError(id, false);
@@ -2779,11 +2787,10 @@ function validateForm() {
     markRequiredEmpty('bairro', det, 'Bairro');
     validateRequiredCPF('cpf', 'CPF do outorgante', det);
 
+    // Telefone NAO e obrigatorio (pedido do escritorio). Se vier preenchido,
+    // ainda tem que ser plausivel — telefone errado atrapalha mais que ausente.
     var telefone = fieldValue('telefone');
-    if (!telefone) {
-        det.push({ id: 'telefone', msg: 'Telefone celular do outorgante é obrigatório.' });
-        setError('telefone', true);
-    } else if (!isValidTelefone(telefone)) {
+    if (telefone && !isValidTelefone(telefone)) {
         det.push({ id: 'telefone', msg: 'Telefone celular inválido. Informe um número plausível, com DDD, sem sequências ou dígitos repetidos.' });
         setError('telefone', true);
     }
@@ -2810,8 +2817,6 @@ function validateForm() {
         ];
         analfCPFs.forEach(function(entry) { validateRequiredCPF(entry.id, entry.label, det); });
         cpfEntries = cpfEntries.concat(analfCPFs);
-        markRequiredEmpty('anexo_t1_nome', det, 'Nome da 1ª testemunha');
-        markRequiredEmpty('anexo_t2_nome', det, 'Nome da 2ª testemunha');
     }
 
     validateDistinctCPFs(cpfEntries, det);
