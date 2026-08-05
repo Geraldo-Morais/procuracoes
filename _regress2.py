@@ -192,6 +192,9 @@ with sync_playwright() as p:
         pg.evaluate("t=>{document.getElementById('tipoSelect').value=t; mudarTipo(t);}", tipo)
         pg.evaluate("()=>definirParceiro({tag:'PARCEIRO:TESTE',nome:'Teste',lugar:'Cidade'})")
         pg.evaluate("preencherStub()")
+        # a contagem abaixo e a dos documentos-base; o contrato tem teste proprio
+        pg.evaluate("()=>{document.getElementById('contratoPularCheck').checked=true;"
+                    " atualizarContrato(); recalcLayout();}")
         pg.select_option("#anexo_beneficio", label="Aposentadoria por Idade Rural")
         pg.wait_for_timeout(350)
         assert pg.evaluate("validateForm().length") == 0, f"{tipo}: form invalido antes do PDF"
@@ -261,8 +264,8 @@ with sync_playwright() as p:
     set_tipo("incapaz")
     pg.wait_for_timeout(300)
     s0 = tab_st()
-    check(all(v == "pend" for v in s0.values()) and len(s0) == 4,
-          f"semaforo: form vazio = tudo amarelo (got {s0})")
+    check(all(v == "pend" for v in s0.values()) and len(s0) == 5,
+          f"semaforo: form vazio = tudo amarelo, contrato incluso (got {s0})")
     pg.evaluate("()=>definirParceiro({tag:'PARCEIRO:TESTE',nome:'Teste',lugar:'Cidade'})")
     pg.evaluate("preencherStub()"); pg.wait_for_timeout(500)
     s1 = tab_st()
@@ -405,6 +408,36 @@ with sync_playwright() as p:
     vazio = pg.evaluate("()=>document.querySelectorAll('#histLista .val-item').length")
     check(vazio == 0, f"historico: apagar limpa a lista (got {vazio})")
     pg.evaluate("fecharHistModal()")
+
+    # --- contrato: multipagina, campos espelhados e caixa de renovacao ---
+    pg.goto("about:blank"); pg.goto(URL); pg.wait_for_timeout(1000)
+    pg.evaluate("()=>definirParceiro({tag:'PARCEIRO:TESTE',nome:'Teste',lugar:'Cidade'})")
+    set_tipo("relativo")
+    pg.evaluate("preencherStub()"); pg.wait_for_timeout(700)
+    ct = pg.evaluate("""()=>({
+        campos: document.querySelectorAll('#ct-corpo .ct-campo').length,
+        vazios: document.querySelectorAll('#ct-corpo .ct-campo-vazio').length,
+        clausulas: document.querySelectorAll('#ct-corpo .ct-clausula').length,
+        cond_ativos: Array.from(document.querySelectorAll('#ct-corpo .ct-cond'))
+                          .filter(e=>!e.hidden).map(e=>e.getAttribute('data-cond-valor'))})""")
+    check(ct["clausulas"] == 23, f"contrato: 23 clausulas portadas (got {ct})")
+    check("relativamente_incapaz" in ct["cond_ativos"] and "absolutamente_incapaz" not in ct["cond_ativos"],
+          f"contrato: so o bloco condicional aplicavel aparece (got {ct['cond_ativos']})")
+    nome_ct = pg.evaluate("()=>document.querySelector('#ct-corpo .ct-campo').textContent")
+    check(nome_ct == "MARIA APARECIDA DE SOUZA", f"contrato: campo espelha a procuracao (got {nome_ct!r})")
+    out = str(pathlib.Path(__file__).resolve().parent / "_r_ct.pdf")
+    pg.pdf(path=out, format="A4", print_background=True)
+    d = fitz.open(out); com = d.page_count
+    cabs = sum(1 for i in range(4, com) if "Menezes Advocacia &" in d[i].get_text())
+    d.close()
+    check(com > 8, f"contrato: sai multipagina junto com os demais (got {com})")
+    check(cabs == com - 4, f"contrato: cabecalho repete em todas as {com-4} paginas dele (got {cabs})")
+    pg.evaluate("()=>{document.getElementById('contratoPularCheck').checked=true;"
+                " atualizarContrato(); recalcLayout();}")
+    pg.wait_for_timeout(500)
+    pg.pdf(path=out, format="A4", print_background=True)
+    d = fitz.open(out); sem = d.page_count; d.close()
+    check(sem == 4, f"contrato: caixa de renovacao tira ele do conjunto (got {sem}, esperado 4)")
 
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
