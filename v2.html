@@ -1,341 +1,518 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
-  <title>Procurações | Menezes Advocacia</title>
-  <link rel="icon" href="logo.png">
-  <link rel="stylesheet" href="assets/v2.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia da procuração | Menezes Advocacia</title>
+<link rel="icon" href="logo.png">
+<style>
+/* =====================================================================
+   PROTÓTIPO — guia de abertura ("mapa mental") do gerador de procurações.
+   Faz 3 ou 4 perguntas em linguagem de balcão e DEDUZ o que hoje o
+   parceiro tem que escolher no jargão: tipo da procuração, qualidade do
+   representante, benefício e assinatura a rogo.
+   Nada de barra lateral: a decisão acontece no centro da tela e, no fim,
+   vira uma trilha de uma linha que dá pra clicar e mudar.
+   Paleta e tipografia herdadas do gerador (index.html).
+   ===================================================================== */
+:root {
+    --vinho: #622423;
+    --vinho-claro: #703030;
+    --vinho-escuro: #46181a;
+    --papel: #ece7e4;
+    --linha: #d6cdc9;
+    --texto: #2f2422;
+    --suave: #8a6e6c;
+    --verde: #46c07a;
+    --ambar: #f0b429;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    margin: 0; background: var(--papel); color: var(--texto);
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex; flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- topo ---------- */
+.topo {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; color: #f4e9e7;
+    background: linear-gradient(180deg, var(--vinho-claro) 0%, #55211e 100%);
+    box-shadow: 0 2px 12px rgba(45,18,16,0.28);
+}
+.topo img { height: 30px; width: auto; opacity: 0.92; }
+.topo b { font-size: 11pt; letter-spacing: 0.3pt; }
+.topo small { display: block; font-size: 7.5pt; opacity: 0.7; letter-spacing: 0.6pt; text-transform: uppercase; }
+.topo .pular {
+    margin-left: auto; background: rgba(255,255,255,0.09); color: #f4e9e7;
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 7px;
+    padding: 7px 13px; font-size: 8.5pt; font-weight: bold; cursor: pointer;
+    font-family: inherit; transition: background .16s ease, transform .16s ease;
+}
+.topo .pular:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+/* ---------- palco ---------- */
+.palco { flex: 1 1 auto; overflow-y: auto; padding: 26px 20px 40px; }
+.centro { max-width: 1020px; margin: 0 auto; }
+
+/* ---------- trilha de passos ---------- */
+.trilha { display: flex; align-items: center; gap: 0; margin: 0 auto 26px; max-width: 560px; }
+.trilha[hidden] { display: none; }
+.trilha .no {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8.5pt; font-weight: bold;
+    background: #fff; color: var(--suave); border: 1.5px solid var(--linha);
+    transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
+}
+.trilha .no.feito { background: var(--vinho); color: #fff; border-color: var(--vinho); }
+.trilha .no.agora { background: #fff; color: var(--vinho); border-color: var(--vinho); transform: scale(1.14); box-shadow: 0 0 0 4px rgba(98,36,35,0.12); }
+.trilha .fio { flex: 1 1 auto; height: 2px; background: var(--linha); position: relative; }
+.trilha .fio i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--vinho); transition: width .35s ease; }
+.trilha .fio.feito i { width: 100%; }
+
+/* ---------- cartão da pergunta ---------- */
+.cena { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 22px; align-items: start; }
+@media (max-width: 900px) { .cena { grid-template-columns: minmax(0,1fr); } }
+
+.pergunta {
+    background: #fff; border: 1px solid var(--linha); border-radius: 12px;
+    padding: 26px 26px 22px; box-shadow: 0 6px 24px rgba(62,35,31,0.09);
+    animation: entra .28s ease both;
+}
+@keyframes entra { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.pergunta .passo { font-size: 8pt; font-weight: bold; letter-spacing: 0.8pt; text-transform: uppercase; color: var(--suave); }
+.pergunta h1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 21pt; line-height: 1.22; margin: 6px 0 4px; color: var(--vinho);
+}
+.pergunta .ajuda { font-size: 9.5pt; color: var(--suave); line-height: 1.5; margin: 0 0 18px; }
+
+.opcoes { display: grid; gap: 10px; }
+.opcoes.duas { grid-template-columns: 1fr 1fr; }
+@media (max-width: 640px) { .opcoes.duas { grid-template-columns: 1fr; } }
+.opcao {
+    display: flex; align-items: flex-start; gap: 12px; text-align: left;
+    background: #fdfbfa; border: 1.5px solid var(--linha); border-radius: 10px;
+    padding: 13px 15px; cursor: pointer; font-family: inherit; color: inherit;
+    transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.opcao:hover { border-color: var(--vinho); background: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(62,35,31,0.12); }
+.opcao:focus-visible { outline: 3px solid rgba(98,36,35,0.35); outline-offset: 2px; }
+.opcao.marcada { border-color: var(--vinho); background: #fff; box-shadow: 0 0 0 3px rgba(98,36,35,0.12); }
+.opcao .tecla {
+    flex: 0 0 auto; width: 21px; height: 21px; border-radius: 5px; margin-top: 1px;
+    background: var(--papel); color: var(--suave); border: 1px solid var(--linha);
+    display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: bold;
+}
+.opcao.marcada .tecla, .opcao:hover .tecla { background: var(--vinho); color: #fff; border-color: var(--vinho); }
+.opcao .rot { min-width: 0; }
+.opcao b { display: block; font-size: 10.5pt; line-height: 1.3; }
+.opcao .desc { display: block; font-size: 8.8pt; color: var(--suave); line-height: 1.45; margin-top: 3px; }
+
+.rodape-cena { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
+.btn-voltar {
+    background: none; border: none; color: var(--suave); font-family: inherit;
+    font-size: 9pt; font-weight: bold; cursor: pointer; padding: 6px 2px;
+}
+.btn-voltar:hover { color: var(--vinho); }
+.btn-voltar[hidden] { display: none; }
+.dica-teclado { margin-left: auto; font-size: 8pt; color: var(--suave); }
+.dica-teclado kbd {
+    background: #fff; border: 1px solid var(--linha); border-bottom-width: 2px;
+    border-radius: 4px; padding: 1px 5px; font-family: inherit; font-size: 7.5pt;
+}
+
+/* ---------- painel de consequências ---------- */
+.consequencia {
+    background: #fff; border: 1px solid var(--linha); border-radius: 12px;
+    padding: 18px 18px 14px; box-shadow: 0 6px 24px rgba(62,35,31,0.07);
+    position: sticky; top: 0;
+}
+.consequencia h2 {
+    font-size: 8pt; letter-spacing: 0.8pt; text-transform: uppercase;
+    color: var(--suave); margin: 0 0 12px;
+}
+.deriv { margin: 0 0 14px; }
+.deriv dt { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.5pt; color: var(--suave); }
+.deriv dd { margin: 1px 0 9px; font-size: 10pt; font-weight: bold; color: var(--vinho); }
+.deriv dd.vazio { color: #bfb2ae; font-weight: normal; font-style: italic; }
+
+.regras { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 7px; }
+.regras li {
+    font-size: 8.6pt; line-height: 1.45; color: var(--texto);
+    background: #f7f3f1; border-left: 3px solid var(--ambar);
+    padding: 7px 10px; border-radius: 0 6px 6px 0;
+    animation: entra .25s ease both;
+}
+.regras li.ok { border-left-color: var(--verde); }
+
+.folhas { display: flex; gap: 7px; flex-wrap: wrap; }
+.folha {
+    width: 46px; height: 62px; background: #fff; border: 1px solid var(--linha);
+    border-radius: 3px; box-shadow: 0 2px 6px rgba(62,35,31,0.1);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    padding: 5px 3px 0; gap: 4px; position: relative; overflow: hidden;
+    animation: entra .25s ease both;
+}
+.folha::before { content: ""; width: 26px; height: 2px; background: var(--vinho); border-radius: 1px; }
+.folha i {
+    width: 30px; height: 1.5px; background: var(--linha); border-radius: 1px;
+    box-shadow: 0 4px 0 var(--linha), 0 8px 0 var(--linha), 0 12px 0 var(--linha);
+}
+.folha em { position: absolute; bottom: 3px; font-style: normal; font-size: 5.5pt; color: var(--suave); letter-spacing: 0.2pt; }
+
+/* ---------- resultado ---------- */
+.resultado { animation: entra .3s ease both; }
+.resultado[hidden] { display: none; }
+.resultado .capa {
+    background: #fff; border: 1px solid var(--linha); border-radius: 12px;
+    padding: 28px; box-shadow: 0 6px 24px rgba(62,35,31,0.09);
+}
+.resultado h1 {
+    font-family: 'Times New Roman', Times, serif; color: var(--vinho);
+    font-size: 22pt; margin: 0 0 4px;
+}
+.resultado .sub { font-size: 9.5pt; color: var(--suave); margin: 0 0 22px; }
+.grade-res { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.card-res { background: #fdfbfa; border: 1px solid var(--linha); border-radius: 9px; padding: 12px 14px; }
+.card-res dt { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.5pt; color: var(--suave); }
+.card-res dd { margin: 3px 0 0; font-size: 11pt; font-weight: bold; color: var(--vinho); line-height: 1.25; }
+.acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn-principal {
+    background: linear-gradient(180deg, var(--vinho-claro), var(--vinho-escuro));
+    color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px;
+    padding: 12px 22px; font-size: 10pt; font-weight: bold; cursor: pointer;
+    font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 14px rgba(25,5,5,0.22);
+    transition: transform .14s ease, box-shadow .14s ease;
+}
+.btn-principal:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(25,5,5,0.3); }
+.btn-secundario {
+    background: #fff; color: var(--vinho); border: 1px solid var(--linha);
+    border-radius: 8px; padding: 12px 18px; font-size: 9.5pt; font-weight: bold;
+    cursor: pointer; font-family: inherit;
+}
+.btn-secundario:hover { border-color: var(--vinho); }
+
+/* ---------- trilha compacta (depois de responder) ---------- */
+.trilha-compacta {
+    display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--linha); border-radius: 10px;
+    padding: 9px 13px; margin-bottom: 18px; font-size: 8.8pt;
+    box-shadow: 0 3px 12px rgba(62,35,31,0.07);
+}
+.trilha-compacta.mostrar { display: flex; }
+.trilha-compacta .rotulo { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.5pt; color: var(--suave); }
+.trilha-compacta .marca {
+    background: var(--papel); border: 1px solid var(--linha); border-radius: 20px;
+    padding: 4px 11px; cursor: pointer; font-family: inherit; font-size: 8.5pt; color: var(--texto);
+    transition: border-color .14s ease, background .14s ease;
+}
+.trilha-compacta .marca:hover { border-color: var(--vinho); background: #fff; }
+.trilha-compacta .marca b { color: var(--vinho); }
+.trilha-compacta .sep { color: var(--linha); }
+.nota-prototipo {
+    max-width: 1020px; margin: 22px auto 0; font-size: 8pt; color: var(--suave);
+    text-align: center; line-height: 1.6;
+}
+</style>
 </head>
 <body>
-  <div class="app-shell procurement-app" id="appShell">
-    <aside class="side-panel" id="sidePanel" aria-label="Preenchimento da procuração">
-      <header class="panel-header">
-        <div class="office-mark">
-          <img src="logo.png" alt="Menezes Advocacia">
-          <div>
-            <strong>Procurações</strong>
-            <span>Menezes Advocacia</span>
-          </div>
-        </div>
-        <button class="icon-button panel-toggle" id="panelToggle" type="button" title="Recolher painel" aria-label="Recolher painel" aria-expanded="true">
-          <i data-lucide="panel-left-close"></i>
-        </button>
-      </header>
 
-      <div class="panel-body" id="panelBody">
-        <section class="step-section is-active" data-step="benefit" aria-labelledby="benefitHeading">
-          <div class="section-heading">
-            <i data-lucide="landmark"></i>
-            <h1 id="benefitHeading">Benefício</h1>
-          </div>
+<header class="topo">
+    <img src="logo.png" alt="">
+    <div>
+        <b>Guia da procuração</b>
+        <small>Menezes Advocacia</small>
+    </div>
+    <button type="button" class="pular" id="btnPular">Já sei o que preciso — pular &rarr;</button>
+</header>
 
-          <div class="field-block" data-field-wrap="benefitId">
-            <label for="benefitId">Tipo de benefício <span class="conditional-required" aria-hidden="true">*</span></label>
-            <select id="benefitId" data-bind="benefitId" required>
-              <option value="">Selecione o benefício</option>
-            </select>
-            <p class="field-error" data-error-for="benefitId"></p>
-          </div>
+<main class="palco">
+<div class="centro">
 
-          <button type="button" class="text-button compact-link" id="openTriage">
-            <i data-lucide="route"></i><span>Não sabe qual benefício?</span>
-          </button>
+    <div class="trilha-compacta" id="trilhaCompacta"></div>
+    <div class="trilha" id="trilha"></div>
 
-          <div class="benefit-summary" id="benefitSummary" hidden>
-            <div class="summary-title">
-              <span class="status-dot"></span>
-              <strong id="benefitSummaryName"></strong>
-            </div>
-            <p id="benefitSummaryText"></p>
-            <button type="button" class="text-button" data-go-step="documents">Ver documentos exigidos <i data-lucide="arrow-right"></i></button>
-          </div>
+    <div class="cena" id="cena">
+        <section class="pergunta" id="pergunta" aria-live="polite"></section>
+        <aside class="consequencia" id="consequencia">
+            <h2>O que já dá pra saber</h2>
+            <dl class="deriv" id="deriv"></dl>
+            <ul class="regras" id="regras"></ul>
+            <h2 style="margin-top:16px">Documentos que vão sair</h2>
+            <div class="folhas" id="folhas"></div>
+        </aside>
+    </div>
 
-          <div class="conditional-fields" id="pensionContext" hidden>
-            <div class="subsection-title">Situação do dependente</div>
-            <div class="field-block">
-              <label for="dependentType">Vínculo com o falecido</label>
-              <select id="dependentType" data-bind="dependentType">
-                <option value="spouse_married">Cônjuge casado</option>
-                <option value="stable_union">Companheiro em união estável</option>
-                <option value="child_under21">Filho menor de 21 anos</option>
-                <option value="child_disabled">Filho maior inválido ou com deficiência</option>
-                <option value="other">Outro dependente</option>
-              </select>
-            </div>
-            <label class="switch-row">
-              <span><b>O falecido já recebia benefício?</b><small>Altera a prova da qualidade de segurado.</small></span>
-              <input type="checkbox" id="deceasedWasBeneficiary" data-bind="deceasedWasBeneficiary">
-              <span class="switch" aria-hidden="true"></span>
-            </label>
-          </div>
-        </section>
+    <div class="resultado" id="resultado" hidden></div>
 
-        <section class="step-section" data-step="representation" aria-labelledby="representationHeading">
-          <div class="section-heading">
-            <i data-lucide="users"></i>
-            <h1 id="representationHeading">Quem assina</h1>
-          </div>
+    <p class="nota-prototipo">
+        Protótipo do guia de abertura. Ele só <b>decide</b> — o preenchimento dos
+        dados continua sendo feito direto no documento, no gerador.
+    </p>
+</div>
+</main>
 
-          <div class="field-block">
-            <label for="representationMode">Forma de assinatura</label>
-            <select id="representationMode">
-              <option value="self">O próprio titular assina</option>
-              <option value="represented">Representante assina pelo titular</option>
-              <option value="assisted">Titular assina com assistente</option>
-            </select>
-            <p class="field-hint" id="representationModeHint">Use quando a pessoa capaz assina sozinha.</p>
-          </div>
+<script>
+/* =====================================================================
+   O guia pergunta o que o parceiro sabe (idade, quem responde pela pessoa,
+   qual benefício, se sabe assinar) e DEDUZ o que o gerador precisa:
+   tipo da procuração, qualidade do representante e assinatura a rogo.
+   Cada resposta mostra na hora a consequência — é isso que dá a sensação
+   de mapa: você vê o galho que escolheu e o que ele muda.
+   ===================================================================== */
 
-          <div class="conditional-fields" id="representationRoleWrap" hidden>
-            <div class="field-block" data-field-wrap="representationRole">
-              <label for="representationRole">Qualidade da representação <span aria-hidden="true">*</span></label>
-              <select id="representationRole" data-bind="representationRole">
-                <option value="">Selecione a qualidade</option>
-              </select>
-              <p class="field-hint" id="roleHint"></p>
-              <p class="field-error" data-error-for="representationRole"></p>
-            </div>
-            <div class="document-rule" id="documentRule"></div>
-          </div>
+var BENEFICIOS = [
+    'Benefício de Prestação Continuada (BPC/LOAS)',
+    'Aposentadoria por Idade Rural',
+    'Aposentadoria por Idade Urbana',
+    'Aposentadoria por Idade Híbrida',
+    'Benefício por Incapacidade',
+    'Auxílio-Acidente',
+    'Auxílio-Reclusão',
+    'Salário-Maternidade Rural',
+    'Salário-Maternidade Urbano',
+    'Pensão por Morte Rural',
+    'Pensão por Morte Urbana',
+    'Revisão de Benefício',
+    'Outro'
+];
 
-          <label class="switch-row signature-switch">
-            <span><b>Signatário não sabe assinar</b><small>Inclui assinatura a rogo, duas testemunhas e impressão digital.</small></span>
-            <input type="checkbox" id="illiterate" data-bind="illiterate">
-            <span class="switch" aria-hidden="true"></span>
-          </label>
-        </section>
+var PERGUNTAS = [
+    {
+        id: 'quem',
+        titulo: 'Quem vai receber o benefício?',
+        ajuda: 'É esta resposta que define o tipo da procuração. Escolha pela situação real da pessoa — o nome técnico o guia coloca sozinho.',
+        opcoes: [
+            { v: 'adulto',    t: 'Um adulto que resolve as próprias coisas', d: 'Maior de 18 anos, sem curatela e sem representante definido.' },
+            { v: 'crianca',   t: 'Uma criança de até 15 anos',               d: 'Quem responde é o representante legal, em nome dela.' },
+            { v: 'adolesc',   t: 'Um adolescente de 16 ou 17 anos',          d: 'Ela participa do ato, assistida por um responsável.' },
+            { v: 'assistida', t: 'Um adulto com curatela, guarda ou representante', d: 'Pessoa com deficiência, idoso ou qualquer adulto que já tenha responsável definido.' }
+        ]
+    },
+    {
+        id: 'quemresponde',
+        titulo: 'Quem responde por essa pessoa?',
+        ajuda: 'O parentesco, ou o documento que essa pessoa tem, é o que define a qualidade no documento — e muda o texto do Termo de Compromisso.',
+        pularSe: function (r) { return r.quem === 'adulto'; },
+        opcoes: [
+            { v: 'TutorNato',  t: 'O pai ou a mãe',                    d: 'Tutor nato — não precisa de documento judicial.' },
+            { v: 'Curador',    t: 'Curador, com sentença de curatela', d: 'Existe processo de curatela concluído.' },
+            { v: 'TutorLegal', t: 'Tutor nomeado pelo juiz',           d: 'Há termo de tutela.' },
+            { v: 'Guarda',     t: 'Guardião, com termo de guarda',     d: 'Guarda deferida judicialmente.' },
+            { v: 'AdmProv',    t: 'Administrador provisório',          d: 'Cadastrado no INSS enquanto a curatela não sai.' },
+            { v: 'Procurador', t: 'Procurador',                        d: 'Apenas procuração, sem representação legal.' }
+        ]
+    },
+    {
+        id: 'beneficio',
+        titulo: 'Qual benefício vai ser pedido?',
+        ajuda: 'É o que entra no Termo de Benefício, e é obrigatório. Em alguns casos também define a profissão.',
+        opcoes: BENEFICIOS.map(function (b) { return { v: b, t: b, d: '' }; })
+    },
+    {
+        id: 'assina',
+        titulo: 'Quem vai assinar sabe assinar?',
+        ajuda: 'Vale para quem assina de fato — o próprio titular, o representante ou o assistente, conforme o caso.',
+        opcoes: [
+            { v: 'sim', t: 'Sim, assina normalmente',            d: 'Linha de assinatura comum nos documentos.' },
+            { v: 'nao', t: 'Não sabe assinar, ou não consegue',   d: 'Entra assinatura a rogo, duas testemunhas e impressão digital.' }
+        ]
+    }
+];
 
-        <section class="step-section" data-step="data" aria-labelledby="dataHeading">
-          <div class="section-heading">
-            <i data-lucide="contact"></i>
-            <h1 id="dataHeading">Dados do titular</h1>
-          </div>
+var respostas = {};
+var passo = 0;
 
-          <div class="form-grid">
-            <div class="field-block span-2" data-field-wrap="holderName">
-              <label for="holderName">Nome completo <span aria-hidden="true">*</span></label>
-              <input id="holderName" data-bind="holderName" autocomplete="name" maxlength="60">
-              <p class="field-error" data-error-for="holderName"></p>
-            </div>
-            <div class="field-block" data-field-wrap="holderCpf">
-              <label for="holderCpf">CPF <span aria-hidden="true">*</span></label>
-              <input id="holderCpf" data-bind="holderCpf" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
-              <p class="field-error" data-error-for="holderCpf"></p>
-            </div>
-            <div class="field-block">
-              <label for="holderRg">RG</label>
-              <input id="holderRg" data-bind="holderRg" inputmode="numeric" maxlength="14" placeholder="Somente números">
-            </div>
-            <div class="field-block" data-field-wrap="holderPhone">
-              <label for="holderPhone">Telefone celular <span aria-hidden="true">*</span></label>
-              <input id="holderPhone" data-bind="holderPhone" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="(77) 99999-9999">
-              <p class="field-error" data-error-for="holderPhone"></p>
-            </div>
-            <div class="field-block">
-              <label for="holderCivilStatus">Estado civil</label>
-              <select id="holderCivilStatus" data-bind="holderCivilStatus">
-                <option value="">Selecione</option>
-                <option>Solteiro</option><option>Casado</option><option>Divorciado</option><option>Viúvo</option><option>Separado judicialmente</option><option>União estável</option>
-              </select>
-            </div>
-            <div class="field-block span-2">
-              <label for="holderProfession">Profissão</label>
-              <input id="holderProfession" data-bind="holderProfession" maxlength="40">
-            </div>
-            <div class="field-block span-2" data-field-wrap="address">
-              <label for="address">Endereço <span aria-hidden="true">*</span></label>
-              <input id="address" data-bind="address" autocomplete="street-address" maxlength="70">
-              <p class="field-error" data-error-for="address"></p>
-            </div>
-            <div class="field-block" data-field-wrap="addressNumber">
-              <label for="addressNumber">Número <span aria-hidden="true">*</span></label>
-              <input id="addressNumber" data-bind="addressNumber" maxlength="10">
-              <p class="field-error" data-error-for="addressNumber"></p>
-            </div>
-            <div class="field-block" data-field-wrap="neighborhood">
-              <label for="neighborhood">Bairro <span aria-hidden="true">*</span></label>
-              <input id="neighborhood" data-bind="neighborhood" maxlength="40">
-              <p class="field-error" data-error-for="neighborhood"></p>
-            </div>
-            <div class="field-block" data-field-wrap="city">
-              <label for="city">Cidade <span aria-hidden="true">*</span></label>
-              <input id="city" data-bind="city" maxlength="40">
-              <p class="field-error" data-error-for="city"></p>
-            </div>
-            <div class="field-block" data-field-wrap="stateUf">
-              <label for="stateUf">UF <span aria-hidden="true">*</span></label>
-              <select id="stateUf" data-bind="stateUf">
-                <option value="">UF</option>
-                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
-              </select>
-              <p class="field-error" data-error-for="stateUf"></p>
-            </div>
-          </div>
+function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 
-          <div class="person-subsection" id="representativeFields" hidden>
-            <div class="subsection-title" id="representativeHeading">Dados do representante</div>
-            <div class="form-grid">
-              <div class="field-block span-2" data-field-wrap="representativeName">
-                <label for="representativeName">Nome completo <span aria-hidden="true">*</span></label>
-                <input id="representativeName" data-bind="representativeName" maxlength="60">
-                <p class="field-error" data-error-for="representativeName"></p>
-              </div>
-              <div class="field-block" data-field-wrap="representativeCpf">
-                <label for="representativeCpf">CPF <span aria-hidden="true">*</span></label>
-                <input id="representativeCpf" data-bind="representativeCpf" inputmode="numeric" maxlength="14">
-                <p class="field-error" data-error-for="representativeCpf"></p>
-              </div>
-              <div class="field-block">
-                <label for="representativeRg">RG</label>
-                <input id="representativeRg" data-bind="representativeRg" inputmode="numeric" maxlength="14" placeholder="Somente números">
-              </div>
-            </div>
-          </div>
+/* ---------- deduções ---------- */
+function tipoDeduzido() {
+    if (!respostas.quem) return null;
+    if (respostas.quem === 'crianca') return { id: 'incapaz', nome: 'Absolutamente Incapaz' };
+    if (respostas.quem === 'adolesc' || respostas.quem === 'assistida') return { id: 'relativo', nome: 'Relativamente Incapaz' };
+    return { id: 'normal', nome: 'Normal' };
+}
+var QUALIDADE_NOME = {
+    TutorNato: 'Tutor nato (pai ou mãe)', Curador: 'Curador', TutorLegal: 'Tutor legal',
+    Guarda: 'Responsável por termo de guarda', AdmProv: 'Administrador provisório', Procurador: 'Procurador'
+};
+function papelDoSignatario() {
+    var t = tipoDeduzido();
+    if (!t) return null;
+    if (t.id === 'incapaz') return 'Representante legal';
+    if (t.id === 'relativo') return 'Assistente legal';
+    return 'O próprio outorgante';
+}
+function documentos() {
+    var t = tipoDeduzido();
+    if (!t) return [];
+    var d = [{ n: 'Procuração', c: 'Proc.' }, { n: 'Termo de Benefício', c: 'Benef.' }];
+    if (t.id !== 'normal') {
+        d.push({ n: 'Termo de Responsabilidade', c: 'Resp.' });
+        d.push({ n: 'Termo de Compromisso', c: 'Comp.' });
+    }
+    return d;
+}
+function regrasAtivas() {
+    var r = [];
+    var t = tipoDeduzido();
+    if (t) r.push({ ok: true, txt: 'Procuração do tipo <b>' + t.nome + '</b>. Quem assina: <b>' + papelDoSignatario().toLowerCase() + '</b>.' });
+    if (respostas.quemresponde === 'TutorNato') {
+        r.push({ ok: true, txt: 'Como é <b>pai ou mãe</b>, o Termo de Compromisso <b>não pede</b> o prazo de 6 meses para comprovar a representação.' });
+    } else if (respostas.quemresponde) {
+        r.push({ txt: 'O Termo de Compromisso vai pedir a comprovação da representação em <b>até 6 meses</b>.' });
+    }
+    if (respostas.beneficio) {
+        if (/rural/i.test(respostas.beneficio)) r.push({ ok: true, txt: 'Benefício rural: a profissão entra como <b>LAVRADOR(A)</b>.' });
+        else if (/BPC|LOAS/i.test(respostas.beneficio)) r.push({ ok: true, txt: 'BPC: a profissão entra como <b>DESEMPREGADO(A)</b>.' });
+    }
+    if (respostas.assina === 'nao') {
+        r.push({ txt: 'Todos os documentos ganham <b>assinatura a rogo</b>, <b>duas testemunhas</b> e <b>impressão digital</b>. Os CPFs precisam ser diferentes entre si.' });
+    }
+    return r;
+}
 
-          <div class="person-subsection" id="witnessFields" hidden>
-            <div class="subsection-title">Assinatura a rogo e testemunhas</div>
-            <div class="form-grid">
-              <div class="field-block span-2"><label for="rogoName">Nome de quem assina a rogo</label><input id="rogoName" data-bind="rogoName" maxlength="60"></div>
-              <div class="field-block" data-field-wrap="rogoCpf"><label for="rogoCpf">CPF de quem assina a rogo</label><input id="rogoCpf" data-bind="rogoCpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="rogoCpf"></p></div>
-              <div class="field-block"><label for="rogoRg">RG</label><input id="rogoRg" data-bind="rogoRg" inputmode="numeric" maxlength="14"></div>
-              <div class="field-block span-2"><label for="witness1Name">1ª testemunha</label><input id="witness1Name" data-bind="witness1Name" maxlength="60"></div>
-              <div class="field-block" data-field-wrap="witness1Cpf"><label for="witness1Cpf">CPF da 1ª testemunha</label><input id="witness1Cpf" data-bind="witness1Cpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="witness1Cpf"></p></div>
-              <div class="field-block"><label for="witness1Rg">RG</label><input id="witness1Rg" data-bind="witness1Rg" inputmode="numeric" maxlength="14"></div>
-              <div class="field-block span-2"><label for="witness2Name">2ª testemunha</label><input id="witness2Name" data-bind="witness2Name" maxlength="60"></div>
-              <div class="field-block" data-field-wrap="witness2Cpf"><label for="witness2Cpf">CPF da 2ª testemunha</label><input id="witness2Cpf" data-bind="witness2Cpf" inputmode="numeric" maxlength="14"><p class="field-error" data-error-for="witness2Cpf"></p></div>
-              <div class="field-block"><label for="witness2Rg">RG</label><input id="witness2Rg" data-bind="witness2Rg" inputmode="numeric" maxlength="14"></div>
-            </div>
-          </div>
-        </section>
+/* ---------- render ---------- */
+function visiveis() {
+    return PERGUNTAS.filter(function (p) { return !(p.pularSe && p.pularSe(respostas)); });
+}
+function renderTrilha() {
+    var lista = visiveis(), el = document.getElementById('trilha'), h = '';
+    lista.forEach(function (p, i) {
+        h += '<span class="no ' + (i < passo ? 'feito' : (i === passo ? 'agora' : '')) + '">' + (i + 1) + '</span>';
+        if (i < lista.length - 1) h += '<span class="fio ' + (i < passo ? 'feito' : '') + '"><i></i></span>';
+    });
+    el.innerHTML = h;
+    el.hidden = false;
+}
+function renderPergunta() {
+    var lista = visiveis();
+    if (passo >= lista.length) return renderResultado();
+    var p = lista[passo];
+    var duas = (p.id === 'beneficio' || p.opcoes.length > 4) ? ' duas' : '';
+    var h = '<div class="passo">Passo ' + (passo + 1) + ' de ' + lista.length + '</div>' +
+            '<h1>' + p.titulo + '</h1><p class="ajuda">' + p.ajuda + '</p>' +
+            '<div class="opcoes' + duas + '" role="group">';
+    p.opcoes.forEach(function (o, i) {
+        h += '<button type="button" class="opcao' + (respostas[p.id] === o.v ? ' marcada' : '') + '" data-v="' + esc(o.v) + '">' +
+             '<span class="tecla">' + (i < 9 ? (i + 1) : '·') + '</span>' +
+             '<span class="rot"><b>' + esc(o.t) + '</b>' + (o.d ? '<span class="desc">' + esc(o.d) + '</span>' : '') + '</span></button>';
+    });
+    h += '</div><div class="rodape-cena">' +
+         '<button type="button" class="btn-voltar" id="btnVoltar"' + (passo === 0 ? ' hidden' : '') + '>&larr; voltar</button>' +
+         '<span class="dica-teclado">use <kbd>1</kbd>&hellip;<kbd>9</kbd> ou clique</span></div>';
+    var el = document.getElementById('pergunta');
+    el.innerHTML = h;
+    el.querySelectorAll('.opcao').forEach(function (b) {
+        b.addEventListener('click', function () { responder(p.id, b.getAttribute('data-v')); });
+    });
+    var v = document.getElementById('btnVoltar');
+    if (v) v.addEventListener('click', voltar);
+    var primeiro = el.querySelector('.opcao');
+    if (primeiro) primeiro.focus();
+}
+function renderConsequencia() {
+    var t = tipoDeduzido();
+    var q = respostas.quemresponde;
+    var semQualidade = (t && t.id === 'normal') ? '—' : 'a definir';
+    document.getElementById('deriv').innerHTML =
+        '<dt>Tipo da procuração</dt><dd class="' + (t ? '' : 'vazio') + '">' + (t ? t.nome : 'a definir') + '</dd>' +
+        '<dt>Qualidade de quem assina</dt><dd class="' + (q ? '' : 'vazio') + '">' + (q ? QUALIDADE_NOME[q] : semQualidade) + '</dd>' +
+        '<dt>Benefício</dt><dd class="' + (respostas.beneficio ? '' : 'vazio') + '">' + esc(respostas.beneficio || 'a definir') + '</dd>';
+    document.getElementById('regras').innerHTML = regrasAtivas().map(function (r) {
+        return '<li' + (r.ok ? ' class="ok"' : '') + '>' + r.txt + '</li>';
+    }).join('');
+    var docs = documentos();
+    document.getElementById('folhas').innerHTML = docs.length
+        ? docs.map(function (d) { return '<div class="folha" title="' + esc(d.n) + '"><i></i><em>' + d.c + '</em></div>'; }).join('')
+        : '<span style="font-size:8.5pt;color:#8a6e6c">responda o passo 1</span>';
+}
+function renderTrilhaCompacta() {
+    var el = document.getElementById('trilhaCompacta');
+    var lista = visiveis();
+    var partes = [];
+    lista.forEach(function (p, i) {
+        var v = respostas[p.id];
+        if (!v) return;
+        var rot = p.id === 'quemresponde' ? QUALIDADE_NOME[v]
+                : p.id === 'assina' ? (v === 'nao' ? 'Não assina' : 'Assina')
+                : p.id === 'quem' ? tipoDeduzido().nome
+                : v;
+        partes.push('<button type="button" class="marca" data-passo="' + i + '"><b>' + esc(rot) + '</b></button>');
+    });
+    el.innerHTML = partes.length ? '<span class="rotulo">Escolhas</span>' + partes.join('<span class="sep">›</span>') : '';
+    el.classList.toggle('mostrar', partes.length > 0);
+    el.querySelectorAll('.marca').forEach(function (b) {
+        b.addEventListener('click', function () {
+            passo = parseInt(b.getAttribute('data-passo'), 10);
+            document.getElementById('resultado').hidden = true;
+            document.getElementById('cena').style.display = '';
+            render();
+        });
+    });
+}
+function renderResultado() {
+    var t = tipoDeduzido();
+    document.getElementById('cena').style.display = 'none';
+    document.getElementById('trilha').hidden = true;
+    var docs = documentos();
+    var el = document.getElementById('resultado');
+    el.hidden = false;
+    el.innerHTML =
+        '<div class="capa"><h1>Pronto &mdash; é isto que vai ser gerado</h1>' +
+        '<p class="sub">' + docs.length + ' documentos, cada um em uma folha A4. Agora é só preencher os dados direto neles.</p>' +
+        '<div class="grade-res">' +
+        '<div class="card-res"><dt>Tipo</dt><dd>' + t.nome + '</dd></div>' +
+        '<div class="card-res"><dt>Quem assina</dt><dd>' + papelDoSignatario() + '</dd></div>' +
+        (respostas.quemresponde ? '<div class="card-res"><dt>Qualidade</dt><dd>' + QUALIDADE_NOME[respostas.quemresponde] + '</dd></div>' : '') +
+        '<div class="card-res"><dt>Benefício</dt><dd>' + esc(respostas.beneficio) + '</dd></div>' +
+        '<div class="card-res"><dt>Assinatura</dt><dd>' + (respostas.assina === 'nao' ? 'A rogo + 2 testemunhas' : 'Assinatura própria') + '</dd></div>' +
+        '</div>' +
+        '<ul class="regras" style="margin-bottom:22px">' +
+        regrasAtivas().map(function (r) { return '<li' + (r.ok ? ' class="ok"' : '') + '>' + r.txt + '</li>'; }).join('') +
+        '</ul><div class="acoes">' +
+        '<a class="btn-principal" href="index.html">Abrir o gerador &rarr;</a>' +
+        '<button type="button" class="btn-secundario" id="btnRefazer">Refazer o guia</button>' +
+        '</div></div>';
+    document.getElementById('btnRefazer').addEventListener('click', function () {
+        respostas = {}; passo = 0;
+        el.hidden = true;
+        document.getElementById('cena').style.display = '';
+        render();
+    });
+    renderTrilhaCompacta();
+}
+function render() {
+    renderTrilha();
+    renderPergunta();
+    renderConsequencia();
+    renderTrilhaCompacta();
+}
+function responder(id, v) {
+    respostas[id] = v;
+    // trocar a resposta do passo 1 pode tornar a pergunta 2 inaplicável
+    if (id === 'quem' && v === 'adulto') delete respostas.quemresponde;
+    passo++;
+    render();
+}
+function voltar() { if (passo > 0) { passo--; render(); } }
 
-        <section class="step-section" data-step="documents" aria-labelledby="documentsHeading">
-          <div class="section-heading">
-            <i data-lucide="list-checks"></i>
-            <h1 id="documentsHeading">Guia do benefício</h1>
-          </div>
-          <details class="benefit-guide" id="benefitGuideDetails">
-            <summary><span>Documentos exigidos, critérios e alertas</span><i data-lucide="chevron-down"></i></summary>
-            <div class="benefit-guide-content">
-          <div class="guide-tabs" role="tablist">
-            <button type="button" role="tab" aria-selected="true" data-guide-tab="checklist">Checklist</button>
-            <button type="button" role="tab" aria-selected="false" data-guide-tab="criteria">Critérios</button>
-            <button type="button" role="tab" aria-selected="false" data-guide-tab="attention">Atenção</button>
-          </div>
-          <div class="guide-panel is-active" data-guide-panel="checklist">
-            <div class="checklist-toolbar">
-              <span id="checklistProgress">0 de 0 separados</span>
-              <div>
-                <button type="button" class="icon-button" id="copyChecklist" title="Copiar para WhatsApp" aria-label="Copiar checklist"><i data-lucide="copy"></i></button>
-                <button type="button" class="icon-button" id="printChecklist" title="Imprimir checklist" aria-label="Imprimir checklist"><i data-lucide="printer"></i></button>
-              </div>
-            </div>
-            <div class="checklist" id="checklist"></div>
-          </div>
-          <div class="guide-panel" data-guide-panel="criteria">
-            <div class="criteria-block"><span>Indicado para</span><p id="benefitFit"></p></div>
-            <div class="criteria-block"><span>Perguntas para conferir</span><ul class="question-list" id="benefitQuestions"></ul></div>
-            <div class="source-list" id="benefitSources"></div>
-            <p class="review-date">Conteúdo revisado em <span id="reviewDate"></span>.</p>
-          </div>
-          <div class="guide-panel" data-guide-panel="attention">
-            <ul class="alert-list" id="benefitAlerts"></ul>
-          </div>
-            </div>
-          </details>
-        </section>
+document.addEventListener('keydown', function (e) {
+    if (!document.getElementById('resultado').hidden) return;
+    if (e.key === 'Backspace' || e.key === 'ArrowLeft') { e.preventDefault(); voltar(); return; }
+    if (/^[1-9]$/.test(e.key)) {
+        var b = document.querySelectorAll('#pergunta .opcao')[parseInt(e.key, 10) - 1];
+        if (b) { e.preventDefault(); b.click(); }
+    }
+});
+document.getElementById('btnPular').addEventListener('click', function () { location.href = 'index.html'; });
 
-        <section class="step-section" data-step="review" aria-labelledby="reviewHeading">
-          <div class="section-heading">
-            <i data-lucide="files"></i>
-            <h1 id="reviewHeading">Documentos a gerar</h1>
-          </div>
-          <div class="pdf-choice" role="radiogroup" aria-label="Documentos que entrarão no PDF">
-            <label>
-              <input type="radio" name="documentMode" value="complete" checked>
-              <span><b>Conjunto completo</b><small>Procuração, Termo de Benefício e termos exigidos pela representação.</small></span>
-              <i data-lucide="circle-check"></i>
-            </label>
-            <label>
-              <input type="radio" name="documentMode" value="procuracao">
-              <span><b>Somente procuração</b><small>Gera uma única página e não exige escolher benefício.</small></span>
-              <i data-lucide="circle-check"></i>
-            </label>
-          </div>
-          <div class="review-status" id="reviewStatus" aria-live="polite"></div>
-          <details class="pending-details" id="pendingDetails">
-            <summary id="pendingSummary">Ver pendências</summary>
-            <div class="review-list" id="reviewList"></div>
-          </details>
-          <div class="document-set">
-            <span>PDF jurídico</span>
-            <ol id="documentSet"></ol>
-          </div>
-          <a href="revogacao-v2.html" class="secondary-button full-button"><i data-lucide="file-x-2"></i><span>Revogar procuração</span></a>
-        </section>
-      </div>
-
-      <footer class="panel-footer">
-        <div class="completion-row"><span>Dados preenchidos</span><strong id="completionLabel">0%</strong></div>
-        <div class="footer-actions">
-          <button type="button" class="primary-button generate-button" id="generatePdf"><i data-lucide="file-down"></i><span>Gerar PDF</span><span class="hold-progress" aria-hidden="true"></span></button>
-        </div>
-        <div class="panel-office-footer">MENEZES ADVOCACIA<span>PROCURAÇÕES</span></div>
-      </footer>
-    </aside>
-
-    <main class="workspace">
-      <header class="workspace-bar">
-        <button class="icon-button mobile-panel-button" id="mobilePanelButton" type="button" aria-label="Abrir preenchimento"><i data-lucide="panel-left-open"></i></button>
-        <div class="document-tabs" id="documentTabs" role="tablist" aria-label="Documentos do PDF"></div>
-        <div class="workspace-meta">
-          <span id="documentCount">2 documentos</span>
-          <button type="button" class="icon-button" id="clearData" title="Limpar dados" aria-label="Limpar dados"><i data-lucide="trash-2"></i></button>
-        </div>
-      </header>
-      <div class="paper-stage" id="paperStage">
-        <div class="document-stack" id="documentStack"></div>
-      </div>
-    </main>
-  </div>
-
-  <dialog class="app-dialog" id="triageDialog">
-    <form method="dialog" class="dialog-shell" id="triageForm">
-      <header><div><span class="eyebrow">Triagem inicial</span><h2>Qual é a situação principal?</h2></div><button type="submit" class="icon-button" value="cancel" aria-label="Fechar"><i data-lucide="x"></i></button></header>
-      <div class="triage-options">
-        <label><input type="checkbox" name="death"><span><i data-lucide="heart-handshake"></i>Falecimento</span></label>
-        <label><input type="checkbox" name="temporaryIncapacity"><span><i data-lucide="stethoscope"></i>Incapacidade temporária</span></label>
-        <label><input type="checkbox" name="permanentIncapacity"><span><i data-lucide="accessibility"></i>Incapacidade permanente</span></label>
-        <label><input type="checkbox" name="workAccident"><span><i data-lucide="hard-hat"></i>Acidente ou doença do trabalho</span></label>
-        <label><input type="checkbox" name="sequela"><span><i data-lucide="activity"></i>Sequela permanente</span></label>
-        <label><input type="checkbox" name="maternity"><span><i data-lucide="baby"></i>Parto ou adoção</span></label>
-        <label><input type="checkbox" name="prison"><span><i data-lucide="shield"></i>Segurado preso</span></label>
-        <label><input type="checkbox" name="lowIncomeDisability"><span><i data-lucide="hand-heart"></i>Deficiência e baixa renda</span></label>
-        <label><input type="checkbox" name="age65LowIncome"><span><i data-lucide="person-standing"></i>65 anos e baixa renda</span></label>
-        <label><input type="checkbox" name="retirement"><span><i data-lucide="calendar-clock"></i>Aposentadoria</span></label>
-        <label><input type="checkbox" name="priorBenefit"><span><i data-lucide="file-search"></i>Benefício já concedido</span></label>
-        <label><input type="checkbox" name="rural"><span><i data-lucide="sprout"></i>Trabalho rural</span></label>
-        <label><input type="checkbox" name="mixedWork"><span><i data-lucide="shuffle"></i>Trabalho rural e urbano</span></label>
-      </div>
-      <div class="triage-results" id="triageResults" aria-live="polite"></div>
-      <footer><button type="button" class="secondary-button" id="runTriage"><i data-lucide="route"></i>Ver caminhos</button><button type="submit" class="text-button" value="cancel">Cancelar</button></footer>
-    </form>
-  </dialog>
-
-  <dialog class="app-dialog compact-dialog" id="internalPrintDialog">
-    <form method="dialog" class="dialog-shell">
-      <header><div><span class="eyebrow">Uso interno</span><h2>Imprimir com campos vazios?</h2></div><button type="submit" class="icon-button" value="cancel" aria-label="Fechar"><i data-lucide="x"></i></button></header>
-      <p>Campos vazios serão liberados. CPF, telefone ou dados parcialmente preenchidos e inválidos continuarão bloqueados.</p>
-      <footer><button type="submit" class="secondary-button" value="cancel">Cancelar</button><button type="button" class="primary-button" id="confirmInternalPrint"><i data-lucide="printer"></i>Imprimir incompleto</button></footer>
-    </form>
-  </dialog>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <div class="print-checklist" id="printChecklistSheet"></div>
-
-  <script src="assets/lucide.min.js"></script>
-  <script type="module" src="assets/v2.js"></script>
+render();
+</script>
 </body>
 </html>
