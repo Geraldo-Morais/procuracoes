@@ -399,6 +399,27 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
                 transform .16s ease, box-shadow .16s ease;
 }
 .doc-tab svg { width: 15px; height: 15px; flex: 0 0 auto; opacity: 0.9; }
+/* Semaforo do documento: verde = completo, amarelo = falta algo, vermelho =
+   falta algo E a pessoa ja tentou gerar o PDF. O estado sai do MESMO
+   validateForm() do modal, entao aba e modal nunca discordam. */
+.doc-tab .tab-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
+    background: rgba(255,255,255,0.32);
+    transition: background .2s ease, box-shadow .2s ease;
+}
+.doc-tab.st-ok   .tab-dot { background: #46c07a; box-shadow: 0 0 0 2.5px rgba(70,192,122,0.25); }
+.doc-tab.st-pend .tab-dot { background: #f0b429; box-shadow: 0 0 0 2.5px rgba(240,180,41,0.25); }
+.doc-tab.st-erro .tab-dot { background: #ff5747; box-shadow: 0 0 0 2.5px rgba(255,87,71,0.3); animation: tabPulse 1.4s ease-in-out infinite; }
+.doc-tab.st-ok   { border-color: rgba(70,192,122,0.42); }
+.doc-tab.st-erro { border-color: rgba(255,87,71,0.62); }
+.doc-tab.active.st-ok   { border-color: #46c07a; }
+.doc-tab.active.st-pend { border-color: #f0b429; }
+.doc-tab.active.st-erro { border-color: #ff5747; }
+@keyframes tabPulse {
+    0%, 100% { box-shadow: 0 0 0 2.5px rgba(255,87,71,0.3); }
+    50%      { box-shadow: 0 0 0 5px rgba(255,87,71,0.12); }
+}
+@media (prefers-reduced-motion: reduce) { .doc-tab.st-erro .tab-dot { animation: none; } }
 .doc-tab:hover { background: rgba(255,255,255,0.19); transform: translateY(-1px); }
 .doc-tab.active {
     background: #fff; color: #622423; border-color: #fff;
@@ -881,10 +902,10 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <header class="doc-tabs" id="docTabs">
     <button type="button" class="wb-icon-btn" id="wbPanelBtn" onclick="toggleSidebar()" title="Recolher ou mostrar a barra lateral" aria-label="Recolher ou mostrar a barra lateral" aria-controls="toolbarEl"><span class="wb-ico-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></span><span class="wb-ico-open"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg></span></button>
     <div class="wb-tabs" role="tablist" aria-label="Documentos do PDF">
-        <button type="button" class="doc-tab" role="tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/></svg><span>Procuração</span></button>
-        <button type="button" class="doc-tab" role="tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M15 2v20"/><path d="M15 7h5"/><path d="M15 12h5"/><path d="M15 17h5"/></svg><span>Termo de Benefício</span></button>
-        <button type="button" class="doc-tab" role="tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span>Termo de Responsabilidade</span></button>
-        <button type="button" class="doc-tab" role="tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span>Termo de Compromisso</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/></svg><span class="tab-txt">Procuração</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M15 2v20"/><path d="M15 7h5"/><path d="M15 12h5"/><path d="M15 17h5"/></svg><span class="tab-txt">Termo de Benefício</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span class="tab-txt">Termo de Responsabilidade</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')"><span class="tab-dot" aria-hidden="true"></span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span class="tab-txt">Termo de Compromisso</span></button>
     </div>
     <div class="wb-meta">
         <span id="docCount">2 documentos</span>
@@ -2602,7 +2623,11 @@ wireBidirectionalSync();
     el.addEventListener('blur', remapQualidade);
 });
 
+// Durante o calculo do semaforo o validateForm roda "em silencio": so
+// queremos a LISTA de pendencias, sem pintar campo de vermelho a cada tecla.
+var VAL_SILENT = false;
 function setError(id, hasError) {
+    if (VAL_SILENT) return;
     var el = document.getElementById(id); if (!el) return;
     if (hasError) {
         el.classList.add('input-error');
@@ -2939,8 +2964,80 @@ function valProximoCampo() {
     _valIdx = (_valIdx + 1) % VAL_ERRORS.length;
     iaVaiParaCampo(VAL_ERRORS[_valIdx].id);
 }
+// ===== Semaforo das abas ===================================================
+var _tentouGerarPdf = false;
+
+// Roda a validacao so pra colher a lista, sem efeito visual nos campos.
+function errosSilenciosos() {
+    var backup = VAL_ERRORS;
+    VAL_SILENT = true;
+    try { validateForm(); } finally { VAL_SILENT = false; }
+    var out = VAL_ERRORS;
+    VAL_ERRORS = backup;
+    return out;
+}
+
+// Um mesmo dado aparece em varios documentos (os campos sao espelhados), entao
+// uma pendencia marca TODOS os documentos que contem o campo ou um espelho dele.
+function paginasDoCampo(id, grupos) {
+    var ids = [id];
+    grupos.forEach(function(g) { if (g.ids.indexOf(id) !== -1) ids = ids.concat(g.ids); });
+    var out = [];
+    ids.forEach(function(i) {
+        var el = document.getElementById(i);
+        if (!el || !el.closest) return;
+        var pg = el.closest('.page');
+        if (pg && pg.id && out.indexOf(pg.id) === -1) out.push(pg.id);
+    });
+    return out;
+}
+
+function atualizarStatusDocs() {
+    var tabs = document.querySelectorAll('#docTabs .doc-tab');
+    if (!tabs.length) return;
+    var erros = errosSilenciosos();
+    if (!erros.length) _tentouGerarPdf = false;
+    var grupos = activeSyncGroups();
+    var pend = {};
+    erros.forEach(function(e) {
+        paginasDoCampo(e.id, grupos).forEach(function(pid) {
+            if (!pend[pid]) pend[pid] = [];
+            if (pend[pid].indexOf(e.msg) === -1) pend[pid].push(e.msg);
+        });
+    });
+    tabs.forEach(function(tab) {
+        var faltas = pend[tab.getAttribute('data-doc')] || [];
+        var st = faltas.length ? (_tentouGerarPdf ? 'erro' : 'pend') : 'ok';
+        tab.classList.toggle('st-ok', st === 'ok');
+        tab.classList.toggle('st-pend', st === 'pend');
+        tab.classList.toggle('st-erro', st === 'erro');
+        var txtEl = tab.querySelector('.tab-txt');
+        var nome = txtEl ? txtEl.textContent : 'Documento';
+        tab.title = faltas.length
+            ? (nome + ' — ' + faltas.length + (faltas.length === 1 ? ' pendência:\n• ' : ' pendências:\n• ') + faltas.join('\n• '))
+            : (nome + ' — completo');
+    });
+}
+
+var _statusScheduled = false;
+function agendarStatusDocs() {
+    if (_statusScheduled) return;
+    _statusScheduled = true;
+    requestAnimationFrame(function() { _statusScheduled = false; atualizarStatusDocs(); });
+}
+// Qualquer digitacao nos documentos recalcula o semaforo (throttle por frame).
+(function wireStatusDocs() {
+    var wrap = document.getElementById('docs-wrap');
+    if (!wrap) return;
+    ['input', 'change'].forEach(function(ev) {
+        wrap.addEventListener(ev, agendarStatusDocs, true);
+    });
+})();
+
 function runPdfValidation() {
     var errors = validateForm();
+    if (errors.length) _tentouGerarPdf = true;
+    agendarStatusDocs();
     if (!errors.length) { _valIdx = -1; return true; }
     var ul = document.getElementById('valList');
     ul.innerHTML = '';
@@ -3418,9 +3515,11 @@ function limparDados() {
     var chk = document.getElementById('termoIncluirCheck');
     if (chk) delete chk.dataset.userTouched;
     VAL_ERRORS = [];
+    _tentouGerarPdf = false;
     syncTermo();
     remapQualidade();
     recalcLayout();
+    agendarStatusDocs();
 }
 
 function focusDoc(id) {
@@ -3464,6 +3563,7 @@ function updateDocTabsUI(active) {
     if (tabAnexo) tabAnexo.hidden = activeIds.indexOf('page-anexox') === -1;
     atualizarContagemDocs();
     updateActiveDocTabFromScroll();
+    agendarStatusDocs();
 }
 
 // "N documentos" na direita da barra — conta as abas realmente aplicaveis.

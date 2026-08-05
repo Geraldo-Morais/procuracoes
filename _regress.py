@@ -212,6 +212,40 @@ with sync_playwright() as p:
     })""")
     check(not any([st2['proc'],st2['anexo'],st2['tr']]), f"unmark termo -> analfabeto collapses in ALL docs (got {st2})")
 
+    # --- semaforo das abas: verde / amarelo / vermelho ---
+    def tab_st():
+        return pg.evaluate("""()=>{var o={};
+          document.querySelectorAll('#docTabs .doc-tab').forEach(function(t){ if(t.hidden) return;
+            o[t.getAttribute('data-doc')] = t.classList.contains('st-ok')?'ok'
+              : t.classList.contains('st-erro')?'erro'
+              : t.classList.contains('st-pend')?'pend':'-';});
+          return o;}""")
+    pg.goto(URL); pg.wait_for_timeout(400)
+    set_tipo("incapaz")
+    pg.wait_for_timeout(300)
+    s0 = tab_st()
+    check(all(v == "pend" for v in s0.values()) and len(s0) == 4,
+          f"semaforo: form vazio = tudo amarelo (got {s0})")
+    pg.evaluate("preencherStub()"); pg.wait_for_timeout(500)
+    s1 = tab_st()
+    check(all(v == "ok" for v in s1.values()), f"semaforo: stub completo = tudo verde (got {s1})")
+    pg.evaluate("()=>{var e=document.getElementById('anexo_beneficio'); e.value='';"
+                " onAnexoBeneficioChange(); e.dispatchEvent(new Event('change',{bubbles:true}));}")
+    pg.wait_for_timeout(400)
+    s2 = tab_st()
+    check(s2.get("page-anexox") == "pend" and s2.get("page-procuracao") == "ok",
+          f"semaforo: falta so o beneficio -> so o Termo de Beneficio amarela (got {s2})")
+    pg.evaluate("runPdfValidation()"); pg.wait_for_timeout(400)
+    s3 = tab_st()
+    check(s3.get("page-anexox") == "erro", f"semaforo: tentou gerar PDF -> vermelho (got {s3})")
+    pg.evaluate("fecharValModal()")
+    pg.select_option("#anexo_beneficio", label="Aposentadoria por Idade Rural"); pg.wait_for_timeout(400)
+    s4 = tab_st()
+    check(all(v == "ok" for v in s4.values()), f"semaforo: corrigido -> volta ao verde (got {s4})")
+    # profissao coerente com o beneficio (rural -> LAVRADOR/A)
+    prof = pg.input_value("#profissao")
+    check(prof.upper().startswith("LAVRADOR"), f"beneficio rural -> profissao lavrador (got {prof!r})")
+
     check(len(console_errors)==0, f"no console errors ({console_errors[:3]})")
     b.close()
 
