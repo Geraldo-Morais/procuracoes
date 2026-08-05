@@ -1,0 +1,249 @@
+{
+ "_atualizado": "2026-08-05",
+ "_fonte": "etiquetas PARCEIRO:* do Tramitação Inteligente, apos limpeza de duplicatas",
+ "_como_adicionar": "acrescente um item com tag/nome/lugar e faca push — nao precisa mexer no index2.html",
+ "parceiros": [
+  {
+   "tag": "PARCEIRO:ADINA",
+   "nome": "Adina",
+   "lugar": "Batuque"
+  },
+  {
+   "tag": "PARCEIRO:CAATIBA",
+   "nome": "Adriana",
+   "lugar": "Caatiba"
+  },
+  {
+   "tag": "PARCEIRO:ANA_PAULA_ITAJIBA",
+   "nome": "Ana Paula",
+   "lugar": "Itajibá"
+  },
+  {
+   "tag": "PARCEIRO:APARECIDA_ENCRUZILHADA",
+   "nome": "Aparecida",
+   "lugar": "Encruzilhada"
+  },
+  {
+   "tag": "PARCEIRO:ARMENIO_CONQUISTA",
+   "nome": "Armênio",
+   "lugar": "Vitória da Conquista"
+  },
+  {
+   "tag": "PARCEIRO:BIA_ITARANTIM",
+   "nome": "Bia",
+   "lugar": "Itarantim"
+  },
+  {
+   "tag": "PARCEIRO:BIANCA_CAMPINHOS",
+   "nome": "Bianca e Simara",
+   "lugar": "Campinhos, Capinal, Povoado Moraes, Potiraguá e VCA"
+  },
+  {
+   "tag": "PARCEIRO:BRENO/ILDENE_POTIRAGUA",
+   "nome": "Breno e Ildene",
+   "lugar": "Potiraguá"
+  },
+  {
+   "tag": "PARCEIRO:CAETANOS",
+   "nome": "Caetanos",
+   "lugar": "Caetanos"
+  },
+  {
+   "tag": "PARCEIRO:CRIS_IGUAI",
+   "nome": "Cris Ribeiro",
+   "lugar": "Iguaí"
+  },
+  {
+   "tag": "PARCEIRO:DACI_ANAGE_APLB",
+   "nome": "Daci",
+   "lugar": "Anagé — Sindicato APLB"
+  },
+  {
+   "tag": "PARCEIRO:DAIANE_LIMEIRA",
+   "nome": "Daiane",
+   "lugar": "Povoado Limeira e Duas Vendas"
+  },
+  {
+   "tag": "PARCEIRO:DANIELA_INHOBIM",
+   "nome": "Daniela e Wilson",
+   "lugar": "Inhobim"
+  },
+  {
+   "tag": "PARCEIRO:DANTILANDIA",
+   "nome": "Dantilândia",
+   "lugar": "Dantilândia"
+  },
+  {
+   "tag": "PARCEIRO:PENACHINHO",
+   "nome": "Diane",
+   "lugar": "Penachinho"
+  },
+  {
+   "tag": "PARCEIRO:EDVALDO/GISELE_POCOES",
+   "nome": "Edvaldo e Gisely",
+   "lugar": "Poções"
+  },
+  {
+   "tag": "PARCEIRO:EDVAN_CONQUISTA",
+   "nome": "Edvan",
+   "lugar": "Vitória da Conquista"
+  },
+  {
+   "tag": "PARCEIRO:ELIAS",
+   "nome": "Elias",
+   "lugar": ""
+  },
+  {
+   "tag": "PARCEIRO:FABRICIO_ANAGE",
+   "nome": "Fabrício",
+   "lugar": "Anagé"
+  },
+  {
+   "tag": "PARCEIRO:FIDELIS",
+   "nome": "Fidélis",
+   "lugar": ""
+  },
+  {
+   "tag": "PARCEIRO:GISELY_CANDIDO",
+   "nome": "Gisely",
+   "lugar": "Cândido Sales (e alguns de Minas Gerais)"
+  },
+  {
+   "tag": "PARCEIRO:GRAZI",
+   "nome": "Grazy",
+   "lugar": "Bate Pé, São Joaquim, Jânio Quadros, Belo Campo, Simão e VCA"
+  },
+  {
+   "tag": "PARCEIRO:GRACA_BAIXAO",
+   "nome": "Graça",
+   "lugar": "Baixão (rural de VC)"
+  },
+  {
+   "tag": "PARCEIRO:ITAMBE",
+   "nome": "Itambé",
+   "lugar": "Itambé"
+  },
+  {
+   "tag": "PARCEIRO:JOABSON",
+   "nome": "Joabson (Robson / Tinha)",
+   "lugar": "Lagoa das Flores"
+  },
+  {
+   "tag": "PARCEIRO:JUCILENE",
+   "nome": "Jucilene",
+   "lugar": "Itapetinga"
+  },
+  {
+   "tag": "PARCEIRO:JUCELIA",
+   "nome": "Jucélia",
+   "lugar": "Macarani"
+  },
+  {
+   "tag": "PARCEIRO:JESSICA_ITATIAIA",
+   "nome": "Jéssica",
+   "lugar": "Vitória da Conquista — Escritório"
+  },
+  {
+   "tag": "PARCEIRO:JESSICA_JOSE_GONCALVES",
+   "nome": "Jéssica",
+   "lugar": "José Gonçalves"
+  },
+  {
+   "tag": "PARCEIRO:KAMILE_MAIQUINIQUE",
+   "nome": "Kamily",
+   "lugar": "Maiquinique"
+  },
+  {
+   "tag": "PARCEIRO:KELLY_CAPINAL",
+   "nome": "Kelly",
+   "lugar": "Capinal"
+  },
+  {
+   "tag": "PARCEIRO:LEANDRO",
+   "nome": "Leandro",
+   "lugar": "Ribeirão do Largo e Nova Brasília"
+  },
+  {
+   "tag": "PARCEIRO:MARTA",
+   "nome": "Marta",
+   "lugar": "Iguaí — processos específicos 2021-2025"
+  },
+  {
+   "tag": "PARCEIRO:NETO",
+   "nome": "Neto",
+   "lugar": "Batuque"
+  },
+  {
+   "tag": "PARCEIRO:NEUZINHA",
+   "nome": "Neuza",
+   "lugar": "Vitória da Conquista"
+  },
+  {
+   "tag": "PARCEIRO:PENHA_BELO_CAMPO",
+   "nome": "Penha e Flávia",
+   "lugar": "Belo Campo — Sindicato (também Tremedal)"
+  },
+  {
+   "tag": "PARCEIRO:PIMBA",
+   "nome": "Pimba",
+   "lugar": "Vitória da Conquista"
+  },
+  {
+   "tag": "PARCEIRO:RAFAEL_BELO_CAMPO",
+   "nome": "Rafael",
+   "lugar": "Belo Campo"
+  },
+  {
+   "tag": "PARCEIRO:REIVALDO",
+   "nome": "Reivaldo",
+   "lugar": "Lajedo do Tabocal (atende Jaguaquara e Jequié)"
+  },
+  {
+   "tag": "PARCEIRO:ROSANIA",
+   "nome": "Rosânia e João",
+   "lugar": "Inhobim"
+  },
+  {
+   "tag": "PARCEIRO:SINDICATO_MACARANI",
+   "nome": "Sindicato",
+   "lugar": "Macarani"
+  },
+  {
+   "tag": "PARCEIRO:VALDELIO",
+   "nome": "Valdélio",
+   "lugar": "Nova Canaã"
+  },
+  {
+   "tag": "PARCEIRO:VILADOCAFE",
+   "nome": "Vila do Café",
+   "lugar": "Vila do Café"
+  },
+  {
+   "tag": "PARCEIRO:DARIO_MEIRA",
+   "nome": "Wolfran",
+   "lugar": "Dário Meira"
+  },
+  {
+   "tag": "PARCEIRO:YASMIN_ANAGE",
+   "nome": "Yasmin",
+   "lugar": "Anagé — Escritório"
+  },
+  {
+   "tag": "PARCEIRO:ROBELIO",
+   "nome": "Zé Felipe",
+   "lugar": "Poções"
+  },
+  {
+   "tag": "PARCEIRO:NAO_POSSUI",
+   "nome": "Cliente procurou o escritório direto",
+   "lugar": "sem indicação de parceiro",
+   "especial": true
+  },
+  {
+   "tag": "PARCEIRO:OPERACIONAL_MENEZES",
+   "nome": "Operacional Menezes",
+   "lugar": "interno",
+   "especial": true
+  }
+ ]
+}
