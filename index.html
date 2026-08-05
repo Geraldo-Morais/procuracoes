@@ -206,7 +206,8 @@ select:focus-visible {
     padding: 7px 10px; font-size: 8.5pt; font-weight: bold; cursor: pointer;
     font-family: Arial, sans-serif; letter-spacing: 0.2pt;
 }
-.sidebar-collapse-btn .sc-icon { font-size: 11px; flex: 0 0 auto; }
+.sidebar-collapse-btn .sc-icon { flex: 0 0 auto; display: inline-flex; }
+.sidebar-collapse-btn .sc-icon svg { width: 16px; height: 16px; }
 .sidebar-collapse-btn:hover { background: rgba(255,255,255,0.2); }
 .sidebar-reopen {
     position: fixed; top: 14px; left: 12px; z-index: 1001;
@@ -218,6 +219,11 @@ select:focus-visible {
     transition: opacity 0.18s ease, transform 0.22s ease, filter 0.12s ease;
 }
 .sidebar-reopen:hover { filter: brightness(1.12); }
+/* O botao da barra mostra "fechar painel" quando a sidebar esta aberta e
+   "abrir painel" quando esta recolhida. */
+.wb-ico-open { display: none; }
+body.sidebar-collapsed .wb-ico-close { display: none; }
+body.sidebar-collapsed .wb-ico-open { display: inline-flex; }
 body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); pointer-events: auto; }
 .brand-tag {
     margin-top: 2px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.14);
@@ -225,8 +231,12 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
     opacity: 0.55; line-height: 1.5;
 }
 .tb-actions { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+/* .tb-toggle e grid, mas o !important antigo vencia o display:none que o
+   syncTermo() aplicava — por isso o "Incluir Termo..." aparecia ate no tipo
+   Normal, onde nao existe termo. Ocultacao agora e por classe. */
+.tb-toggle.is-hidden { display: none !important; }
 .tb-toggle {
-    display: grid !important;
+    display: grid;
     grid-template-columns: 16px minmax(0, 1fr);
     align-items: start;
     gap: 8px;
@@ -367,24 +377,51 @@ body.sidebar-collapsed .sidebar-reopen { opacity: 1; transform: translateX(0); p
 /* Abas dos documentos (fixas no topo da area de documentos) — atalhos de
    "pular para o documento" (a exibicao e em pilha vertical com rolagem). */
 .doc-tabs {
-    flex: 0 0 auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-    padding: 10px 24px; background: #f5f2f0; border-bottom: 1px solid #d6cdc9;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 2px 8px rgba(62,35,31,0.08);
-    transition: padding-left 0.22s ease;
+    flex: 0 0 auto; display: flex; gap: 10px; align-items: center;
+    padding: 8px 16px;
+    background: linear-gradient(180deg, #703030 0%, #55211e 100%);
+    border-bottom: 1px solid rgba(0,0,0,0.28);
+    box-shadow: 0 2px 12px rgba(45,18,16,0.28);
+    font-family: Arial, sans-serif; color: #f4e9e7;
 }
-.doc-tabs-label { font-size: 8.5pt; font-weight: bold; color: #8a6e6c; text-transform: uppercase; letter-spacing: 0.4pt; margin-right: 2px; }
-/* Com a sidebar recolhida, o botão flutuante de reabrir (▸▸) fica no canto
-   superior esquerdo — sem esse respiro ele cobre a primeira aba. */
-body.sidebar-collapsed .doc-tabs { padding-left: 60px; }
+.wb-tabs {
+    display: flex; align-items: center; gap: 6px;
+    flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none;
+}
+.wb-tabs::-webkit-scrollbar { display: none; }
 .doc-tab {
-    background: #fff; color: #622423; border: 1px solid #d6cdc9;
-    padding: 6px 13px; font-size: 9pt; font-weight: bold; border-radius: 6px;
-    cursor: pointer; transition: background 0.12s ease, color 0.12s ease;
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+    background: rgba(255,255,255,0.09); color: #f4e9e7;
+    border: 1px solid rgba(255,255,255,0.17);
+    padding: 6px 12px; font-size: 8.8pt; font-weight: bold; border-radius: 7px;
+    cursor: pointer; font-family: inherit;
+    transition: background .16s ease, color .16s ease, border-color .16s ease,
+                transform .16s ease, box-shadow .16s ease;
 }
-.doc-tab:hover { background: #622423; color: #fff; border-color: #622423; }
-.doc-tab.active { background: #622423; color: #fff; border-color: #622423; box-shadow: 0 2px 6px rgba(98,36,35,0.2); }
+.doc-tab svg { width: 15px; height: 15px; flex: 0 0 auto; opacity: 0.9; }
+.doc-tab:hover { background: rgba(255,255,255,0.19); transform: translateY(-1px); }
+.doc-tab.active {
+    background: #fff; color: #622423; border-color: #fff;
+    box-shadow: 0 3px 10px rgba(30,10,9,0.35);
+}
+.doc-tab.active svg { opacity: 1; }
 .doc-tab[hidden] { display: none; }
+/* Botao de icone da barra (recolher painel / limpar dados). */
+.wb-icon-btn {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.09); color: #f4e9e7;
+    border: 1px solid rgba(255,255,255,0.17); cursor: pointer;
+    transition: background .16s ease, transform .16s ease, color .16s ease,
+                border-color .16s ease;
+}
+.wb-icon-btn svg { width: 17px; height: 17px; }
+.wb-icon-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+#clearDataBtn:hover { background: #b4453c; border-color: #d06a60; color: #fff; }
+.wb-meta {
+    flex: 0 0 auto; margin-left: auto; display: flex; align-items: center; gap: 10px;
+    font-size: 8pt; letter-spacing: 0.3pt; color: rgba(244,233,231,0.72); white-space: nowrap;
+}
 
 /* Area dos documentos: fixa a direita da sidebar, sem scroll de pagina */
 #docsArea {
@@ -727,7 +764,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
 <div class="toolbar" id="toolbarEl">
     <button type="button" class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="toggleSidebar()" title="Recolher a barra lateral para ver os documentos maiores" aria-expanded="true" aria-controls="toolbarEl">
-        <span class="sc-icon">◂◂</span> Recolher barra
+        <span class="sc-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></span> Recolher barra
     </button>
     <div class="tb-group">
         <div class="tb-row">
@@ -754,7 +791,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
 
     <hr>
 
-    <label id="termo-toggle-wrap" class="tb-toggle" style="display:none;">
+    <label id="termo-toggle-wrap" class="tb-toggle is-hidden">
         <input type="checkbox" id="termoIncluirCheck" onchange="this.dataset.userTouched='1'; syncTermo();">
         <span>Incluir Termo de Responsabilidade e Compromisso</span>
     </label>
@@ -775,7 +812,6 @@ body.sidebar-collapsed #docsArea { left: 0; }
     <p>Quando o signatário não souber assinar, marque <b>“Signatário(a) analfabeto(a)”</b> no documento.</p>
 </div>
 
-<button type="button" class="sidebar-reopen" id="sidebarReopenBtn" onclick="toggleSidebar()" title="Mostrar a barra lateral" aria-label="Mostrar a barra lateral">▸▸</button>
 
 <!-- Preenchimento por IA: input de arquivo (compartilhado), painel de config
      (chave OpenRouter + modelo, salvos no navegador) e toast de status. -->
@@ -815,6 +851,17 @@ body.sidebar-collapsed #docsArea { left: 0; }
 </div>
 
 <!-- Modal proprio de validacao (substitui o alert() feio do navegador). -->
+<div class="ia-modal-overlay" id="clearModal" style="display:none">
+    <div class="ia-modal">
+        <div class="ia-modal-title">Limpar todos os dados?</div>
+        <p class="ia-note">Apaga o que foi preenchido nos documentos desta tela. A chave da IA e o modelo continuam salvos. Não dá para desfazer.</p>
+        <div class="ia-modal-actions">
+            <button type="button" onclick="fecharClearModal()">Cancelar</button>
+            <button type="button" onclick="fecharClearModal(); limparDados();">Limpar dados</button>
+        </div>
+    </div>
+</div>
+
 <div class="ia-modal-overlay" id="valModal" style="display:none">
     <div class="ia-modal">
         <div class="ia-modal-title">Revise os campos</div>
@@ -831,13 +878,19 @@ body.sidebar-collapsed #docsArea { left: 0; }
 <span id="sizer"></span>
 
 <div id="docsArea">
-<div class="doc-tabs" id="docTabs">
-    <span class="doc-tabs-label">Ir para:</span>
-    <button type="button" class="doc-tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')">Procuração</button>
-    <button type="button" class="doc-tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')">Termo de Benefício</button>
-    <button type="button" class="doc-tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')">Termo de Responsabilidade</button>
-    <button type="button" class="doc-tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')">Termo de Compromisso</button>
-</div>
+<header class="doc-tabs" id="docTabs">
+    <button type="button" class="wb-icon-btn" id="wbPanelBtn" onclick="toggleSidebar()" title="Recolher ou mostrar a barra lateral" aria-label="Recolher ou mostrar a barra lateral" aria-controls="toolbarEl"><span class="wb-ico-close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></span><span class="wb-ico-open"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg></span></button>
+    <div class="wb-tabs" role="tablist" aria-label="Documentos do PDF">
+        <button type="button" class="doc-tab" role="tab" data-doc="page-procuracao" onclick="focusDoc('page-procuracao')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/></svg><span>Procuração</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-anexox" id="tabAnexo" onclick="focusDoc('page-anexox')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M15 2v20"/><path d="M15 7h5"/><path d="M15 12h5"/><path d="M15 17h5"/></svg><span>Termo de Benefício</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-termoresp" id="tabTermoResp" hidden onclick="focusDoc('page-termoresp')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg><span>Termo de Responsabilidade</span></button>
+        <button type="button" class="doc-tab" role="tab" data-doc="page-termocomp" id="tabTermoComp" hidden onclick="focusDoc('page-termocomp')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg><span>Termo de Compromisso</span></button>
+    </div>
+    <div class="wb-meta">
+        <span id="docCount">2 documentos</span>
+        <button type="button" class="wb-icon-btn" id="clearDataBtn" onclick="abrirClearModal()" title="Limpar os dados preenchidos" aria-label="Limpar os dados preenchidos"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+    </div>
+</header>
 <div id="docsViewport">
 <!-- Documentos empilhados verticalmente (tamanho A4 real); rola pra ver todos.
      Procuração primeiro; Anexo X (obrigatório) e Termos abaixo quando aplicáveis. -->
@@ -1964,6 +2017,52 @@ function atualizarPapelAnexo(tipo) {
     if (euRep) euRep.style.display = temRep ? '' : 'none';
 }
 
+// --- Profissao coerente com o beneficio pedido -------------------------
+// Beneficio rural exige LAVRADOR/LAVRADORA; BPC, DESEMPREGADO/DESEMPREGADA.
+// So preenche campo vazio ou preenchido por nos mesmos (data-auto="1") —
+// nunca sobrescreve o que o parceiro digitou a mao.
+var PROFISSAO_POR_BENEFICIO = [
+    { re: /rural/i,               m: 'LAVRADOR',     f: 'LAVRADORA' },
+    { re: /BPC|LOAS|assistencial/i, m: 'DESEMPREGADO', f: 'DESEMPREGADA' }
+];
+// Genero pelo estado civil (Solteir[ao], Casad[ao], Viuv[ao]...). Sem estado
+// civil preenchido, usa a forma neutra "LAVRADOR(A)".
+function generoTitular() {
+    var ec = (fieldValue('estado_civil') || '').trim();
+    if (!ec) return null;
+    var w = ec.split(/\s+/)[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (/a$/.test(w)) return 'f';
+    if (/o$/.test(w)) return 'm';
+    return null;
+}
+function sugerirProfissao() {
+    var el = document.getElementById('profissao');
+    if (!el) return;
+    if (el.value && el.dataset.auto !== '1') return;
+    var benef = (fieldValue('anexo_beneficio') || '') + ' ' + (fieldValue('anexo_beneficio_outro') || '');
+    var regra = null;
+    PROFISSAO_POR_BENEFICIO.forEach(function(r) { if (!regra && r.re.test(benef)) regra = r; });
+    if (!regra) return;
+    var g = generoTitular();
+    var v = (g === 'f') ? regra.f : (g === 'm' ? regra.m : regra.m + '(A)');
+    if (el.value === v) return;
+    el.value = v;
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+    el.dispatchEvent(new Event('blur', {bubbles:true}));
+    el.dataset.auto = '1';
+    setError('profissao', false);
+}
+// Digitou a mao -> deixa de ser sugestao nossa e nunca mais e sobrescrito.
+(function wireProfissaoManual() {
+    var el = document.getElementById('profissao');
+    if (!el) return;
+    el.addEventListener('input', function(e) {
+        if (e.isTrusted) delete el.dataset.auto;
+    });
+    var ec = document.getElementById('estado_civil');
+    if (ec) ec.addEventListener('blur', function() { sugerirProfissao(); });
+})();
+
 // Requerimento do ANEXO X — revela o campo livre quando "Outro" e escolhido.
 function onAnexoBeneficioChange() {
     var sel = document.getElementById('anexo_beneficio');
@@ -1973,6 +2072,7 @@ function onAnexoBeneficioChange() {
     outro.style.display = isOutro ? '' : 'none';
     if (!isOutro) outro.value = '';
     else requestAnimationFrame(function() { autoFitGridFont(outro); });
+    sugerirProfissao();
     recalcLayout();
 }
 function updateFooterPagina() {
@@ -1993,7 +2093,7 @@ function syncTermo() {
     var analfabeto = analfabetoAtivo();
     var wrap = document.getElementById('termo-toggle-wrap');
     var chk = document.getElementById('termoIncluirCheck');
-    if (wrap) wrap.style.display = aplicavel ? 'flex' : 'none';
+    if (wrap) wrap.classList.toggle('is-hidden', !aplicavel);
     if (!aplicavel && chk) chk.checked = false;
     if (aplicavel && chk && !chk.dataset.userTouched) chk.checked = true;
 
@@ -3294,6 +3394,35 @@ function getActiveDocEls() {
 // Exibição em pilha vertical: as abas viram atalhos de "pular para o documento"
 // (scrollIntoView). Não há mais modos Foco/2/Todos — todos os docs aplicáveis
 // ficam empilhados em tamanho real e rola-se pra vê-los.
+// --- Limpar dados (botao da lixeira na barra) --------------------------
+// Zera so o que foi PREENCHIDO nos documentos. Nao mexe no tipo de procuracao
+// nem na config da IA (chave/modelo ficam no localStorage).
+function abrirClearModal() {
+    var m = document.getElementById('clearModal');
+    if (m) m.style.display = 'flex';
+}
+function fecharClearModal() {
+    var m = document.getElementById('clearModal');
+    if (m) m.style.display = 'none';
+}
+function limparDados() {
+    document.querySelectorAll('#docs-wrap input[type="text"]').forEach(function(el) {
+        el.value = '';
+        delete el.dataset.auto;
+        if (el.id) setError(el.id, false);
+        autoSize(el);
+    });
+    var benef = document.getElementById('anexo_beneficio');
+    if (benef) { benef.value = ''; onAnexoBeneficioChange(); }
+    setAnalfabetoAll(false);
+    var chk = document.getElementById('termoIncluirCheck');
+    if (chk) delete chk.dataset.userTouched;
+    VAL_ERRORS = [];
+    syncTermo();
+    remapQualidade();
+    recalcLayout();
+}
+
 function focusDoc(id) {
     var el = document.getElementById(id);
     if (el) {
@@ -3333,7 +3462,17 @@ function updateDocTabsUI(active) {
     if (tabComp) tabComp.hidden = activeIds.indexOf('page-termocomp') === -1;
     var tabAnexo = document.getElementById('tabAnexo');
     if (tabAnexo) tabAnexo.hidden = activeIds.indexOf('page-anexox') === -1;
+    atualizarContagemDocs();
     updateActiveDocTabFromScroll();
+}
+
+// "N documentos" na direita da barra — conta as abas realmente aplicaveis.
+function atualizarContagemDocs() {
+    var el = document.getElementById('docCount');
+    if (!el) return;
+    var n = 0;
+    document.querySelectorAll('#docTabs .doc-tab').forEach(function(t) { if (!t.hidden) n++; });
+    el.textContent = n + (n === 1 ? ' documento' : ' documentos');
 }
 
 var _docTabScrollScheduled = false;
