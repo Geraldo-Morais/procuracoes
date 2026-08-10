@@ -1891,7 +1891,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
         <tr>
             <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
             <td style="width:34%; text-align:center; vertical-align:bottom;">
-                <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
             </td>
             <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
                 Menezes Advocacia &amp; Consultoria Jurídica
@@ -2186,7 +2186,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <tr>
                 <td style="width:33%;">&nbsp;</td>
                 <td style="width:34%; text-align:center; vertical-align:bottom;">
-                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                    <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
                     Menezes Advocacia &amp; Consultoria Jurídica
@@ -2356,7 +2356,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <tr>
                 <td style="width:33%;">&nbsp;</td>
                 <td style="width:34%; text-align:center; vertical-align:bottom;">
-                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                    <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
                     Menezes Advocacia &amp; Consultoria Jurídica
@@ -2486,7 +2486,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
             <tr>
                 <td style="width:33%;">&nbsp;</td>
                 <td style="width:34%; text-align:center; vertical-align:bottom;">
-                    <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                    <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                 </td>
                 <td style="width:33%; text-align:right; vertical-align:bottom; font-family:'Times New Roman',serif; font-size:11pt; font-style:italic; color:#333;">
                     Menezes Advocacia &amp; Consultoria Jurídica
@@ -2622,7 +2622,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <tbody><tr>
                     <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
                     <td style="width:34%; text-align:center; vertical-align:bottom;">
-                        <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                        <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                     </td>
                     <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
                         Menezes Advocacia &amp; Consultoria Jurídica
@@ -2749,7 +2749,7 @@ body.sidebar-collapsed #docsArea { left: 0; }
                 <tbody><tr>
                     <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
                     <td style="width:34%; text-align:center; vertical-align:bottom;">
-                        <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                        <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
                     </td>
                     <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
                         Menezes Advocacia &amp; Consultoria Jurídica
@@ -4384,7 +4384,7 @@ Object.keys(FIELDS).forEach(function(id) { var el = document.getElementById(id);
  'test1_rg_relativo','test2_rg_relativo','rogo_rg_relativo',
  'anexo_rg','anexo_rogo_rg','anexo_t1_rg','anexo_t2_rg'].forEach(function(id) { applyRGFallback(id); });
 
-// O guia (v2.html) manda as decisoes pela URL:
+// Links guiados podem enviar decisões pela URL:
 //   index.html#tipo=relativo&qualidade=Curador&beneficio=...&naoassina=1
 // Aplica uma vez, no carregamento, e limpa o hash pra nao repetir no F5.
 function aplicarDecisoesDoGuia() {
@@ -4941,7 +4941,7 @@ var PARCEIROS = [{"tag": "PARCEIRO:ADINA", "nome": "Adina", "lugar": "Batuque", 
     // acima ja atende. Publicado, o JSON manda, e incluir parceiro novo nao
     // exige mexer nesta pagina.
     if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-    fetch('parceiros.json', {cache: 'no-cache'})
+    fetch('data/parceiros.json', {cache: 'no-cache'})
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(j) {
             if (j && j.parceiros && j.parceiros.length) { PARCEIROS = j.parceiros; renderPcLista(); }

@@ -235,17 +235,17 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
             <option value="analfabeto">Analfabeto</option>
         </select>
         <span class="help-btn">?
-            <div class="help-popup">
+            <span class="help-popup">
                 <b>Normal:</b> Pessoa maior de 18 anos, capaz, que assina o documento.<br><br>
                 <b>Absolutamente Incapaz:</b> Menor de 16 anos. O representante legal (pai, mãe ou tutor) assina pela criança.<br><br>
                 <b>Relativamente Incapaz:</b> Pessoa de 16-17 anos OU maior de 18 com deficiência intelectual. Assina junto com o assistente legal (genitor ou curador).<br><br>
                 <b>Analfabeto:</b> Pessoa que não sabe assinar. A 1ª testemunha assina a rogo (em nome do outorgante) + impressão digital.
-            </div>
+            </span>
         </span>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
         <a href="index.html" style="color:#fff; text-decoration:underline; font-size:10pt;">← Procuração (outorga)</a>
-        <button onclick="gerarPDF()">Gerar PDF</button>
+        <button type="button" onclick="gerarPDF()">Gerar PDF</button>
     </div>
 </div>
 
@@ -256,15 +256,17 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <!-- CABECALHO -->
 <div class="header">
     <table>
+        <tbody>
         <tr>
             <td style="width:33%; vertical-align:bottom;">&nbsp;</td>
             <td style="width:34%; text-align:center; vertical-align:bottom;">
-                <img src="logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
+                <img src="assets/logo.png" style="width:65px; margin:0 auto 2pt; display:block;" alt="Logo Menezes">
             </td>
             <td style="width:33%; text-align:right; vertical-align:bottom; font-family:Times New Roman,serif; font-size:11pt; font-style:italic; color:#333;">
                 Menezes &amp; Advogados Associados
             </td>
         </tr>
+        </tbody>
     </table>
 </div>
 
@@ -275,6 +277,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <div id="sec-outorgante-full" class="tipo-section active">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;" id="lbl-outorgante">OUTORGANTE:</div>
 <table class="dados-table">
+<tbody>
 <tr>
     <td style="width:50%"><span class="label">Nome Completo:</span><input type="text" id="nome" value="" maxlength="50"></td>
     <td style="width:25%"><span class="label">CPF:</span><input type="text" id="cpf" value="" maxlength="14"></td>
@@ -294,6 +297,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
     <td><span class="label">Cidade:</span><input type="text" id="cidade" value="" maxlength="30" list="cidades-list"></td>
     <td colspan="2"><span class="label">Bairro:</span><input type="text" id="bairro" value="" maxlength="30"></td>
 </tr>
+</tbody>
 </table>
 </div>
 <datalist id="estados-list"></datalist>
@@ -331,12 +335,14 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <div id="sec-representante" class="tipo-section" style="display:none !important;">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">REPRESENTANTE LEGAL:</div>
 <table class="dados-table">
+<tbody>
 <tr>
     <td style="width:40%"><span class="label">Nome Completo:</span><input type="text" id="rep_nome" value="" maxlength="50"></td>
     <td style="width:20%"><span class="label">CPF:</span><input type="text" id="rep_cpf" value="" maxlength="14"></td>
     <td style="width:20%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="rep_rg" value="" maxlength="25"></td>
     <td style="width:20%"><span class="label">Qualidade:</span><input type="text" id="rep_qualidade" value="" maxlength="20" placeholder="Pai, Mãe, Tutor..."></td>
 </tr>
+</tbody>
 </table>
 </div>
 
@@ -344,12 +350,14 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <div id="sec-assistente" class="tipo-section">
 <div style="font-weight:bold; margin-bottom:2pt; font-size:12pt;">ASSISTENTE LEGAL:</div>
 <table class="dados-table">
+<tbody>
 <tr>
     <td style="width:40%"><span class="label">Nome Completo:</span><input type="text" id="assist_nome" value="" maxlength="50"></td>
     <td style="width:20%"><span class="label">CPF:</span><input type="text" id="assist_cpf" value="" maxlength="14"></td>
     <td style="width:20%"><span class="label">RG / Órgão Emissor:</span><input type="text" id="assist_rg" value="" maxlength="25"></td>
     <td style="width:20%"><span class="label">Qualidade:</span><input type="text" id="assist_qualidade" value="" maxlength="20" placeholder="Genitor, Curador..."></td>
 </tr>
+</tbody>
 </table>
 </div>
 
@@ -393,6 +401,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
 <!-- ====== ASSINATURA: ANALFABETO ====== -->
 <div id="sec-assinatura-analfabeto" class="tipo-section">
 <table style="width:100%; margin-top:18pt; border:none; border-collapse:collapse;">
+<tbody>
 <tr>
     <td style="width:50%; vertical-align:middle; text-align:center; border:none; padding:0 8pt 0 0;">
         <div style="font-weight:bold; font-size:10pt; margin-bottom:4pt;">ASSINATURA A ROGO DO(A) OUTORGANTE:</div>
@@ -426,6 +435,7 @@ p { text-align: justify; margin-bottom: 8pt; line-height: 1.5; }
         </div>
     </td>
 </tr>
+</tbody>
 </table>
 </div>
 
