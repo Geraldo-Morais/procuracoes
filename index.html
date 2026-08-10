@@ -4925,6 +4925,8 @@ function ajustarRespiroContrato() {
 // A lista vem de parceiros.json (mesmas etiquetas do Tramitacao). Assim, incluir
 // parceiro novo e editar um JSON — nao precisa mexer nesta pagina.
 var PC_LS = 'proc_parceiro';
+var PC_CONFIRMACAO_LS = 'proc_escritorio_confirmacao';
+var PC_CONFIRMACAO_VERSAO = '2026-08-10-publico-v1';
 // Formulas de honorarios por beneficio. Origem: formulas-honorarios.json,
 // revisado em 2026-08-05. As justificativas e fontes de cada numero ficam la — este
 // e so o texto que vai ao papel.
@@ -4950,7 +4952,10 @@ function parceiroAtual() {
     try { return JSON.parse(localStorage.getItem(PC_LS) || 'null'); } catch (e) { return null; }
 }
 function definirParceiro(p) {
-    try { localStorage.setItem(PC_LS, JSON.stringify(p)); } catch (e) {}
+    try {
+        localStorage.setItem(PC_LS, JSON.stringify(p));
+        localStorage.setItem(PC_CONFIRMACAO_LS, PC_CONFIRMACAO_VERSAO);
+    } catch (e) {}
     aplicarParceiro();
     agendarStatusDocs();
     iaToast('Preenchendo como ' + p.nome + '.', 'ok');
@@ -5087,11 +5092,15 @@ function aplicarParceiro() {
 }
 
 function normPc(v) { return stripDiacritics(String(v || '')).toLowerCase(); }
-// Primeira vez neste navegador: o modal abre sozinho. Ja identificado, nunca
-// mais abre (localStorage). NAO e gate — da pra fechar e trabalhar; o bloqueio
-// de verdade continua sendo o validateForm() na hora de gerar o PDF. Pedir
-// duas vezes e que seria chato.
-(function pedirParceiroNaPrimeiraVez() {
+// A primeira abertura desta versão exige nova identificação, inclusive de quem
+// já utilizava o gerador. A confirmação fica versionada: aparece uma vez para
+// todos e só volta numa futura migração deliberada.
+(function exigirConfirmacaoDoEscritorio() {
+    var confirmada = '';
+    try { confirmada = localStorage.getItem(PC_CONFIRMACAO_LS) || ''; } catch (e) {}
+    if (confirmada !== PC_CONFIRMACAO_VERSAO) {
+        try { localStorage.removeItem(PC_LS); } catch (e) {}
+    }
     setTimeout(function() { if (!parceiroAtual()) abrirPcModal(); }, 700);
 })();
 var PC_MAX_SUG = 6;
